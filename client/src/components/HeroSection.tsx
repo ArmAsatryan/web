@@ -161,10 +161,7 @@ export function HeroSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 pb-16">
         <div className="flex items-center gap-12 xl:gap-16">
           <div className="max-w-2xl flex-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 backdrop-blur-sm border border-white/10 text-sm text-white/80 mb-6">
-              <span className="w-2 h-2 rounded-full bg-[#13CE66] animate-pulse" />
-              {t("hero.badge")}
-            </div>
+
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-6">
               {t("hero.title1")}{" "}

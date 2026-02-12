@@ -110,6 +110,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "contact.form.message.placeholder": "Your message...",
     "contact.form.submit": "Send Message",
     "contact.info.title": "Contact Info",
+    "contact.info.address": "Address",
+    "contact.info.address.value": "Armenia Yerevan, Str. Nansen 17/10",
     "contact.social.title": "Follow Us",
 
     "footer.rights": "All rights reserved.",
@@ -208,6 +210,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "contact.form.message.placeholder": "Votre message...",
     "contact.form.submit": "Envoyer le Message",
     "contact.info.title": "Infos de Contact",
+    "contact.info.address": "Adresse",
+    "contact.info.address.value": "Armenia Yerevan, Str. Nansen 17/10",
     "contact.social.title": "Suivez-nous",
 
     "footer.rights": "Tous droits réservés.",
@@ -306,6 +310,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "contact.form.message.placeholder": "Il tuo messaggio...",
     "contact.form.submit": "Invia Messaggio",
     "contact.info.title": "Info Contatto",
+    "contact.info.address": "Indirizzo",
+    "contact.info.address.value": "Armenia Yerevan, Str. Nansen 17/10",
     "contact.social.title": "Seguici",
 
     "footer.rights": "Tutti i diritti riservati.",
@@ -404,6 +410,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "contact.form.message.placeholder": "Tu mensaje...",
     "contact.form.submit": "Enviar Mensaje",
     "contact.info.title": "Info de Contacto",
+    "contact.info.address": "Dirección",
+    "contact.info.address.value": "Armenia Yerevan, Str. Nansen 17/10",
     "contact.social.title": "S\u00edguenos",
 
     "footer.rights": "Todos los derechos reservados.",
@@ -502,6 +510,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "contact.form.message.placeholder": "Ձեր հաղորդագրությունը...",
     "contact.form.submit": "Ուղարկել",
     "contact.info.title": "Կոնտակտային տվյալներ",
+    "contact.info.address": "Հասցե",
+    "contact.info.address.value": "Հայաստանի Հանրապետություն, քաղաք Երևան, Նանսենի 17/10",
     "contact.social.title": "Հետևեք մեզ",
 
     "footer.rights": "Բոլոր իրավունքները պաշտպանված են:",

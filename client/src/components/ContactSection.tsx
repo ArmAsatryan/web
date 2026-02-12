@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Mail, Send, Copy, Check } from "lucide-react";
+import { Mail, Send, Copy, Check, MapPin } from "lucide-react";
 import { SiFacebook, SiInstagram, SiLinkedin, SiTelegram, SiWhatsapp } from "react-icons/si";
 import { useI18n } from "@/hooks/use-i18n";
 import { AnimatedSection } from "./AnimatedSection";
@@ -133,44 +133,52 @@ export function ContactSection() {
             <div className="space-y-6">
               <Card className="p-8 glass-card">
                 <h3 className="text-xl font-semibold text-foreground mb-6">{t("contact.info.title")}</h3>
-                <div className="flex items-center gap-3">
-                  <a
-                    href="mailto:support@ballistiq.xyz"
-                    className="inline-flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
-                    data-testid="link-email"
-                  >
-                    <Mail className="w-5 h-5" />
-                    <span className="text-sm">support@ballistiq.xyz</span>
-                  </a>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={copyEmail}
-                    className="text-muted-foreground"
-                    aria-label="Copy email"
-                    data-testid="button-copy-email"
-                  >
-                    {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
-                  </Button>
-                  {copied && (
-                    <span className="text-xs text-primary animate-in fade-in">Copied!</span>
-                  )}
-                </div>
-              </Card>
-
-              <Card className="p-8 glass-card">
-                <h3 className="text-xl font-semibold text-foreground mb-6">{t("contact.social.title")}</h3>
-                <div className="flex flex-wrap gap-3">
-                  {socialLinks.map(({ name, url, Icon }) => (
-                    <Button
-                      key={name}
-                      asChild
-                      variant="ghost"
-                      size="icon"
-                      aria-label={name}
-                      data-testid={`link-social-${name.toLowerCase()}`}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 shrink-0 text-muted-foreground" aria-hidden/>
+                    <div>
+                      <span
+                          className="text-xs font-medium text-muted-foreground block mb-0.5">{t("contact.info.address")}</span>
+                      <span className="text-sm text-foreground">{t("contact.info.address.value")}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <a
+                        href="mailto:support@ballistiq.xyz"
+                        className="inline-flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                        data-testid="link-email"
                     >
-                      <a href={url} target="_blank" rel="noopener noreferrer">
+
+                      <Mail className="w-5 h-5 shrink-0"/>
+
+                      <span className="text-sm">support@ballistiq.xyz</span>
+                    </a>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={copyEmail}
+                        className="text-muted-foreground"
+                        aria-label="Copy email"
+                        data-testid="button-copy-email"
+                    >
+                      {copied ? <Check className="w-4 h-4 text-primary"/> : <Copy className="w-4 h-4"/>}
+                    </Button>
+                    {copied && (
+                        <span className="text-xs text-primary animate-in fade-in">Copied!</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {socialLinks.map(({name, url, Icon}) => (
+                      <Button
+                          key={name}
+                          asChild
+                          variant="ghost"
+                          size="icon"
+                          aria-label={name}
+                          data-testid={`link-social-${name.toLowerCase()}`}
+                      >
+                        <a href={url} target="_blank" rel="noopener noreferrer">
                         <Icon className="w-4 h-4" />
                       </a>
                     </Button>
