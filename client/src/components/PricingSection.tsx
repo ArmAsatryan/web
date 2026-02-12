@@ -109,7 +109,9 @@ export function PricingSection() {
                 <h3 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
                   <img
                     src={logoImg}
-                    alt=""
+                    alt="BALLISTiQ logo"
+                    width={28}
+                    height={28}
                     className="w-7 h-7 flex-shrink-0"
                     style={{
                       filter: plan.highlighted

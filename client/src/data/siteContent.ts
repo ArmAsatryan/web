@@ -163,7 +163,7 @@ export const teamMembers = [
   },
   {
     name: "Arame Avetisyan",
-    role: "Software Test Engineers",
+    role: "Software Test Engineer",
     image: "Arame_Avetisyan",
   },
 ];

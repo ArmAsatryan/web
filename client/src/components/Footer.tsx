@@ -21,9 +21,9 @@ export function Footer() {
               {t("footer.privacy")}
             </Link>
             <span className="text-border">|</span>
-            <a href="/terms-of-service" className="hover:text-foreground transition-colors" data-testid="link-terms">
+            <Link href="/terms-of-service" className="hover:text-foreground transition-colors" data-testid="link-terms">
               {t("footer.terms")}
-            </a>
+            </Link>
             <span className="text-border">|</span>
             <a href="#features" className="hover:text-foreground transition-colors" data-testid="link-footer-features">
               {t("nav.features")}

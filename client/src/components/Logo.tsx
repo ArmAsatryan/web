@@ -61,6 +61,8 @@ export function Logo({ size = "md", className = "", invert = false }: LogoProps)
       <img
         src={logoImg}
         alt="BALLISTiQ logo"
+        width={56}
+        height={56}
         className={`${imgSizes[size]} flex-shrink-0`}
         style={filterStyle}
         data-testid="img-logo"

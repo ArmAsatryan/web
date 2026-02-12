@@ -3,9 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>BALLISTiQ | Ballistic Calculator & Sniper Assistant App | Offline Ready</title>
+    <title>BALLISTiQ | Ballistic Calculator & Sniper Assistant App</title>
     <meta name="description" content="Precision ballistic calculator and sniper assistant app. Offline ballistic engine, ammo data (Remington, Hornady). B2B: thermal scope ballistic module, UGV drones, Smart Turret. iOS & Android." />
     <meta name="keywords" content="ballistic calculator, sniper assistant app, ballistic engine, thermal scope ballistic module, UGV drones, Smart Turret, offline ballistic calculator, Remington, Hornady, ammo database, trajectory calculator" />
+    <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://ballistiq.xyz/" />
 
     <!-- Open Graph -->
@@ -26,30 +27,70 @@
     <meta name="twitter:image" content="https://ballistiq.xyz/og-image.png" />
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&display=swap" as="style" />
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- JSON-LD: Organization + SoftwareApplication -->
+    <!-- JSON-LD: Organization, WebSite, SoftwareApplication, Offer, Reviews -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
         {
           "@type": "Organization",
+          "@id": "https://ballistiq.xyz/#organization",
           "name": "BALLISTiQ",
           "url": "https://ballistiq.xyz",
           "logo": "https://ballistiq.xyz/favicon.png",
-          "description": "BALLISTiQ builds precision ballistic calculator and sniper assistant apps, plus B2B ballistic engines for thermal scopes, UGV drones, and Smart Turrets."
+          "description": "BALLISTiQ builds precision ballistic calculator and sniper assistant apps, plus B2B ballistic engines for thermal scopes, UGV drones, and Smart Turrets.",
+          "sameAs": [
+            "https://www.facebook.com/profile.php?id=61575991441085",
+            "https://instagram.com/ballistiq_app",
+            "https://www.linkedin.com/company/103644170",
+            "https://t.me/ballistiqsupport"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "name": "BALLISTiQ",
+          "url": "https://ballistiq.xyz",
+          "description": "Ballistic calculator and sniper assistant app. Offline ballistic engine, thermal scope module, UGV and Smart Turret integration.",
+          "publisher": { "@id": "https://ballistiq.xyz/#organization" },
+          "inLanguage": "en"
         },
         {
           "@type": "SoftwareApplication",
           "name": "BALLISTiQ",
           "applicationCategory": "UtilitiesApplication",
           "operatingSystem": "iOS, Android",
-          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-          "description": "Precision ballistic calculator and sniper assistant app. Offline ballistic engine, comprehensive ammo database (Remington, Hornady and more), trajectory computation, thermal scope and UGV integration.",
+          "url": "https://ballistiq.xyz",
+          "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "USD",
+            "lowPrice": "0",
+            "highPrice": "0",
+            "offerCount": "2"
+          },
+          "description": "Precision ballistic calculator and sniper assistant app. Offline ballistic engine, comprehensive ammo database, trajectory computation, thermal scope and UGV integration.",
           "featureList": ["Ballistic calculator", "Offline ballistic engine", "Ammo database", "Thermal scope ballistic module", "UGV and Smart Turret integration", "Kestrel integration"]
+        },
+        {
+          "@type": "Review",
+          "itemReviewed": { "@type": "SoftwareApplication", "name": "BALLISTiQ" },
+          "author": { "@type": "Person", "name": "Mike R." },
+          "reviewRating": { "@type": "Rating", "ratingValue": 5, "bestRating": 5 },
+          "reviewBody": "BALLISTiQ is hands down the best ballistic calculator I've used. The accuracy of the trajectory predictions is remarkable, and the Kestrel integration is a game-changer."
+        },
+        {
+          "@type": "Review",
+          "itemReviewed": { "@type": "SoftwareApplication", "name": "BALLISTiQ" },
+          "author": { "@type": "Person", "name": "David K." },
+          "reviewRating": { "@type": "Rating", "ratingValue": 5, "bestRating": 5 },
+          "reviewBody": "Finally a ballistic app that works offline in the field. The ammo database is comprehensive, and the reticle overlay feature saved me hours of manual calculation."
         }
       ]
     }

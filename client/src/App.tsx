@@ -4,6 +4,7 @@ import { I18nContext, useI18nProvider } from "@/hooks/use-i18n";
 import { HomePage } from "@/pages/HomePage";
 import { PrivacyPolicyPage } from "@/pages/PrivacyPolicy";
 import { TermsOfServicePage } from "@/pages/TermsOfService";
+import NotFound from "@/pages/not-found";
 
 function App() {
   const themeValue = useThemeProvider();
@@ -17,6 +18,7 @@ function App() {
             <Route path="/privacy-policy" component={PrivacyPolicyPage} />
             <Route path="/terms-of-service" component={TermsOfServicePage} />
             <Route path="/" component={HomePage} />
+            <Route path="/:rest+" component={NotFound} />
           </Switch>
         </Router>
       </I18nContext.Provider>

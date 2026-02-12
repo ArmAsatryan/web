@@ -4,8 +4,15 @@ import { Footer } from "@/components/Footer";
 import { PageBackground } from "@/components/PageBackground";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { ArrowLeft } from "lucide-react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 
 export function PrivacyPolicyPage() {
+  usePageMeta({
+    title: "Privacy Policy | BALLISTiQ",
+    description:
+      "BALLISTiQ Privacy Policy: how we collect, use, and protect your information when you use our ballistic calculator app.",
+    path: "/privacy-policy",
+  });
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageBackground />
