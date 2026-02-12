@@ -1,11 +1,16 @@
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+
 export function PageBackground() {
+  const reduced = useReducedMotion();
+  const orbClass = reduced ? "absolute rounded-full" : "page-orb absolute rounded-full";
+
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
       <div className="page-grid absolute inset-0" />
       <div className="page-noise absolute inset-0" />
 
       <div
-        className="page-orb absolute w-[600px] h-[600px] rounded-full blur-[160px]"
+        className={`${orbClass} w-[600px] h-[600px] blur-[160px]`}
         style={{
           background: "radial-gradient(circle, hsl(188 100% 35%) 0%, transparent 70%)",
           top: "15%",
@@ -15,7 +20,7 @@ export function PageBackground() {
         }}
       />
       <div
-        className="page-orb absolute w-[500px] h-[500px] rounded-full blur-[140px]"
+        className={`${orbClass} w-[500px] h-[500px] blur-[140px]`}
         style={{
           background: "radial-gradient(circle, hsl(188 80% 40%) 0%, transparent 70%)",
           top: "45%",
@@ -26,7 +31,7 @@ export function PageBackground() {
         }}
       />
       <div
-        className="page-orb absolute w-[400px] h-[400px] rounded-full blur-[120px]"
+        className={`${orbClass} w-[400px] h-[400px] blur-[120px]`}
         style={{
           background: "radial-gradient(circle, hsl(142 60% 40%) 0%, transparent 70%)",
           bottom: "10%",
@@ -37,7 +42,7 @@ export function PageBackground() {
         }}
       />
       <div
-        className="page-orb absolute w-[350px] h-[350px] rounded-full blur-[100px]"
+        className={`${orbClass} w-[350px] h-[350px] blur-[100px]`}
         style={{
           background: "radial-gradient(circle, hsl(188 100% 45%) 0%, transparent 70%)",
           top: "70%",

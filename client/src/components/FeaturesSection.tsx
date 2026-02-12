@@ -28,7 +28,7 @@ export function FeaturesSection() {
               className="group p-6 glass-card hover-elevate transition-all duration-300"
               data-testid={`card-feature-${i}`}
             >
-              <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors">
+              <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-5">
                 <Icon className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-3">

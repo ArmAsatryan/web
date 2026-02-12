@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { useMagneticButton } from "@/hooks/use-magnetic-button";
 import { useTiltCard } from "@/hooks/use-tilt-card";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { HeroBackground } from "./HeroBackground";
 import bgImage from "@assets/Background1_1770884231570.jpg";
 
@@ -19,11 +20,15 @@ function MagneticWrapper({ children }: { children: React.ReactNode }) {
 
 const windIcons = [ArrowUpRight, ArrowUpLeft, ArrowRight, ArrowLeft, ArrowDownRight, ArrowDownLeft];
 
-function useSmoothValue(target: number, duration = 1200) {
+function useSmoothValue(target: number, duration = 1200, skipAnimation = false) {
   const [current, setCurrent] = useState(target);
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
+    if (skipAnimation) {
+      setCurrent(target);
+      return;
+    }
     const start = current;
     const diff = target - start;
     if (Math.abs(diff) < 0.01) return;
@@ -39,7 +44,7 @@ function useSmoothValue(target: number, duration = 1200) {
 
     rafRef.current = requestAnimationFrame(step);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [target, duration]);
+  }, [target, duration, skipAnimation]);
 
   return current;
 }
@@ -56,16 +61,18 @@ function generateTargets() {
 
 function useRandomValues() {
   const [targets, setTargets] = useState(generateTargets);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
+    if (reduced) return;
     const interval = setInterval(() => setTargets(generateTargets()), 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [reduced]);
 
-  const distance = useSmoothValue(targets.distance);
-  const windSpeed = useSmoothValue(targets.windSpeed);
-  const hClicks = useSmoothValue(targets.hClicks);
-  const vClicks = useSmoothValue(targets.vClicks);
+  const distance = useSmoothValue(targets.distance, 1200, reduced);
+  const windSpeed = useSmoothValue(targets.windSpeed, 1200, reduced);
+  const hClicks = useSmoothValue(targets.hClicks, 1200, reduced);
+  const vClicks = useSmoothValue(targets.vClicks, 1200, reduced);
 
   return {
     distance: Math.round(distance),

@@ -54,12 +54,20 @@ export function ScrollProgress() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [handleScroll]);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
   };
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
   if (isMobile) return null;
 
   return (
