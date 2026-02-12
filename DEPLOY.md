@@ -1,5 +1,12 @@
 # Deploy to Cloudflare Pages (ballistiq.xyz)
 
+## Deploy command (fix "run wrangler pages deploy instead")
+
+Set **Deploy command** to: `npx wrangler pages deploy dist/public`  
+Do **not** use `npx wrangler deploy` (Workers) — use **pages deploy**.
+
+---
+
 ## Fix “infinite build”
 
 The build must **finish** and produce static files. Do **not** use `npm run dev` (that starts a server and never exits).
@@ -30,8 +37,9 @@ After DNS propagates, the site will be served at **https://ballistiq.xyz**.
 
 ## Summary
 
-| Setting              | Value            |
-|----------------------|------------------|
-| Build command        | `npm run build`  |
-| Build output dir     | `dist/public`    |
-| Root directory       | (leave default)  |
+| Setting              | Value                                      |
+|----------------------|--------------------------------------------|
+| Build command        | `npm run build` or `npm run dev`           |
+| **Deploy command**   | **`npx wrangler pages deploy dist/public`** |
+| Build output dir     | `dist/public`                              |
+| Root directory       | (leave default)                            |
