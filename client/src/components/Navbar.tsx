@@ -1,19 +1,32 @@
 import { useState, useEffect } from "react";
 import { Logo } from "./Logo";
-import { navLinks } from "@/data/siteContent";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/use-theme";
+import { useI18n, type Locale, localeFlags } from "@/hooks/use-i18n";
+
+const navKeys = [
+  { key: "nav.features", href: "#features" },
+  { key: "nav.pricing", href: "#pricing" },
+  { key: "nav.business", href: "#b2b" },
+  { key: "nav.reviews", href: "#reviews" },
+  { key: "nav.team", href: "#team" },
+  { key: "nav.contact", href: "#contact" },
+];
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const { theme, toggleTheme } = useTheme();
+  const { t, locale, setLocale } = useI18n();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
 
-      const sections = navLinks.map((link) => link.href.replace("#", ""));
+      const sections = navKeys.map((l) => l.href.replace("#", ""));
       let current = "";
       for (const id of sections) {
         const el = document.getElementById(id);
@@ -39,6 +52,8 @@ export function Navbar() {
     }
   };
 
+  const locales: Locale[] = ["en", "fr", "it", "es"];
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -55,59 +70,142 @@ export function Navbar() {
           </a>
 
           <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
+            {navKeys.map((link) => (
               <Button
                 key={link.href}
                 variant="ghost"
                 size="sm"
                 onClick={() => handleNavClick(link.href)}
                 className={activeSection === link.href.replace("#", "")
-                  ? "text-[rgb(0,151,178)]"
-                  : "text-white/70"
+                  ? "text-primary"
+                  : "text-muted-foreground"
                 }
-                data-testid={`link-${link.label.toLowerCase().replace(/\s/g, "-")}`}
+                data-testid={`link-${link.href.replace("#", "")}`}
               >
-                {link.label}
+                {t(link.key)}
               </Button>
             ))}
+
+            <div className="relative ml-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLangOpen(!langOpen)}
+                className="text-muted-foreground"
+                data-testid="button-language"
+              >
+                <Globe className="w-4 h-4" />
+                {localeFlags[locale]}
+              </Button>
+              {langOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md overflow-hidden shadow-lg z-50">
+                  {locales.map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => { setLocale(l); setLangOpen(false); }}
+                      className={`block w-full text-left px-4 py-2 text-sm transition-colors ${
+                        locale === l
+                          ? "text-primary bg-primary/10"
+                          : "text-foreground hover:bg-muted"
+                      }`}
+                      data-testid={`button-lang-${l}`}
+                    >
+                      {localeFlags[l]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="text-muted-foreground"
+              aria-label="Toggle theme"
+              data-testid="button-theme-toggle"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+
             <Button
               onClick={() => handleNavClick("#hero")}
-              className="ml-3"
+              className="ml-2"
               data-testid="link-download-nav"
             >
-              Download
+              {t("nav.download")}
             </Button>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-white/80"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-            data-testid="button-mobile-menu"
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
+          <div className="flex lg:hidden items-center gap-1">
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setLangOpen(!langOpen)}
+                className="text-muted-foreground"
+                data-testid="button-language-mobile"
+              >
+                <Globe className="w-4 h-4" />
+              </Button>
+              {langOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md overflow-hidden shadow-lg z-50">
+                  {locales.map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => { setLocale(l); setLangOpen(false); }}
+                      className={`block w-full text-left px-4 py-2 text-sm transition-colors ${
+                        locale === l
+                          ? "text-primary bg-primary/10"
+                          : "text-foreground hover:bg-muted"
+                      }`}
+                      data-testid={`button-lang-mobile-${l}`}
+                    >
+                      {localeFlags[l]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="text-muted-foreground"
+              aria-label="Toggle theme"
+              data-testid="button-theme-toggle-mobile"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Toggle menu"
+              data-testid="button-mobile-menu"
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+          </div>
         </div>
       </div>
 
       {mobileOpen && (
         <div className="lg:hidden bg-background/95 backdrop-blur-xl border-b border-border/50">
           <div className="px-4 py-4 space-y-1">
-            {navLinks.map((link) => (
+            {navKeys.map((link) => (
               <Button
                 key={link.href}
                 variant="ghost"
                 onClick={() => handleNavClick(link.href)}
                 className={`w-full justify-start ${
                   activeSection === link.href.replace("#", "")
-                    ? "text-[rgb(0,151,178)]"
-                    : "text-white/70"
+                    ? "text-primary"
+                    : "text-muted-foreground"
                 }`}
-                data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}
+                data-testid={`link-mobile-${link.href.replace("#", "")}`}
               >
-                {link.label}
+                {t(link.key)}
               </Button>
             ))}
             <Button
@@ -115,7 +213,7 @@ export function Navbar() {
               className="w-full mt-3"
               data-testid="link-download-mobile"
             >
-              Download
+              {t("nav.download")}
             </Button>
           </div>
         </div>

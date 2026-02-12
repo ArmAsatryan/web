@@ -1,17 +1,21 @@
 import { reviews } from "@/data/siteContent";
 import { Card } from "@/components/ui/card";
 import { Star } from "lucide-react";
+import { useI18n } from "@/hooks/use-i18n";
 
 export function ReviewsSection() {
+  const { t } = useI18n();
+
   return (
     <section id="reviews" className="py-24 sm:py-32" data-testid="section-reviews">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            What Shooters <span className="text-[rgb(0,151,178)]">Say</span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+            {t("reviews.title1")}{" "}
+            <span className="text-primary">{t("reviews.title2")}</span>
           </h2>
-          <p className="text-white/50 text-lg max-w-2xl mx-auto">
-            Trusted by precision shooters, hunters, and professionals worldwide.
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            {t("reviews.subtitle")}
           </p>
         </div>
 
@@ -29,17 +33,17 @@ export function ReviewsSection() {
                     className={`w-4 h-4 ${
                       j < review.rating
                         ? "text-yellow-400 fill-yellow-400"
-                        : "text-white/20"
+                        : "text-muted-foreground/30"
                     }`}
                   />
                 ))}
               </div>
-              <p className="text-white/70 text-sm leading-relaxed mb-6">
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
                 &ldquo;{review.text}&rdquo;
               </p>
               <div>
-                <p className="text-white font-semibold text-sm">{review.name}</p>
-                <p className="text-white/40 text-xs">{review.handle}</p>
+                <p className="text-foreground font-semibold text-sm">{review.name}</p>
+                <p className="text-muted-foreground/60 text-xs">{review.handle}</p>
               </div>
             </Card>
           ))}

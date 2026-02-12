@@ -8,11 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Mail, Send } from "lucide-react";
 import { SiFacebook, SiInstagram, SiLinkedin, SiTelegram, SiWhatsapp } from "react-icons/si";
+import { useI18n } from "@/hooks/use-i18n";
 
 const contactSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Valid email is required"),
-  message: z.string().min(1, "Message is required"),
+  name: z.string().min(1),
+  email: z.string().email(),
+  message: z.string().min(1),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
@@ -26,6 +27,7 @@ const socialLinks = [
 ];
 
 export function ContactSection() {
+  const { t } = useI18n();
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
     defaultValues: { name: "", email: "", message: "" },
@@ -41,17 +43,18 @@ export function ContactSection() {
     <section id="contact" className="py-24 sm:py-32" data-testid="section-contact">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Get in <span className="text-[rgb(0,151,178)]">Touch</span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+            {t("contact.title1")}{" "}
+            <span className="text-primary">{t("contact.title2")}</span>
           </h2>
-          <p className="text-white/50 text-lg max-w-2xl mx-auto">
-            Have questions or interested in B2B integration? We&apos;d love to hear from you.
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            {t("contact.subtitle")}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
           <Card className="p-8 bg-card border-card-border">
-            <h3 className="text-xl font-semibold text-white mb-6">Send a Message</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">{t("contact.form.title")}</h3>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
@@ -59,10 +62,10 @@ export function ContactSection() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60">Name</FormLabel>
+                      <FormLabel className="text-muted-foreground">{t("contact.form.name")}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Your name"
+                          placeholder={t("contact.form.name.placeholder")}
                           data-testid="input-name"
                           {...field}
                         />
@@ -75,11 +78,11 @@ export function ContactSection() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60">Email</FormLabel>
+                      <FormLabel className="text-muted-foreground">{t("contact.form.email")}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="your@email.com"
+                          placeholder={t("contact.form.email.placeholder")}
                           data-testid="input-email"
                           {...field}
                         />
@@ -92,10 +95,10 @@ export function ContactSection() {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60">Message</FormLabel>
+                      <FormLabel className="text-muted-foreground">{t("contact.form.message")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Your message..."
+                          placeholder={t("contact.form.message.placeholder")}
                           rows={4}
                           className="resize-none"
                           data-testid="input-message"
@@ -107,7 +110,7 @@ export function ContactSection() {
                 />
                 <Button type="submit" className="w-full" data-testid="button-send">
                   <Send className="w-4 h-4" />
-                  Send Message
+                  {t("contact.form.submit")}
                 </Button>
               </form>
             </Form>
@@ -115,10 +118,10 @@ export function ContactSection() {
 
           <div className="space-y-6">
             <Card className="p-8 bg-card border-card-border">
-              <h3 className="text-xl font-semibold text-white mb-6">Contact Info</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-6">{t("contact.info.title")}</h3>
               <a
                 href="mailto:info@ballistiq.xyz"
-                className="inline-flex items-center gap-3 text-white/70 hover:text-[rgb(0,151,178)] transition-colors"
+                className="inline-flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
                 data-testid="link-email"
               >
                 <Mail className="w-5 h-5" />
@@ -127,7 +130,7 @@ export function ContactSection() {
             </Card>
 
             <Card className="p-8 bg-card border-card-border">
-              <h3 className="text-xl font-semibold text-white mb-6">Follow Us</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-6">{t("contact.social.title")}</h3>
               <div className="flex flex-wrap gap-3">
                 {socialLinks.map(({ name, url, Icon }) => (
                   <Button

@@ -1,0 +1,452 @@
+import { useState, useEffect, createContext, useContext } from "react";
+
+export type Locale = "en" | "fr" | "it" | "es";
+
+export const localeNames: Record<Locale, string> = {
+  en: "English",
+  fr: "Fran\u00e7ais",
+  it: "Italiano",
+  es: "Espa\u00f1ol",
+};
+
+export const localeFlags: Record<Locale, string> = {
+  en: "EN",
+  fr: "FR",
+  it: "IT",
+  es: "ES",
+};
+
+const translations: Record<Locale, Record<string, string>> = {
+  en: {
+    "nav.features": "Features",
+    "nav.pricing": "Pricing",
+    "nav.business": "For Business",
+    "nav.reviews": "Reviews",
+    "nav.team": "Team",
+    "nav.contact": "Contact",
+    "nav.download": "Download",
+
+    "hero.badge": "Available on iOS & Android",
+    "hero.title1": "Your Shooter",
+    "hero.title2": "Assistant",
+    "hero.subtitle": "Precision ballistic calculator, comprehensive ammo database, and advanced shooting tools \u2014 all in one app.",
+    "hero.appstore.top": "Download on the",
+    "hero.appstore.bottom": "App Store",
+    "hero.google.top": "Get it on",
+    "hero.google.bottom": "Google Play",
+    "hero.manual": "Download User Manual",
+
+    "features.title1": "Powerful",
+    "features.title2": "Features",
+    "features.subtitle": "Everything you need for precision shooting, from ballistic calculations to comprehensive ammo data.",
+    "features.0.title": "Ballistic Calculator",
+    "features.0.desc": "Advanced trajectory computation engine with atmospheric corrections, Coriolis effect, spin drift, and more. Get precise firing solutions in real time.",
+    "features.1.title": "Ammo Database",
+    "features.1.desc": "Comprehensive ammunition library with detailed ballistic data for thousands of cartridges. Search, compare, and select with confidence.",
+    "features.2.title": "Reticle Database",
+    "features.2.desc": "Extensive collection of reticle patterns with overlay visualization. Match your optic to your ammunition for perfect subtensions.",
+    "features.3.title": "BALLISTiQ PRO Mini-Apps",
+    "features.3.desc": "Specialized tools including unit converters, wind calculators, range estimation, and target log. Everything a precision shooter needs.",
+    "features.4.title": "Kestrel Integration",
+    "features.4.desc": "Seamless integration with Kestrel weather meters for live atmospheric data. Automatic environmental updates for maximum accuracy.",
+    "features.5.title": "Offline Ready",
+    "features.5.desc": "Full functionality without internet connection. All calculations run locally on your device, ensuring reliability in the field.",
+
+    "pricing.title1": "Choose Your",
+    "pricing.title2": "Version",
+    "pricing.subtitle": "Start free and upgrade to PRO for advanced features. Currently in beta \u2014 all features are free.",
+    "pricing.free.name": "BALLISTiQ",
+    "pricing.free.desc": "Essential ballistic tools for every shooter",
+    "pricing.free.cta": "Download Free",
+    "pricing.pro.name": "BALLISTiQ PRO",
+    "pricing.pro.desc": "Advanced features for precision shooters",
+    "pricing.pro.cta": "Get PRO Beta",
+    "pricing.pro.badge": "Beta",
+    "pricing.feature.calc": "Ballistic Calculator",
+    "pricing.feature.ammo": "Basic Ammo Database",
+    "pricing.feature.reticle": "Reticle Database",
+    "pricing.feature.offline": "Offline Mode",
+    "pricing.feature.converters": "Unit Converters",
+    "pricing.feature.everything": "Everything in Free",
+    "pricing.feature.miniapps": "PRO Mini-Apps Suite",
+    "pricing.feature.kestrel": "Kestrel Integration",
+    "pricing.feature.trajectory": "Advanced Trajectory Modeling",
+    "pricing.feature.custom": "Custom Ammo Profiles",
+    "pricing.feature.target": "Target Log & Analytics",
+    "pricing.feature.support": "Priority Support",
+
+    "b2b.badge": "Enterprise Solutions",
+    "b2b.title1": "BALLISTiQ",
+    "b2b.title2": "B2B",
+    "b2b.subtitle": "Integrate the BALLISTiQ C++ Ballistic Module into thermal scopes, UGVs, smart optics, and defense systems.",
+    "b2b.offline": "Works online or fully offline (embedded)",
+    "b2b.cta": "Contact Us for B2B",
+    "b2b.0.title": "C++ Engine for Thermal Scopes",
+    "b2b.0.desc": "Embed our ballistic engine directly into thermal imaging scopes. Provides real-time firing solutions overlay on thermal imagery.",
+    "b2b.1.title": "C++ Engine for Ground Drones (UGV)",
+    "b2b.1.desc": "Integrate precision ballistics into unmanned ground vehicles. Automated targeting solutions for autonomous and remotely operated systems.",
+    "b2b.2.title": "C++ Engine for Smart Turrets",
+    "b2b.2.desc": "Power remote weapon stations with advanced ballistic computation. Full trajectory calculation suite for automated turret systems.",
+
+    "reviews.title1": "What Shooters",
+    "reviews.title2": "Say",
+    "reviews.subtitle": "Trusted by precision shooters, hunters, and professionals worldwide.",
+
+    "team.title1": "Meet the",
+    "team.title2": "Team",
+    "team.subtitle": "The people behind BALLISTiQ, dedicated to building the best ballistic tools.",
+
+    "contact.title1": "Get in",
+    "contact.title2": "Touch",
+    "contact.subtitle": "Have questions or interested in B2B integration? We'd love to hear from you.",
+    "contact.form.title": "Send a Message",
+    "contact.form.name": "Name",
+    "contact.form.name.placeholder": "Your name",
+    "contact.form.email": "Email",
+    "contact.form.email.placeholder": "your@email.com",
+    "contact.form.message": "Message",
+    "contact.form.message.placeholder": "Your message...",
+    "contact.form.submit": "Send Message",
+    "contact.info.title": "Contact Info",
+    "contact.social.title": "Follow Us",
+
+    "footer.rights": "All rights reserved.",
+    "footer.privacy": "Privacy Policy",
+    "footer.terms": "Terms of Service",
+  },
+
+  fr: {
+    "nav.features": "Fonctionnalit\u00e9s",
+    "nav.pricing": "Tarifs",
+    "nav.business": "Entreprises",
+    "nav.reviews": "Avis",
+    "nav.team": "\u00c9quipe",
+    "nav.contact": "Contact",
+    "nav.download": "T\u00e9l\u00e9charger",
+
+    "hero.badge": "Disponible sur iOS et Android",
+    "hero.title1": "Votre Assistant",
+    "hero.title2": "de Tir",
+    "hero.subtitle": "Calculateur balistique de pr\u00e9cision, base de donn\u00e9es compl\u00e8te de munitions et outils de tir avanc\u00e9s \u2014 tout en une seule application.",
+    "hero.appstore.top": "T\u00e9l\u00e9charger sur",
+    "hero.appstore.bottom": "App Store",
+    "hero.google.top": "Obtenir sur",
+    "hero.google.bottom": "Google Play",
+    "hero.manual": "T\u00e9l\u00e9charger le manuel",
+
+    "features.title1": "Fonctionnalit\u00e9s",
+    "features.title2": "Puissantes",
+    "features.subtitle": "Tout ce dont vous avez besoin pour le tir de pr\u00e9cision, du calcul balistique aux donn\u00e9es compl\u00e8tes sur les munitions.",
+    "features.0.title": "Calculateur Balistique",
+    "features.0.desc": "Moteur de calcul de trajectoire avanc\u00e9 avec corrections atmosph\u00e9riques, effet Coriolis, d\u00e9rive de rotation et plus encore.",
+    "features.1.title": "Base de Munitions",
+    "features.1.desc": "Biblioth\u00e8que compl\u00e8te de munitions avec des donn\u00e9es balistiques d\u00e9taill\u00e9es pour des milliers de cartouches.",
+    "features.2.title": "Base de R\u00e9ticules",
+    "features.2.desc": "Collection compl\u00e8te de motifs de r\u00e9ticules avec visualisation en surimpression.",
+    "features.3.title": "BALLISTiQ PRO Mini-Apps",
+    "features.3.desc": "Outils sp\u00e9cialis\u00e9s incluant convertisseurs d\u2019unit\u00e9s, calculateurs de vent, estimation de distance et journal de tir.",
+    "features.4.title": "Int\u00e9gration Kestrel",
+    "features.4.desc": "Int\u00e9gration transparente avec les stations m\u00e9t\u00e9o Kestrel pour des donn\u00e9es atmosph\u00e9riques en direct.",
+    "features.5.title": "Mode Hors Ligne",
+    "features.5.desc": "Fonctionnalit\u00e9 compl\u00e8te sans connexion internet. Tous les calculs s\u2019ex\u00e9cutent localement sur votre appareil.",
+
+    "pricing.title1": "Choisissez Votre",
+    "pricing.title2": "Version",
+    "pricing.subtitle": "Commencez gratuitement et passez \u00e0 PRO pour des fonctionnalit\u00e9s avanc\u00e9es. Actuellement en b\u00eata \u2014 tout est gratuit.",
+    "pricing.free.name": "BALLISTiQ",
+    "pricing.free.desc": "Outils balistiques essentiels pour chaque tireur",
+    "pricing.free.cta": "T\u00e9l\u00e9charger Gratuit",
+    "pricing.pro.name": "BALLISTiQ PRO",
+    "pricing.pro.desc": "Fonctionnalit\u00e9s avanc\u00e9es pour tireurs de pr\u00e9cision",
+    "pricing.pro.cta": "Obtenir PRO B\u00eata",
+    "pricing.pro.badge": "B\u00eata",
+    "pricing.feature.calc": "Calculateur Balistique",
+    "pricing.feature.ammo": "Base de Munitions Basique",
+    "pricing.feature.reticle": "Base de R\u00e9ticules",
+    "pricing.feature.offline": "Mode Hors Ligne",
+    "pricing.feature.converters": "Convertisseurs d\u2019Unit\u00e9s",
+    "pricing.feature.everything": "Tout dans la version Gratuite",
+    "pricing.feature.miniapps": "Suite Mini-Apps PRO",
+    "pricing.feature.kestrel": "Int\u00e9gration Kestrel",
+    "pricing.feature.trajectory": "Mod\u00e9lisation de Trajectoire Avanc\u00e9e",
+    "pricing.feature.custom": "Profils de Munitions Personnalis\u00e9s",
+    "pricing.feature.target": "Journal de Cibles et Analyses",
+    "pricing.feature.support": "Support Prioritaire",
+
+    "b2b.badge": "Solutions Entreprise",
+    "b2b.title1": "BALLISTiQ",
+    "b2b.title2": "B2B",
+    "b2b.subtitle": "Int\u00e9grez le module balistique C++ BALLISTiQ dans les lunettes thermiques, drones terrestres, optiques intelligentes et syst\u00e8mes de d\u00e9fense.",
+    "b2b.offline": "Fonctionne en ligne ou enti\u00e8rement hors ligne (embarqu\u00e9)",
+    "b2b.cta": "Contactez-nous pour B2B",
+    "b2b.0.title": "Moteur C++ pour Lunettes Thermiques",
+    "b2b.0.desc": "Int\u00e9grez notre moteur balistique directement dans les lunettes thermiques. Solutions de tir en temps r\u00e9el sur l\u2019imagerie thermique.",
+    "b2b.1.title": "Moteur C++ pour Drones Terrestres (UGV)",
+    "b2b.1.desc": "Int\u00e9grez la balistique de pr\u00e9cision dans les v\u00e9hicules terrestres sans pilote. Solutions de ciblage automatis\u00e9es.",
+    "b2b.2.title": "Moteur C++ pour Tourelles Intelligentes",
+    "b2b.2.desc": "Alimentez les stations d\u2019armes \u00e0 distance avec un calcul balistique avanc\u00e9. Suite compl\u00e8te de calcul de trajectoire.",
+
+    "reviews.title1": "Ce que disent",
+    "reviews.title2": "les Tireurs",
+    "reviews.subtitle": "Approuv\u00e9 par des tireurs de pr\u00e9cision, chasseurs et professionnels du monde entier.",
+
+    "team.title1": "D\u00e9couvrez",
+    "team.title2": "l\u2019\u00c9quipe",
+    "team.subtitle": "Les personnes derri\u00e8re BALLISTiQ, d\u00e9di\u00e9es \u00e0 cr\u00e9er les meilleurs outils balistiques.",
+
+    "contact.title1": "Prenez",
+    "contact.title2": "Contact",
+    "contact.subtitle": "Des questions ou int\u00e9ress\u00e9 par l\u2019int\u00e9gration B2B ? Nous serions ravis de vous entendre.",
+    "contact.form.title": "Envoyer un Message",
+    "contact.form.name": "Nom",
+    "contact.form.name.placeholder": "Votre nom",
+    "contact.form.email": "Email",
+    "contact.form.email.placeholder": "votre@email.com",
+    "contact.form.message": "Message",
+    "contact.form.message.placeholder": "Votre message...",
+    "contact.form.submit": "Envoyer le Message",
+    "contact.info.title": "Informations de Contact",
+    "contact.social.title": "Suivez-nous",
+
+    "footer.rights": "Tous droits r\u00e9serv\u00e9s.",
+    "footer.privacy": "Politique de Confidentialit\u00e9",
+    "footer.terms": "Conditions d\u2019Utilisation",
+  },
+
+  it: {
+    "nav.features": "Funzionalit\u00e0",
+    "nav.pricing": "Prezzi",
+    "nav.business": "Per Aziende",
+    "nav.reviews": "Recensioni",
+    "nav.team": "Team",
+    "nav.contact": "Contatti",
+    "nav.download": "Scarica",
+
+    "hero.badge": "Disponibile su iOS e Android",
+    "hero.title1": "Il Tuo Assistente",
+    "hero.title2": "di Tiro",
+    "hero.subtitle": "Calcolatore balistico di precisione, database completo di munizioni e strumenti di tiro avanzati \u2014 tutto in un\u2019app.",
+    "hero.appstore.top": "Scarica su",
+    "hero.appstore.bottom": "App Store",
+    "hero.google.top": "Disponibile su",
+    "hero.google.bottom": "Google Play",
+    "hero.manual": "Scarica il Manuale Utente",
+
+    "features.title1": "Funzionalit\u00e0",
+    "features.title2": "Potenti",
+    "features.subtitle": "Tutto ci\u00f2 che serve per il tiro di precisione, dai calcoli balistici ai dati completi sulle munizioni.",
+    "features.0.title": "Calcolatore Balistico",
+    "features.0.desc": "Motore avanzato di calcolo della traiettoria con correzioni atmosferiche, effetto Coriolis, deriva di spin e altro.",
+    "features.1.title": "Database Munizioni",
+    "features.1.desc": "Libreria completa di munizioni con dati balistici dettagliati per migliaia di cartucce.",
+    "features.2.title": "Database Reticoli",
+    "features.2.desc": "Ampia collezione di pattern reticolari con visualizzazione in sovrapposizione.",
+    "features.3.title": "BALLISTiQ PRO Mini-App",
+    "features.3.desc": "Strumenti specializzati tra cui convertitori di unit\u00e0, calcolatori del vento, stima della distanza e registro bersagli.",
+    "features.4.title": "Integrazione Kestrel",
+    "features.4.desc": "Integrazione con le stazioni meteo Kestrel per dati atmosferici in tempo reale.",
+    "features.5.title": "Modalit\u00e0 Offline",
+    "features.5.desc": "Funzionalit\u00e0 completa senza connessione internet. Tutti i calcoli vengono eseguiti localmente sul dispositivo.",
+
+    "pricing.title1": "Scegli la Tua",
+    "pricing.title2": "Versione",
+    "pricing.subtitle": "Inizia gratis e passa a PRO per funzionalit\u00e0 avanzate. Attualmente in beta \u2014 tutto \u00e8 gratuito.",
+    "pricing.free.name": "BALLISTiQ",
+    "pricing.free.desc": "Strumenti balistici essenziali per ogni tiratore",
+    "pricing.free.cta": "Scarica Gratis",
+    "pricing.pro.name": "BALLISTiQ PRO",
+    "pricing.pro.desc": "Funzionalit\u00e0 avanzate per tiratori di precisione",
+    "pricing.pro.cta": "Ottieni PRO Beta",
+    "pricing.pro.badge": "Beta",
+    "pricing.feature.calc": "Calcolatore Balistico",
+    "pricing.feature.ammo": "Database Munizioni Base",
+    "pricing.feature.reticle": "Database Reticoli",
+    "pricing.feature.offline": "Modalit\u00e0 Offline",
+    "pricing.feature.converters": "Convertitori di Unit\u00e0",
+    "pricing.feature.everything": "Tutto nella versione Gratuita",
+    "pricing.feature.miniapps": "Suite Mini-App PRO",
+    "pricing.feature.kestrel": "Integrazione Kestrel",
+    "pricing.feature.trajectory": "Modellazione Traiettoria Avanzata",
+    "pricing.feature.custom": "Profili Munizioni Personalizzati",
+    "pricing.feature.target": "Registro Bersagli e Analisi",
+    "pricing.feature.support": "Supporto Prioritario",
+
+    "b2b.badge": "Soluzioni Enterprise",
+    "b2b.title1": "BALLISTiQ",
+    "b2b.title2": "B2B",
+    "b2b.subtitle": "Integra il modulo balistico C++ BALLISTiQ in mirini termici, droni terrestri, ottiche intelligenti e sistemi di difesa.",
+    "b2b.offline": "Funziona online o completamente offline (incorporato)",
+    "b2b.cta": "Contattaci per B2B",
+    "b2b.0.title": "Motore C++ per Mirini Termici",
+    "b2b.0.desc": "Incorpora il nostro motore balistico direttamente nei mirini termici. Soluzioni di tiro in tempo reale sull\u2019imaging termico.",
+    "b2b.1.title": "Motore C++ per Droni Terrestri (UGV)",
+    "b2b.1.desc": "Integra la balistica di precisione nei veicoli terrestri senza equipaggio. Soluzioni di puntamento automatizzate.",
+    "b2b.2.title": "Motore C++ per Torrette Intelligenti",
+    "b2b.2.desc": "Alimenta le stazioni d\u2019arma remote con calcolo balistico avanzato. Suite completa di calcolo della traiettoria.",
+
+    "reviews.title1": "Cosa Dicono",
+    "reviews.title2": "i Tiratori",
+    "reviews.subtitle": "Apprezzato da tiratori di precisione, cacciatori e professionisti in tutto il mondo.",
+
+    "team.title1": "Incontra il",
+    "team.title2": "Team",
+    "team.subtitle": "Le persone dietro BALLISTiQ, dedicate a creare i migliori strumenti balistici.",
+
+    "contact.title1": "Mettiti in",
+    "contact.title2": "Contatto",
+    "contact.subtitle": "Hai domande o sei interessato all\u2019integrazione B2B? Ci piacerebbe sentirti.",
+    "contact.form.title": "Invia un Messaggio",
+    "contact.form.name": "Nome",
+    "contact.form.name.placeholder": "Il tuo nome",
+    "contact.form.email": "Email",
+    "contact.form.email.placeholder": "tua@email.com",
+    "contact.form.message": "Messaggio",
+    "contact.form.message.placeholder": "Il tuo messaggio...",
+    "contact.form.submit": "Invia Messaggio",
+    "contact.info.title": "Info Contatto",
+    "contact.social.title": "Seguici",
+
+    "footer.rights": "Tutti i diritti riservati.",
+    "footer.privacy": "Informativa sulla Privacy",
+    "footer.terms": "Termini di Servizio",
+  },
+
+  es: {
+    "nav.features": "Funciones",
+    "nav.pricing": "Precios",
+    "nav.business": "Empresas",
+    "nav.reviews": "Rese\u00f1as",
+    "nav.team": "Equipo",
+    "nav.contact": "Contacto",
+    "nav.download": "Descargar",
+
+    "hero.badge": "Disponible en iOS y Android",
+    "hero.title1": "Tu Asistente",
+    "hero.title2": "de Tiro",
+    "hero.subtitle": "Calculadora bal\u00edstica de precisi\u00f3n, base de datos completa de municiones y herramientas avanzadas de tiro \u2014 todo en una app.",
+    "hero.appstore.top": "Descargar en",
+    "hero.appstore.bottom": "App Store",
+    "hero.google.top": "Obt\u00e9nlo en",
+    "hero.google.bottom": "Google Play",
+    "hero.manual": "Descargar Manual de Usuario",
+
+    "features.title1": "Funciones",
+    "features.title2": "Potentes",
+    "features.subtitle": "Todo lo que necesitas para el tiro de precisi\u00f3n, desde c\u00e1lculos bal\u00edsticos hasta datos completos de municiones.",
+    "features.0.title": "Calculadora Bal\u00edstica",
+    "features.0.desc": "Motor avanzado de c\u00e1lculo de trayectoria con correcciones atmosf\u00e9ricas, efecto Coriolis, deriva de giro y m\u00e1s.",
+    "features.1.title": "Base de Municiones",
+    "features.1.desc": "Biblioteca completa de municiones con datos bal\u00edsticos detallados para miles de cartuchos.",
+    "features.2.title": "Base de Ret\u00edculas",
+    "features.2.desc": "Amplia colecci\u00f3n de patrones reticulares con visualizaci\u00f3n superpuesta.",
+    "features.3.title": "BALLISTiQ PRO Mini-Apps",
+    "features.3.desc": "Herramientas especializadas incluyendo conversores de unidades, calculadoras de viento, estimaci\u00f3n de distancia y registro de blancos.",
+    "features.4.title": "Integraci\u00f3n Kestrel",
+    "features.4.desc": "Integraci\u00f3n con estaciones meteorol\u00f3gicas Kestrel para datos atmosf\u00e9ricos en tiempo real.",
+    "features.5.title": "Modo Sin Conexi\u00f3n",
+    "features.5.desc": "Funcionalidad completa sin conexi\u00f3n a internet. Todos los c\u00e1lculos se ejecutan localmente en tu dispositivo.",
+
+    "pricing.title1": "Elige Tu",
+    "pricing.title2": "Versi\u00f3n",
+    "pricing.subtitle": "Comienza gratis y pasa a PRO para funciones avanzadas. Actualmente en beta \u2014 todo es gratuito.",
+    "pricing.free.name": "BALLISTiQ",
+    "pricing.free.desc": "Herramientas bal\u00edsticas esenciales para cada tirador",
+    "pricing.free.cta": "Descargar Gratis",
+    "pricing.pro.name": "BALLISTiQ PRO",
+    "pricing.pro.desc": "Funciones avanzadas para tiradores de precisi\u00f3n",
+    "pricing.pro.cta": "Obtener PRO Beta",
+    "pricing.pro.badge": "Beta",
+    "pricing.feature.calc": "Calculadora Bal\u00edstica",
+    "pricing.feature.ammo": "Base de Municiones B\u00e1sica",
+    "pricing.feature.reticle": "Base de Ret\u00edculas",
+    "pricing.feature.offline": "Modo Sin Conexi\u00f3n",
+    "pricing.feature.converters": "Conversores de Unidades",
+    "pricing.feature.everything": "Todo en la versi\u00f3n Gratuita",
+    "pricing.feature.miniapps": "Suite Mini-Apps PRO",
+    "pricing.feature.kestrel": "Integraci\u00f3n Kestrel",
+    "pricing.feature.trajectory": "Modelado de Trayectoria Avanzado",
+    "pricing.feature.custom": "Perfiles de Munici\u00f3n Personalizados",
+    "pricing.feature.target": "Registro de Blancos y An\u00e1lisis",
+    "pricing.feature.support": "Soporte Prioritario",
+
+    "b2b.badge": "Soluciones Empresariales",
+    "b2b.title1": "BALLISTiQ",
+    "b2b.title2": "B2B",
+    "b2b.subtitle": "Integra el m\u00f3dulo bal\u00edstico C++ de BALLISTiQ en miras t\u00e9rmicas, drones terrestres, \u00f3pticas inteligentes y sistemas de defensa.",
+    "b2b.offline": "Funciona en l\u00ednea o completamente sin conexi\u00f3n (integrado)",
+    "b2b.cta": "Cont\u00e1ctanos para B2B",
+    "b2b.0.title": "Motor C++ para Miras T\u00e9rmicas",
+    "b2b.0.desc": "Integra nuestro motor bal\u00edstico directamente en miras t\u00e9rmicas. Soluciones de tiro en tiempo real sobre imagen t\u00e9rmica.",
+    "b2b.1.title": "Motor C++ para Drones Terrestres (UGV)",
+    "b2b.1.desc": "Integra bal\u00edstica de precisi\u00f3n en veh\u00edculos terrestres no tripulados. Soluciones de apuntado automatizadas.",
+    "b2b.2.title": "Motor C++ para Torretas Inteligentes",
+    "b2b.2.desc": "Potencia estaciones de armas remotas con c\u00e1lculo bal\u00edstico avanzado. Suite completa de c\u00e1lculo de trayectoria.",
+
+    "reviews.title1": "Lo que Dicen",
+    "reviews.title2": "los Tiradores",
+    "reviews.subtitle": "Valorado por tiradores de precisi\u00f3n, cazadores y profesionales en todo el mundo.",
+
+    "team.title1": "Conoce al",
+    "team.title2": "Equipo",
+    "team.subtitle": "Las personas detr\u00e1s de BALLISTiQ, dedicadas a crear las mejores herramientas bal\u00edsticas.",
+
+    "contact.title1": "Ponte en",
+    "contact.title2": "Contacto",
+    "contact.subtitle": "\u00bfTienes preguntas o te interesa la integraci\u00f3n B2B? Nos encantar\u00eda saber de ti.",
+    "contact.form.title": "Enviar un Mensaje",
+    "contact.form.name": "Nombre",
+    "contact.form.name.placeholder": "Tu nombre",
+    "contact.form.email": "Email",
+    "contact.form.email.placeholder": "tu@email.com",
+    "contact.form.message": "Mensaje",
+    "contact.form.message.placeholder": "Tu mensaje...",
+    "contact.form.submit": "Enviar Mensaje",
+    "contact.info.title": "Info de Contacto",
+    "contact.social.title": "S\u00edguenos",
+
+    "footer.rights": "Todos los derechos reservados.",
+    "footer.privacy": "Pol\u00edtica de Privacidad",
+    "footer.terms": "T\u00e9rminos de Servicio",
+  },
+};
+
+interface I18nContextType {
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
+  t: (key: string) => string;
+}
+
+export const I18nContext = createContext<I18nContextType>({
+  locale: "en",
+  setLocale: () => {},
+  t: (key: string) => key,
+});
+
+export function useI18nProvider() {
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("ballistiq-locale");
+      if (stored && (stored === "en" || stored === "fr" || stored === "it" || stored === "es")) {
+        return stored as Locale;
+      }
+    }
+    return "en";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("ballistiq-locale", locale);
+    document.documentElement.lang = locale;
+  }, [locale]);
+
+  const setLocale = (l: Locale) => setLocaleState(l);
+
+  const t = (key: string): string => {
+    return translations[locale]?.[key] || translations.en[key] || key;
+  };
+
+  return { locale, setLocale, t };
+}
+
+export function useI18n() {
+  return useContext(I18nContext);
+}

@@ -1,3 +1,5 @@
+import { useTheme } from "@/hooks/use-theme";
+
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   className?: string;
@@ -15,9 +17,9 @@ export function Logo({ size = "md", className = "" }: LogoProps) {
       className={`font-bold tracking-wider ${sizeClasses[size]} ${className}`}
       data-testid="logo"
     >
-      <span style={{ color: "rgb(255, 255, 255)" }}>BALLIST</span>
-      <span style={{ color: "rgb(0, 151, 178)" }}>i</span>
-      <span style={{ color: "rgb(255, 255, 255)" }}>Q</span>
+      <span className="text-foreground">BALLIST</span>
+      <span className="text-primary">i</span>
+      <span className="text-foreground">Q</span>
     </div>
   );
 }

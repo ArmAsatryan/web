@@ -1,5 +1,6 @@
 import { teamMembers } from "@/data/siteContent";
 import { Card } from "@/components/ui/card";
+import { useI18n } from "@/hooks/use-i18n";
 import armenImg from "@assets/Armen_Asatryan_1770884174859.png";
 import gerasimImg from "@assets/Gerasim_Israyelyan_1770884180100.jpg";
 import ishkhanImg from "@assets/Ishkhan_Gevorgyan_1770884185940.png";
@@ -13,15 +14,18 @@ const imageMap: Record<string, string> = {
 };
 
 export function TeamSection() {
+  const { t } = useI18n();
+
   return (
     <section id="team" className="py-24 sm:py-32" data-testid="section-team">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Meet the <span className="text-[rgb(0,151,178)]">Team</span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+            {t("team.title1")}{" "}
+            <span className="text-primary">{t("team.title2")}</span>
           </h2>
-          <p className="text-white/50 text-lg max-w-2xl mx-auto">
-            The people behind BALLISTiQ, dedicated to building the best ballistic tools.
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            {t("team.subtitle")}
           </p>
         </div>
 
@@ -43,10 +47,10 @@ export function TeamSection() {
                 />
               </div>
               <div className="p-5">
-                <h3 className="text-base font-semibold text-white mb-1">
+                <h3 className="text-base font-semibold text-foreground mb-1">
                   {member.name}
                 </h3>
-                <p className="text-[rgb(0,151,178)] text-sm">{member.role}</p>
+                <p className="text-primary text-sm">{member.role}</p>
               </div>
             </Card>
           ))}

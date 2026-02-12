@@ -1,0 +1,62 @@
+WOW EFFECTS (must implement, keep it elegant and fast):
+Goal: premium “precision / high-tech” vibe (not flashy). Every effect must feel intentional.
+
+1) HERO “Living Background” (lightweight):
+- Create a subtle animated background using pure CSS (no heavy libs):
+  - A slow-moving radial gradient + faint grid + soft noise overlay.
+  - Add 2–3 blurred “glow orbs” (teal + green) with very slow animation (30–60s loop).
+- Add a thin “trajectory line” SVG behind the hero content (curved line with 2–3 glowing nodes).
+- Respect reduced motion: if prefers-reduced-motion => disable all animations.
+
+2) Scroll reveal animations (Framer Motion allowed, minimal use):
+- Install framer-motion and animate sections on first view:
+  - Fade + small upward slide (8–16px), 0.4–0.6s, spring or easeOut.
+- Stagger cards (features/pricing/testimonials/team) slightly for depth.
+- Do not animate everything at once. Only first-time entering viewport.
+
+3) Interactive product mockup tilt (CSS only):
+- Hero screenshot card should have a gentle 3D tilt on mouse move (subtle).
+- Add a soft “glass” reflection (pseudo-element) moving slightly with cursor.
+- On mobile: disable tilt, keep a static premium look.
+
+4) “Magnetic” CTA buttons (microinteraction):
+- Primary CTA button slightly follows cursor (max 6–10px) on desktop.
+- On hover: glow border + subtle scale (1.02), crisp shadow.
+- On focus: strong accessible outline.
+
+5) Scroll progress “precision indicator”:
+- Add a small vertical progress indicator on the right side (desktop only):
+  - Thin line + nodes for each section (Hero/Features/Pricing/B2B/Reviews/Team/Contact).
+  - Active node glows teal; click node scrolls to section.
+- Hide on mobile.
+
+6) Numbers that feel real (no fake stats):
+- Create a “Key Metrics” mini-strip (3 items) under hero:
+  - Use content pulled from siteContent.ts and write “update later” placeholders if unsure.
+  - Animate counting up only when visible (IntersectionObserver), but keep subtle.
+  - Example labels: “Users”, “Languages”, “Countries” (values must be editable).
+
+7) Premium “glass cards” system:
+- All cards use consistent style:
+  - Slight translucent background, 1px low-contrast border, soft shadow.
+  - On hover: border becomes slightly brighter + tiny lift (translateY -2).
+- Keep contrast readable (WCAG-ish).
+
+8) Easter-egg level polish (small but wow):
+- Add a custom cursor accent only on desktop (tiny teal dot) OR skip if it feels too much.
+- Add a “Copy email” button in Contacts with a success toast.
+- Add smooth anchor scroll + active nav highlight + section snapping feel (but no scroll-jank).
+
+Performance constraints:
+- Lighthouse-friendly: no huge animations, no heavy particle libraries by default.
+- Use requestAnimationFrame only when needed; throttle mousemove handlers.
+- Lazy-load below-the-fold images.
+- All effects must be disabled or reduced under prefers-reduced-motion.
+
+Deliverable requirements:
+- Implement these effects as reusable utilities:
+  - useInViewAnimation hook
+  - useMagneticButton hook
+  - useTiltCard hook
+  - ScrollProgress component
+- Keep code clean and documented.
