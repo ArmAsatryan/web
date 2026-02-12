@@ -1,3 +1,4 @@
+import express from "express";
 import { type Express } from "express";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
@@ -9,6 +10,10 @@ import { nanoid } from "nanoid";
 const viteLogger = createLogger();
 
 export async function setupVite(server: Server, app: Express) {
+  // Serve client/public (favicon, manifest, etc.) so /favicon.ico works in dev
+  const clientPublic = path.resolve(import.meta.dirname, "..", "client", "public");
+  app.use(express.static(clientPublic));
+
   const serverOptions = {
     middlewareMode: true,
     hmr: { server, path: "/vite-hmr" },
