@@ -36,20 +36,20 @@ export function TeamSection() {
           {teamMembers.map((member, i) => (
             <Card
               key={i}
-              className="group overflow-visible glass-card text-center hover-elevate transition-all duration-300"
+              className="group overflow-visible glass-card text-center hover-elevate transition-all duration-300 flex flex-col"
               data-testid={`card-team-${i}`}
             >
               <div className="aspect-square relative overflow-hidden rounded-t-[inherit]">
                 <img
                   src={imageMap[member.image]}
                   alt={member.name}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500"
                   loading="lazy"
                   width={300}
                   height={300}
                 />
               </div>
-              <div className="p-5">
+              <div className="p-5 flex-1 flex flex-col justify-center">
                 <h3 className="text-base font-semibold text-foreground mb-1">
                   {member.name}
                 </h3>
