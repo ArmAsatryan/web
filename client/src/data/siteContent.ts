@@ -126,6 +126,12 @@ export const reviews = [
     rating: 5,
     text: "Switched from three different apps to just BALLISTiQ. Everything I need in one place. The wind calculator alone is worth it.",
   },
+  {
+    name: "Mikita_ch",
+    handle: "Nov 16, 2025",
+    rating: 5,
+    text: "Interface simple d'utilisation qui a l'air tr\u00e8s complet pour mon usage TLD et surtout j'aime la r\u00e9activit\u00e9 et l'efficacit\u00e9 du service d'aide en ligne qui malgr\u00e9 le week-end et l'heure tardive m'a offert une r\u00e9ponse d\u00e9taill\u00e9e et en fran\u00e7ais en moins d'une minute.",
+  },
 ];
 
 export const teamMembers = [

@@ -60,50 +60,52 @@ export function PricingSection() {
           </p>
         </AnimatedSection>
 
-        <StaggeredGrid className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <StaggeredGrid className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto items-stretch">
           {plans.map((plan, i) => (
             <Card
               key={i}
-              className={`relative p-8 glass-card transition-all duration-300 ${
+              className={`relative glass-card transition-all duration-300 flex flex-col ${
                 plan.highlighted
                   ? "border-primary/30 border-2"
                   : ""
               }`}
               data-testid={`card-pricing-${i}`}
             >
-              {plan.badgeKey && (
-                <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground no-default-hover-elevate no-default-active-elevate">
-                  {t(plan.badgeKey)}
-                </Badge>
-              )}
-
-              <h3 className="text-xl font-bold text-foreground mb-2">{t(plan.nameKey)}</h3>
-              <p className="text-muted-foreground text-sm mb-6">{t(plan.descKey)}</p>
-
-              <div className="flex items-baseline gap-2 mb-8">
-                <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                {plan.priceSuffix && (
-                  <span className="text-muted-foreground text-sm">{plan.priceSuffix}</span>
+              <div className="p-8 flex flex-col flex-1">
+                {plan.badgeKey && (
+                  <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground no-default-hover-elevate no-default-active-elevate">
+                    {t(plan.badgeKey)}
+                  </Badge>
                 )}
+
+                <h3 className="text-xl font-bold text-foreground mb-2">{t(plan.nameKey)}</h3>
+                <p className="text-muted-foreground text-sm mb-6">{t(plan.descKey)}</p>
+
+                <div className="flex items-baseline gap-2 mb-8">
+                  <span className="text-4xl font-bold text-foreground">{plan.price}</span>
+                  {plan.priceSuffix && (
+                    <span className="text-muted-foreground text-sm">{plan.priceSuffix}</span>
+                  )}
+                </div>
+
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.featureKeys.map((fk, j) => (
+                    <li key={j} className="flex items-center gap-3 text-sm">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span className="text-muted-foreground">{t(fk)}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button
+                  asChild
+                  variant={plan.highlighted ? "default" : "secondary"}
+                  className="w-full"
+                  data-testid={`button-pricing-cta-${i}`}
+                >
+                  <a href="#hero">{t(plan.ctaKey)}</a>
+                </Button>
               </div>
-
-              <ul className="space-y-3 mb-8">
-                {plan.featureKeys.map((fk, j) => (
-                  <li key={j} className="flex items-center gap-3 text-sm">
-                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className="text-muted-foreground">{t(fk)}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                asChild
-                variant={plan.highlighted ? "default" : "secondary"}
-                className="w-full"
-                data-testid={`button-pricing-cta-${i}`}
-              >
-                <a href="#hero">{t(plan.ctaKey)}</a>
-              </Button>
             </Card>
           ))}
         </StaggeredGrid>

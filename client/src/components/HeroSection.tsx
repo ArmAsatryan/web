@@ -1,5 +1,6 @@
+import { useState, useEffect, useMemo } from "react";
 import { SiApple, SiGoogleplay } from "react-icons/si";
-import { FileText, Crosshair, Wind, Mountain } from "lucide-react";
+import { FileText, Crosshair, Wind, ArrowUpRight, ArrowUpLeft, ArrowRight, ArrowLeft, ArrowDownRight, ArrowDownLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { useMagneticButton } from "@/hooks/use-magnetic-button";
@@ -16,8 +17,34 @@ function MagneticWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
+const windIcons = [ArrowUpRight, ArrowUpLeft, ArrowRight, ArrowLeft, ArrowDownRight, ArrowDownLeft];
+
+function useRandomValues() {
+  const [values, setValues] = useState(() => generateValues());
+
+  function generateValues() {
+    const windSpeed = (Math.random() * 10).toFixed(1);
+    const windIconIdx = Math.floor(Math.random() * windIcons.length);
+    const distance = Math.floor(500 + Math.random() * 1000);
+    const hClicks = (10 + Math.random() * 30).toFixed(1);
+    const vClicks = (10 + Math.random() * 30).toFixed(1);
+    return { windSpeed, windIconIdx, distance, hClicks, vClicks };
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setValues(generateValues());
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return values;
+}
+
 function AppMockup() {
   const { ref, style, glareStyle } = useTiltCard(6);
+  const { windSpeed, windIconIdx, distance, hClicks, vClicks } = useRandomValues();
+  const WindIcon = windIcons[windIconIdx];
 
   return (
     <div
@@ -38,26 +65,33 @@ function AppMockup() {
             <Crosshair className="w-4 h-4 text-primary" />
             <div className="flex-1">
               <div className="text-white/80 text-xs">Distance</div>
-              <div className="text-white text-sm font-semibold">1,247 m</div>
+              <div className="text-white text-sm font-semibold transition-all duration-700">{distance.toLocaleString()} m</div>
             </div>
           </div>
           <div className="flex items-center gap-3 p-2 rounded-md bg-white/5">
             <Wind className="w-4 h-4 text-primary" />
             <div className="flex-1">
               <div className="text-white/80 text-xs">Wind</div>
-              <div className="text-white text-sm font-semibold">3.2 m/s @ 45</div>
+              <div className="text-white text-sm font-semibold flex items-center gap-1.5 transition-all duration-700">
+                {windSpeed} m/s
+                <WindIcon className="w-3.5 h-3.5 text-primary/80" />
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-3 p-2 rounded-md bg-white/5">
-            <Mountain className="w-4 h-4 text-primary" />
-            <div className="flex-1">
-              <div className="text-white/80 text-xs">Elevation</div>
-              <div className="text-white text-sm font-semibold">+8.4 MOA</div>
+          <div className="mt-4 p-3 rounded-md bg-primary/20 border border-primary/30">
+            <div className="text-primary text-xs text-center mb-2">Solution Ready</div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="text-center">
+                <div className="text-white/60 text-[10px] uppercase tracking-wider">Horizontal</div>
+                <div className="text-white font-bold text-lg transition-all duration-700">{hClicks}</div>
+                <div className="text-white/40 text-[10px]">clicks</div>
+              </div>
+              <div className="text-center">
+                <div className="text-white/60 text-[10px] uppercase tracking-wider">Vertical</div>
+                <div className="text-white font-bold text-lg transition-all duration-700">{vClicks}</div>
+                <div className="text-white/40 text-[10px]">clicks</div>
+              </div>
             </div>
-          </div>
-          <div className="mt-4 p-3 rounded-md bg-primary/20 border border-primary/30 text-center">
-            <div className="text-primary text-xs">Solution Ready</div>
-            <div className="text-white font-bold text-lg">24.3 clicks</div>
           </div>
         </div>
       </div>

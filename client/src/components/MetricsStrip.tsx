@@ -9,16 +9,16 @@ interface Metric {
 }
 
 const metrics: Metric[] = [
-  { value: 5000, suffix: "+", labelKey: "metrics.users" },
-  { value: 4, suffix: "", labelKey: "metrics.languages" },
-  { value: 25, suffix: "+", labelKey: "metrics.countries" },
+  { value: 13000, suffix: "+", labelKey: "metrics.users" },
+  { value: 56, suffix: "+", labelKey: "metrics.languages" },
+  { value: 0, suffix: "", labelKey: "metrics.support" },
 ];
 
 const metricLabels: Record<string, Record<string, string>> = {
-  en: { "metrics.users": "Active Users", "metrics.languages": "Languages", "metrics.countries": "Countries" },
-  fr: { "metrics.users": "Utilisateurs Actifs", "metrics.languages": "Langues", "metrics.countries": "Pays" },
-  it: { "metrics.users": "Utenti Attivi", "metrics.languages": "Lingue", "metrics.countries": "Paesi" },
-  es: { "metrics.users": "Usuarios Activos", "metrics.languages": "Idiomas", "metrics.countries": "Pa\u00edses" },
+  en: { "metrics.users": "Active Users", "metrics.languages": "Languages", "metrics.support": "24/7 Support" },
+  fr: { "metrics.users": "Utilisateurs Actifs", "metrics.languages": "Langues", "metrics.support": "Support 24/7" },
+  it: { "metrics.users": "Utenti Attivi", "metrics.languages": "Lingue", "metrics.support": "Supporto 24/7" },
+  es: { "metrics.users": "Usuarios Activos", "metrics.languages": "Idiomas", "metrics.support": "Soporte 24/7" },
 };
 
 function useCountUp(target: number, duration = 1500, start = false, reduced = false) {
@@ -26,7 +26,7 @@ function useCountUp(target: number, duration = 1500, start = false, reduced = fa
 
   useEffect(() => {
     if (!start) return;
-    if (reduced) {
+    if (reduced || target === 0) {
       setCount(target);
       return;
     }
@@ -55,11 +55,12 @@ function MetricItem({ metric, started, reduced }: { metric: Metric; started: boo
   const { locale } = useI18n();
 
   const label = metricLabels[locale]?.[metric.labelKey] || metricLabels.en[metric.labelKey];
+  const isSupport = metric.labelKey === "metrics.support";
 
   return (
     <div className="text-center px-6 py-4" data-testid={`metric-${metric.labelKey.split(".")[1]}`}>
       <div className="text-3xl sm:text-4xl font-bold text-foreground mb-1">
-        {count.toLocaleString()}{metric.suffix}
+        {isSupport ? "24/7" : `${count.toLocaleString()}${metric.suffix}`}
       </div>
       <div className="text-sm text-muted-foreground">{label}</div>
     </div>
