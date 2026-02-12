@@ -36,7 +36,7 @@ export function TeamSection() {
           {teamMembers.map((member, i) => (
             <Card
               key={i}
-              className="group overflow-visible glass-card text-center hover-elevate transition-all duration-300 flex flex-col"
+              className="group overflow-visible glass-card text-center hover-elevate transition-all duration-300 flex flex-col h-full"
               data-testid={`card-team-${i}`}
             >
               <div className="aspect-square relative overflow-hidden rounded-t-[inherit]">

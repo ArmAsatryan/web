@@ -42,7 +42,7 @@ function StaggerItem({ children, delay }: { children: React.ReactNode; delay: nu
   const { ref, motionProps } = useInViewAnimation({ delay });
 
   return (
-    <motion.div ref={ref} {...motionProps}>
+    <motion.div ref={ref} {...motionProps} className="h-full">
       {children}
     </motion.div>
   );

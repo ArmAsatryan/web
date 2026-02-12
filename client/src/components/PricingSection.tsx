@@ -64,7 +64,7 @@ export function PricingSection() {
           {plans.map((plan, i) => (
             <Card
               key={i}
-              className={`relative glass-card transition-all duration-300 flex flex-col ${
+              className={`relative glass-card transition-all duration-300 flex flex-col h-full ${
                 plan.highlighted
                   ? "border-primary/30 border-2"
                   : ""
