@@ -99,7 +99,7 @@ function AppMockup() {
         <div className="p-4 border-b border-white/10">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-white/80 text-xs font-semibold tracking-wider">BALLISTiQ PRO</span>
+            <span className="text-primary text-xs font-semibold tracking-wider">BALLISTiQ PRO</span>
           </div>
         </div>
         <div className="p-4 space-y-3">

@@ -40,8 +40,7 @@ export function Logo({ size = "md", className = "" }: LogoProps) {
 
   const filterStyle: React.CSSProperties = theme === "dark"
     ? {
-        filter:
-          "brightness(0) saturate(100%) invert(55%) sepia(80%) saturate(500%) hue-rotate(155deg) brightness(95%)",
+        filter: "brightness(0) invert(1)",
         transform: `rotate(${rotation}deg)`,
         transition: "filter 0.3s ease",
       }
