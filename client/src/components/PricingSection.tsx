@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,8 @@ import { useI18n } from "@/hooks/use-i18n";
 import { useTheme } from "@/hooks/use-theme";
 import { AnimatedSection, StaggeredGrid } from "./AnimatedSection";
 import logoImg from "@assets/Logo_1770890960676.png";
+
+const BLUE_FILTER = "brightness(0) saturate(100%) invert(45%) sepia(95%) saturate(600%) hue-rotate(155deg) brightness(92%)";
 
 const freeFeatureKeys = [
   "pricing.feature.calc",
@@ -25,9 +28,29 @@ const proFeatureKeys = [
   "pricing.feature.support",
 ];
 
+function useScrollRotation() {
+  const [rotation, setRotation] = useState(0);
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setRotation(window.scrollY * 0.15);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return rotation;
+}
+
 export function PricingSection() {
   const { t } = useI18n();
   const { theme } = useTheme();
+  const rotation = useScrollRotation();
 
   const plans = [
     {
@@ -88,10 +111,12 @@ export function PricingSection() {
                     className="w-7 h-7 flex-shrink-0"
                     style={{
                       filter: plan.highlighted
-                        ? "brightness(0) saturate(100%) invert(55%) sepia(80%) saturate(500%) hue-rotate(155deg) brightness(95%)"
+                        ? BLUE_FILTER
                         : theme === "dark"
                           ? "brightness(0) invert(1)"
                           : "brightness(0)",
+                      transform: `rotate(${rotation}deg)`,
+                      transition: "filter 0.3s ease",
                     }}
                   />
                   {t(plan.nameKey)}
