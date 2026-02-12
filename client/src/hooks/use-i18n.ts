@@ -11,11 +11,11 @@ export const localeNames: Record<Locale, string> = {
 };
 
 export const localeFlags: Record<Locale, string> = {
-  en: "EN",
-  fr: "FR",
-  it: "IT",
-  es: "ES",
-  hy: "HY",
+  en: "\ud83c\uddec\ud83c\udde7 EN",
+  fr: "\ud83c\uddeb\ud83c\uddf7 FR",
+  it: "\ud83c\uddee\ud83c\uddf9 IT",
+  es: "\ud83c\uddea\ud83c\uddf8 ES",
+  hy: "\ud83c\udde6\ud83c\uddf2 HY",
 };
 
 const translations: Record<Locale, Record<string, string>> = {
