@@ -3,7 +3,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
+import { useTheme } from "@/hooks/use-theme";
 import { AnimatedSection, StaggeredGrid } from "./AnimatedSection";
+import logoImg from "@assets/Logo_1770890960676.png";
 
 const freeFeatureKeys = [
   "pricing.feature.calc",
@@ -25,6 +27,7 @@ const proFeatureKeys = [
 
 export function PricingSection() {
   const { t } = useI18n();
+  const { theme } = useTheme();
 
   const plans = [
     {
@@ -78,7 +81,21 @@ export function PricingSection() {
                   </Badge>
                 )}
 
-                <h3 className="text-xl font-bold text-foreground mb-2">{t(plan.nameKey)}</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
+                  <img
+                    src={logoImg}
+                    alt=""
+                    className="w-7 h-7 flex-shrink-0"
+                    style={{
+                      filter: plan.highlighted
+                        ? "brightness(0) saturate(100%) invert(55%) sepia(80%) saturate(500%) hue-rotate(155deg) brightness(95%)"
+                        : theme === "dark"
+                          ? "brightness(0) invert(1)"
+                          : "brightness(0)",
+                    }}
+                  />
+                  {t(plan.nameKey)}
+                </h3>
                 <p className="text-muted-foreground text-sm mb-6">{t(plan.descKey)}</p>
 
                 <div className="flex items-baseline gap-2 mb-8">
