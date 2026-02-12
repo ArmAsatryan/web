@@ -155,6 +155,11 @@ export const teamMembers = [
     role: "Co-Founder & CPO",
     image: "Ishkhan_Gevorgyan",
   },
+  {
+    name: "Andranik Eghoyan",
+    role: "Android Magician",
+    image: "Andranik_Eghoyan",
+  },
 ];
 
 export const socialLinks = [

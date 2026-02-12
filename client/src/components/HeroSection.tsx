@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SiApple, SiGoogleplay } from "react-icons/si";
 import { FileText, Crosshair, Wind, ArrowUpRight, ArrowUpLeft, ArrowRight, ArrowLeft, ArrowDownRight, ArrowDownLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,26 +19,61 @@ function MagneticWrapper({ children }: { children: React.ReactNode }) {
 
 const windIcons = [ArrowUpRight, ArrowUpLeft, ArrowRight, ArrowLeft, ArrowDownRight, ArrowDownLeft];
 
-function useRandomValues() {
-  const [values, setValues] = useState(() => generateValues());
-
-  function generateValues() {
-    const windSpeed = (Math.random() * 10).toFixed(1);
-    const windIconIdx = Math.floor(Math.random() * windIcons.length);
-    const distance = Math.floor(500 + Math.random() * 1000);
-    const hClicks = (10 + Math.random() * 30).toFixed(1);
-    const vClicks = (10 + Math.random() * 30).toFixed(1);
-    return { windSpeed, windIconIdx, distance, hClicks, vClicks };
-  }
+function useSmoothValue(target: number, duration = 1200) {
+  const [current, setCurrent] = useState(target);
+  const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setValues(generateValues());
-    }, 4000);
+    const start = current;
+    const diff = target - start;
+    if (Math.abs(diff) < 0.01) return;
+    let startTime: number;
+
+    const step = (ts: number) => {
+      if (!startTime) startTime = ts;
+      const progress = Math.min((ts - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCurrent(start + diff * eased);
+      if (progress < 1) rafRef.current = requestAnimationFrame(step);
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target, duration]);
+
+  return current;
+}
+
+function generateTargets() {
+  return {
+    windSpeed: Math.random() * 10,
+    windIconIdx: Math.floor(Math.random() * windIcons.length),
+    distance: 500 + Math.random() * 1000,
+    hClicks: 10 + Math.random() * 30,
+    vClicks: 10 + Math.random() * 30,
+  };
+}
+
+function useRandomValues() {
+  const [targets, setTargets] = useState(generateTargets);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTargets(generateTargets()), 4000);
     return () => clearInterval(interval);
   }, []);
 
-  return values;
+  const distance = useSmoothValue(targets.distance);
+  const windSpeed = useSmoothValue(targets.windSpeed);
+  const hClicks = useSmoothValue(targets.hClicks);
+  const vClicks = useSmoothValue(targets.vClicks);
+
+  return {
+    distance: Math.round(distance),
+    windSpeed: windSpeed.toFixed(1),
+    windIconIdx: targets.windIconIdx,
+    hClicks: hClicks.toFixed(1),
+    vClicks: vClicks.toFixed(1),
+  };
 }
 
 function AppMockup() {

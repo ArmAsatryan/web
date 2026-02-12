@@ -6,12 +6,14 @@ import armenImg from "@assets/Armen_Asatryan_1770884174859.png";
 import gerasimImg from "@assets/Gerasim_Israyelyan_1770884180100.jpg";
 import ishkhanImg from "@assets/Ishkhan_Gevorgyan_1770884185940.png";
 import spartakImg from "@assets/Spartak_Kyureghyan_1770884192540.jpg";
+import andranikImg from "@assets/ChatGPT_Image_12_փտվ,_2026_թ.,_13_13_42_1770887628586.png";
 
 const imageMap: Record<string, string> = {
   Armen_Asatryan: armenImg,
   Gerasim_Israyelyan: gerasimImg,
   Ishkhan_Gevorgyan: ishkhanImg,
   Spartak_Kyureghyan: spartakImg,
+  Andranik_Eghoyan: andranikImg,
 };
 
 export function TeamSection() {
@@ -30,7 +32,7 @@ export function TeamSection() {
           </p>
         </AnimatedSection>
 
-        <StaggeredGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StaggeredGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {teamMembers.map((member, i) => (
             <Card
               key={i}
