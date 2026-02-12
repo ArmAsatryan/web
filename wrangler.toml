@@ -1,6 +1,9 @@
 # Cloudflare Pages – deploy with: npm run deploy
 # Or: npx wrangler pages deploy dist/public
 # First time: npx wrangler pages project create ballistiq (or your project name)
+#
+# Git deploy: In dashboard set Build command = "npm run build", Build output = "dist/public"
+# Custom domain: Dashboard → Custom domains → Add ballistiq.xyz (see DEPLOY.md)
 
 name = "ballistiq"
 compatibility_date = "2024-01-01"
