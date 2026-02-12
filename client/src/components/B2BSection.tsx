@@ -43,7 +43,7 @@ export function B2BSection() {
           {[0, 1, 2].map((i) => (
             <Card
               key={i}
-              className="group overflow-visible glass-card hover-elevate transition-all duration-300"
+              className="group overflow-visible glass-card hover-elevate transition-all duration-300 flex flex-col h-full"
               data-testid={`card-b2b-${i}`}
             >
               <div className="aspect-[4/3] relative overflow-hidden rounded-t-[inherit]">
@@ -56,7 +56,7 @@ export function B2BSection() {
                   height={300}
                 />
               </div>
-              <div className="p-6">
+              <div className="p-6 flex-1 flex flex-col">
                 <h3 className="text-lg font-semibold text-foreground mb-3">
                   {t(`b2b.${i}.title`)}
                 </h3>
