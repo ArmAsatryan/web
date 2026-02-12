@@ -5,9 +5,11 @@ import logoImg from "@assets/Logo_1770890960676.png";
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   className?: string;
+  /** When true, render logo and text in white (e.g. on transparent navbar in light mode) */
+  invert?: boolean;
 }
 
-export function Logo({ size = "md", className = "" }: LogoProps) {
+export function Logo({ size = "md", className = "", invert = false }: LogoProps) {
   const { theme } = useTheme();
   const [rotation, setRotation] = useState(0);
 
@@ -38,7 +40,8 @@ export function Logo({ size = "md", className = "" }: LogoProps) {
     lg: "text-3xl",
   };
 
-  const filterStyle: React.CSSProperties = theme === "dark"
+  const useWhite = theme === "dark" || invert;
+  const filterStyle: React.CSSProperties = useWhite
     ? {
         filter: "brightness(0) invert(1)",
         transform: `rotate(${rotation}deg)`,
@@ -63,9 +66,9 @@ export function Logo({ size = "md", className = "" }: LogoProps) {
         data-testid="img-logo"
       />
       <div className={`font-bold tracking-wider ${textSizes[size]}`}>
-        <span className="text-foreground">BALLIST</span>
-        <span className="text-primary">i</span>
-        <span className="text-foreground">Q</span>
+        <span className={invert ? "text-white" : "text-foreground"}>BALLIST</span>
+        <span className={invert ? "text-primary" : "text-primary"}>i</span>
+        <span className={invert ? "text-white" : "text-foreground"}>Q</span>
       </div>
     </div>
   );

@@ -1,0 +1,9 @@
+# Cloudflare Pages – deploy with: npm run deploy
+# Or: npx wrangler pages deploy dist/public
+# First time: npx wrangler pages project create ballistiq (or your project name)
+
+name = "ballistiq"
+compatibility_date = "2024-01-01"
+
+# Static output from npm run build (client → dist/public)
+pages_build_output_dir = "./dist/public"

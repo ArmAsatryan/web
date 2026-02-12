@@ -1,4 +1,5 @@
 import { type LucideIcon } from "lucide-react";
+import {SiFacebook, SiInstagram, SiLinkedin, SiTelegram, SiWhatsapp} from "react-icons/si";
 
 export const navLinks = [
   { label: "Features", href: "#features" },
@@ -117,7 +118,7 @@ export const reviews = [
   {
     name: "James L.",
     handle: "@tacticalpro",
-    rating: 4,
+    rating: 5,
     text: "Great tool for professionals. The C++ engine performance is impressive - calculations are instant. Looking forward to seeing more ammo added to the database.",
   },
   {
@@ -160,12 +161,17 @@ export const teamMembers = [
     role: "Android Magician",
     image: "Andranik_Eghoyan",
   },
+  {
+    name: "Arame Avetisyan",
+    role: "Software Test Engineers",
+    image: "Arame_Avetisyan",
+  },
 ];
 
 export const socialLinks = [
-  { name: "Facebook", url: "https://facebook.com/ballistiq", icon: "SiFacebook" },
-  { name: "Instagram", url: "https://instagram.com/ballistiq", icon: "SiInstagram" },
-  { name: "LinkedIn", url: "https://linkedin.com/company/ballistiq", icon: "SiLinkedin" },
-  { name: "Telegram", url: "https://t.me/ballistiq", icon: "SiTelegram" },
-  { name: "WhatsApp", url: "https://wa.me/ballistiq", icon: "SiWhatsapp" },
+  { name: "Facebook", url: "https://www.facebook.com/profile.php?id=61575991441085", Icon: SiFacebook },
+  { name: "Instagram", url: "https://instagram.com/ballistiq_app", Icon: SiInstagram },
+  { name: "LinkedIn", url: "https://www.linkedin.com/company/103644170", Icon: SiLinkedin },
+  { name: "Telegram", url: "https://t.me/ballistiqsupport", Icon: SiTelegram },
+  { name: "WhatsApp", url: "https://wa.me/353899602753", Icon: SiWhatsapp },
 ];

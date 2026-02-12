@@ -183,7 +183,7 @@ export function HeroSection() {
                   className="bg-white text-black border-white/80 backdrop-blur-sm"
                 >
                   <a
-                    href="https://apps.apple.com/app/ballistiq"
+                    href="https://apps.apple.com/us/app/ballistiq-shooters-assistant/id6476917854"
                     target="_blank"
                     rel="noopener noreferrer"
                     data-testid="link-appstore"
@@ -204,7 +204,7 @@ export function HeroSection() {
                   className="bg-white text-black border-white/80 backdrop-blur-sm"
                 >
                   <a
-                    href="https://play.google.com/store/apps/details?id=com.ballistiq"
+                    href="https://play.google.com/store/apps/details?id=com.zeniq.ballistiq.mobile"
                     target="_blank"
                     rel="noopener noreferrer"
                     data-testid="link-googleplay"
@@ -224,7 +224,7 @@ export function HeroSection() {
               variant="ghost"
               className="text-white/60"
             >
-              <a href="#" data-testid="link-user-manual">
+              <a href="https://drive.google.com/uc?export=download&id=1vfUtcI7Angr2WvJgG6oJtmSgend1ZPCi" data-testid="link-user-manual">
                 <FileText className="w-4 h-4" />
                 {t("hero.manual")}
               </a>

@@ -35,4 +35,4 @@ Professional single-page landing website for BALLISTiQ - a ballistic calculator 
 - All components use semantic Tailwind color tokens for theme compatibility
 
 ## Running
-- `npm run dev` starts the dev server on port 5000
+- `npm run dev` starts the dev server on port 3000

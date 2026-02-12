@@ -66,7 +66,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 h-16 sm:h-20">
           <a href="#" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} data-testid="link-home">
-            <Logo size="md" />
+            <Logo size="md" invert={!isScrolled && theme === "light"} />
           </a>
 
           <div className="hidden lg:flex items-center gap-1">
@@ -132,7 +132,7 @@ export function Navbar() {
               className="ml-2"
               data-testid="link-download-nav"
             >
-              {t("nav.download")}
+              <a href="https://apps.apple.com/am/app/ballistiq-pro/id6504687588" target="_blank">{t("nav.download")}</a>
             </Button>
           </div>
 
@@ -212,6 +212,7 @@ export function Navbar() {
               className="w-full mt-3"
               data-testid="link-download-mobile"
             >
+
               {t("nav.download")}
             </Button>
           </div>

@@ -60,6 +60,7 @@ export function PricingSection() {
       price: "Free",
       featureKeys: freeFeatureKeys,
       highlighted: false,
+      href : "https://apps.apple.com/us/app/ballistiq-shooters-assistant/id6476917854",
     },
     {
       nameKey: "pricing.pro.name",
@@ -70,6 +71,7 @@ export function PricingSection() {
       badgeKey: "pricing.pro.badge",
       featureKeys: proFeatureKeys,
       highlighted: true,
+      href : "https://apps.apple.com/am/app/ballistiq-pro/id6504687588",
     },
   ];
 
@@ -140,12 +142,18 @@ export function PricingSection() {
                 </ul>
 
                 <Button
-                  asChild
-                  variant={plan.highlighted ? "default" : "secondary"}
-                  className="w-full"
-                  data-testid={`button-pricing-cta-${i}`}
+                    asChild
+                    variant={plan.highlighted ? "default" : "secondary"}
+                    className="w-full"
+                    data-testid={`button-pricing-cta-${i}`}
                 >
-                  <a href="#hero">{t(plan.ctaKey)}</a>
+                  <a
+                      href={plan.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                  >
+                    {t(plan.ctaKey)}
+                  </a>
                 </Button>
               </div>
             </Card>

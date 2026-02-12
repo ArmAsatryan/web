@@ -21,11 +21,11 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 const socialLinks = [
-  { name: "Facebook", url: "https://facebook.com/ballistiq", Icon: SiFacebook },
-  { name: "Instagram", url: "https://instagram.com/ballistiq", Icon: SiInstagram },
-  { name: "LinkedIn", url: "https://linkedin.com/company/ballistiq", Icon: SiLinkedin },
-  { name: "Telegram", url: "https://t.me/ballistiq", Icon: SiTelegram },
-  { name: "WhatsApp", url: "https://wa.me/ballistiq", Icon: SiWhatsapp },
+  { name: "Facebook", url: "https://www.facebook.com/profile.php?id=61575991441085", Icon: SiFacebook },
+  { name: "Instagram", url: "https://instagram.com/ballistiq_app", Icon: SiInstagram },
+  { name: "LinkedIn", url: "https://www.linkedin.com/company/103644170", Icon: SiLinkedin },
+  { name: "Telegram", url: "https://t.me/ballistiqsupport", Icon: SiTelegram },
+  { name: "WhatsApp", url: "https://wa.me/353899602753", Icon: SiWhatsapp },
 ];
 
 export function ContactSection() {
@@ -39,12 +39,12 @@ export function ContactSection() {
   const onSubmit = (data: ContactFormData) => {
     const subject = encodeURIComponent(`Contact from ${data.name}`);
     const body = encodeURIComponent(`Name: ${data.name}\nEmail: ${data.email}\n\n${data.message}`);
-    window.location.href = `mailto:info@ballistiq.xyz?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:support@ballistiq.xyz?subject=${subject}&body=${body}`;
   };
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText("info@ballistiq.xyz");
+      await navigator.clipboard.writeText("support@ballistiq.xyz");
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -135,12 +135,12 @@ export function ContactSection() {
                 <h3 className="text-xl font-semibold text-foreground mb-6">{t("contact.info.title")}</h3>
                 <div className="flex items-center gap-3">
                   <a
-                    href="mailto:info@ballistiq.xyz"
+                    href="mailto:support@ballistiq.xyz"
                     className="inline-flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
                     data-testid="link-email"
                   >
                     <Mail className="w-5 h-5" />
-                    <span className="text-sm">info@ballistiq.xyz</span>
+                    <span className="text-sm">support@ballistiq.xyz</span>
                   </a>
                   <Button
                     variant="ghost"
