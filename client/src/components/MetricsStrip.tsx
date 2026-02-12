@@ -9,17 +9,17 @@ interface Metric {
 }
 
 const metrics: Metric[] = [
-  { value: 13000, suffix: "+", labelKey: "metrics.users" },
+  { value: (99), suffix: "% ", labelKey: "metrics.users" },
   { value: 56, suffix: "+", labelKey: "metrics.languages" },
   { value: 0, suffix: "", labelKey: "metrics.support" },
 ];
 
 const metricLabels: Record<string, Record<string, string>> = {
-  en: { "metrics.users": "Active Users", "metrics.languages": "Languages", "metrics.support": "24/7 Support" },
-  fr: { "metrics.users": "Utilisateurs Actifs", "metrics.languages": "Langues", "metrics.support": "Support 24/7" },
-  it: { "metrics.users": "Utenti Attivi", "metrics.languages": "Lingue", "metrics.support": "Supporto 24/7" },
-  es: { "metrics.users": "Usuarios Activos", "metrics.languages": "Idiomas", "metrics.support": "Soporte 24/7" },
-  hy: { "metrics.users": "\u0531\u056f\u057f\u056b\u057e \u0555\u0563\u057f\u0561\u057f\u0565\u0580\u0565\u0580", "metrics.languages": "\u053c\u0565\u0566\u0578\u0582\u0576\u0565\u0580", "metrics.support": "24/7 \u0531\u057b\u0561\u056f\u0581\u0578\u0582\u0569\u0575\u0578\u0582\u0576" },
+  en: { "metrics.users": "Accuracy", "metrics.languages": "Languages", "metrics.support": "24/7 Support" },
+  fr: { "metrics.users": "Précision", "metrics.languages": "Langues", "metrics.support": "Support 24/7" },
+  it: { "metrics.users": "Precisione", "metrics.languages": "Lingue", "metrics.support": "Supporto 24/7" },
+  es: { "metrics.users": "Exactitud", "metrics.languages": "Idiomas", "metrics.support": "Soporte 24/7" },
+  hy: { "metrics.users": "Ճշգրտություն", "metrics.languages": "\u053c\u0565\u0566\u0578\u0582\u0576\u0565\u0580", "metrics.support": "24/7 \u0531\u057b\u0561\u056f\u0581\u0578\u0582\u0569\u0575\u0578\u0582\u0576" },
 };
 
 function useCountUp(target: number, duration = 1500, start = false, reduced = false) {

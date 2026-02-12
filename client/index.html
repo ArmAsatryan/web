@@ -3,16 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>BALLISTiQ - Your Shooter Assistant | Ballistic Calculator & Ammo Database</title>
-    <meta name="description" content="BALLISTiQ is a precision ballistic calculator, ammo database, and advanced shooting tools app. Available on iOS and Android. B2B integration for defense systems." />
-    <meta property="og:title" content="BALLISTiQ - Your Shooter Assistant" />
-    <meta property="og:description" content="Precision ballistic calculator, ammo database, and advanced shooting tools." />
+    <title>BALLISTiQ | Ballistic Calculator & Sniper Assistant App | Offline Ready</title>
+    <meta name="description" content="Precision ballistic calculator and sniper assistant app. Offline ballistic engine, ammo data (Remington, Hornady). B2B: thermal scope ballistic module, UGV drones, Smart Turret. iOS & Android." />
+    <meta name="keywords" content="ballistic calculator, sniper assistant app, ballistic engine, thermal scope ballistic module, UGV drones, Smart Turret, offline ballistic calculator, Remington, Hornady, ammo database, trajectory calculator" />
+    <link rel="canonical" href="https://ballistiq.xyz/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="BALLISTiQ | Ballistic Calculator & Sniper Assistant App" />
+    <meta property="og:description" content="Precision ballistic calculator, offline ballistic engine, ammo database. B2B: thermal scopes, UGV, Smart Turret. iOS & Android." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://ballistiq.xyz" />
+    <meta property="og:url" content="https://ballistiq.xyz/" />
+    <meta property="og:image" content="https://ballistiq.xyz/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="BALLISTiQ" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BALLISTiQ | Ballistic Calculator & Sniper Assistant App" />
+    <meta name="twitter:description" content="Precision ballistic calculator, offline ballistic engine. Thermal scope & UGV integration. iOS & Android." />
+    <meta name="twitter:image" content="https://ballistiq.xyz/og-image.png" />
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- JSON-LD: Organization + SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "name": "BALLISTiQ",
+          "url": "https://ballistiq.xyz",
+          "logo": "https://ballistiq.xyz/favicon.png",
+          "description": "BALLISTiQ builds precision ballistic calculator and sniper assistant apps, plus B2B ballistic engines for thermal scopes, UGV drones, and Smart Turrets."
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "BALLISTiQ",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "iOS, Android",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "description": "Precision ballistic calculator and sniper assistant app. Offline ballistic engine, comprehensive ammo database (Remington, Hornady and more), trajectory computation, thermal scope and UGV integration.",
+          "featureList": ["Ballistic calculator", "Offline ballistic engine", "Ammo database", "Thermal scope ballistic module", "UGV and Smart Turret integration", "Kestrel integration"]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
