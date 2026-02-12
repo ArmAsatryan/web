@@ -8,7 +8,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { AnimatedSection, StaggeredGrid } from "./AnimatedSection";
 import logoImg from "@assets/Logo_1770890960676.png";
 
-const BLUE_FILTER = "brightness(0) saturate(100%) invert(45%) sepia(95%) saturate(600%) hue-rotate(155deg) brightness(92%)";
+const BLUE_FILTER = "brightness(0) saturate(100%) invert(48%) sepia(98%) saturate(1800%) hue-rotate(161deg) brightness(89%) contrast(101%)";
 
 const freeFeatureKeys = [
   "pricing.feature.calc",
