@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Logo } from "./Logo";
-import { Menu, X, Sun, Moon, Globe } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useI18n, type Locale, localeFlags } from "@/hooks/use-i18n";
@@ -94,7 +94,6 @@ export function Navbar() {
                 className="text-muted-foreground"
                 data-testid="button-language"
               >
-                <Globe className="w-4 h-4" />
                 {localeFlags[locale]}
               </Button>
               {langOpen && (
@@ -146,7 +145,7 @@ export function Navbar() {
                 className="text-muted-foreground"
                 data-testid="button-language-mobile"
               >
-                <Globe className="w-4 h-4" />
+                {localeFlags[locale]}
               </Button>
               {langOpen && (
                 <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md overflow-hidden shadow-lg z-50">
