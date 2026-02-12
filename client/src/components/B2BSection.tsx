@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield } from "lucide-react";
 import { useI18n } from "@/hooks/use-i18n";
+import { AnimatedSection, StaggeredGrid } from "./AnimatedSection";
 import thermalImg from "@assets/ThermalScope_1770884062208.png";
 import ugvImg from "@assets/UGV_1770884064333.png";
 import turretImg from "@assets/SmartTurret_1770884055178.png";
@@ -21,7 +22,7 @@ export function B2BSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <AnimatedSection className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary/10 border border-primary/20 text-sm text-primary mb-6">
             <Shield className="w-4 h-4" />
             {t("b2b.badge")}
@@ -36,13 +37,13 @@ export function B2BSection() {
           <p className="text-muted-foreground/60 text-sm">
             {t("b2b.offline")}
           </p>
-        </div>
+        </AnimatedSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <StaggeredGrid className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {[0, 1, 2].map((i) => (
             <Card
               key={i}
-              className="group overflow-visible bg-card border-card-border hover-elevate transition-all duration-300"
+              className="group overflow-visible glass-card hover-elevate transition-all duration-300"
               data-testid={`card-b2b-${i}`}
             >
               <div className="aspect-[4/3] relative overflow-hidden rounded-t-[inherit]">
@@ -65,16 +66,16 @@ export function B2BSection() {
               </div>
             </Card>
           ))}
-        </div>
+        </StaggeredGrid>
 
-        <div className="text-center">
+        <AnimatedSection className="text-center" delay={0.3}>
           <Button asChild data-testid="button-b2b-contact">
             <a href="#contact">
               {t("b2b.cta")}
               <ArrowRight className="w-4 h-4" />
             </a>
           </Button>
-        </div>
+        </AnimatedSection>
       </div>
     </section>
   );

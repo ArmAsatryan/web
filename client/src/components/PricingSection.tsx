@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
+import { AnimatedSection, StaggeredGrid } from "./AnimatedSection";
 
 const freeFeatureKeys = [
   "pricing.feature.calc",
@@ -49,7 +50,7 @@ export function PricingSection() {
   return (
     <section id="pricing" className="py-24 sm:py-32" data-testid="section-pricing">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <AnimatedSection className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {t("pricing.title1")}{" "}
             <span className="text-primary">{t("pricing.title2")}</span>
@@ -57,21 +58,21 @@ export function PricingSection() {
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             {t("pricing.subtitle")}
           </p>
-        </div>
+        </AnimatedSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <StaggeredGrid className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {plans.map((plan, i) => (
             <Card
               key={i}
-              className={`relative p-8 transition-all duration-300 ${
+              className={`relative p-8 glass-card transition-all duration-300 ${
                 plan.highlighted
-                  ? "bg-card border-primary/30 border-2"
-                  : "bg-card border-card-border"
+                  ? "border-primary/30 border-2"
+                  : ""
               }`}
               data-testid={`card-pricing-${i}`}
             >
               {plan.badgeKey && (
-                <Badge className="absolute top-4 right-4 bg-primary text-white no-default-hover-elevate no-default-active-elevate">
+                <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground no-default-hover-elevate no-default-active-elevate">
                   {t(plan.badgeKey)}
                 </Badge>
               )}
@@ -105,7 +106,7 @@ export function PricingSection() {
               </Button>
             </Card>
           ))}
-        </div>
+        </StaggeredGrid>
       </div>
     </section>
   );
