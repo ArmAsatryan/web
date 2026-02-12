@@ -1,0 +1,127 @@
+You are building a modern, professional business landing website for BALLISTiQ.
+
+REFERENCE:
+- Use https://ballistiq.xyz as the source of truth for structure/sections and base messaging.
+- Do NOT copy the old layout. Redesign it with a premium, modern SaaS/defense-tech style.
+
+TECH STACK (do this exactly):
+- React + Vite + TypeScript
+- TailwindCSS
+- No heavy UI libraries. Keep it fast and clean.
+- Single-page site with anchored sections and smooth scroll.
+
+ASSETS:
+- I will upload: logo (or use HTML logo), product screenshots, team member images, icons (Apple/Google), and optional background images.
+- Put all assets in /public/assets and reference them via absolute paths like /assets/filename.png.
+- If an asset is missing, render a tasteful placeholder (don’t break the layout).
+
+TYPOGRAPHY:
+- Use Google Font “Jura” for the whole site.
+- Tailwind config must set fontFamily.sans = ["Jura", "system-ui", "sans-serif"].
+- Use strong hierarchy: big hero title, clean section headings, readable body text.
+
+LOGO (use this exact idea):
+- Create a <Logo /> component that renders:
+  <div class="font-bold tracking-wider">
+    <span style="color: rgb(255, 255, 255);">BALLIST</span>
+    <span style="color: rgb(0, 151, 178);">i</span>
+    <span style="color: rgb(255, 255, 255);">Q</span>
+  </div>
+- Make the logo responsive and crisp (use Jura).
+
+COLOR PALETTE (use consistent tokens):
+- Background: very dark (near black)
+- Text: white + muted gray for secondary
+- Primary accent: rgb(0,151,178)  (same as the “i” in the logo)
+- CTA accent: a vivid green for “Get it now” style buttons (close to #13CE66 vibe)
+- Cards: slightly lighter than background
+- Borders: subtle, low-contrast
+Implement these as CSS variables in src/index.css, then map them to Tailwind using arbitrary values or utility classes.
+
+STYLE DIRECTION:
+- Professional business / high-trust / modern product vibe.
+- Subtle gradients, soft shadows, clean cards, generous spacing.
+- Rounded corners (16–24px).
+- Mobile-first responsive. Must look excellent on phones.
+
+PAGE STRUCTURE (match sections from the reference site, but redesigned):
+1) Sticky top navbar:
+   - Left: Logo
+   - Right: links (Download, Features, Prices, For Business, Reviews, Team, Contacts)
+   - Smooth scroll to sections, highlight active section on scroll.
+   - Mobile hamburger menu.
+
+2) HERO section:
+   - Title: “Your Shooter Assistant”
+   - Short subtitle: ballistic calculator + ammo database + advanced tools.
+   - Primary CTA buttons:
+     - App Store (with icon)
+     - Google Play (with icon)
+     - Secondary link/button: “Download User Manual”
+   - Hero visual: product screenshot mock (use uploaded screenshot).
+
+3) FEATURES section:
+   - 3–6 feature cards (use content based on ballistiq.xyz):
+     - BALLISTiQ PRO (mini-apps)
+     - Ammo database
+     - Ballistic Calculator
+     - Reticle database
+     - Kestrel integration
+   - Each card includes icon + short description.
+
+4) PRICING / “Choose Your Version” section:
+   - Two pricing cards:
+     - BALLISTiQ (Free)
+     - BALLISTiQ PRO (Beta) (Still Free)
+   - Show included features with checkmarks.
+   - CTA buttons for each.
+   - Add a small note: “Pro is currently in beta” (tasteful, non-intrusive).
+
+5) FOR BUSINESS & INTEGRATION (B2B) section:
+   - Heading: “BALLISTiQ B2B”
+   - Subtext: integrate the BALLISTiQ C++ Module into thermal scopes, UGVs, smart optics, and defense systems.
+   - 3 solution cards with images:
+     - C++ Engine for Thermal Scopes
+     - C++ Engine for Ground Drones (UGV)
+     - C++ Engine for Smart Turrets
+   - CTA: “Contact Us for B2B” opens a modal (or scrolls to contact form).
+   - Include a small “Works online or fully offline (embedded)” line (short, technical, confident).
+
+6) REVIEWS section:
+   - Pull 3–6 reviews (use what’s on the reference site as base content).
+   - Display as clean testimonial cards with name/handle and rating stars.
+
+7) TEAM section:
+   - Grid of team members with photo + name + role:
+     - Gerasim Israyelyan — Co-Founder & CTO
+     - Spartak Kyureghyan — Co-Founder & CFO
+     - Ishkhan Gevorgyan — Co-Founder & CPO
+     - Armen Asatryan — Co-Founder & CEO
+   - Use uploaded images. If missing, fallback to initials avatar.
+
+8) CONTACTS section:
+   - Contact card with:
+     - Email (mailto)
+     - Social icons: Facebook, Instagram, WhatsApp, Telegram, LinkedIn
+   - Add a simple contact form (name, email, message) that opens a mailto: link (no backend).
+
+9) FOOTER:
+   - Minimal: copyright + “Made with ❤️ by BALLISTiQ”
+   - Also include quick links and small legal note placeholder (Privacy Policy / Terms) even if pages are not built yet.
+
+ENGINEERING REQUIREMENTS:
+- Clean component structure:
+  - src/components: Navbar, Logo, Button, Section, FeatureCard, PricingCard, TestimonialCard, TeamCard, ContactForm, Footer
+- Use a data file:
+  - src/data/siteContent.ts for features/pricing/reviews/team to keep content editable.
+- Performance:
+  - Images should have width/height or aspect ratio set.
+  - Lazy-load below-the-fold images.
+- Accessibility:
+  - Semantic headings, aria-labels for icons, focus states for buttons/links.
+- SEO:
+  - Proper <title>, meta description, OpenGraph basics, favicon placeholder.
+
+DELIVERABLE:
+- A fully working Replit project that runs with one command.
+- Make it look polished and production-ready.
