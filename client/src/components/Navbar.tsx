@@ -52,7 +52,7 @@ export function Navbar() {
     }
   };
 
-  const locales: Locale[] = ["en", "fr", "it", "es"];
+  const locales: Locale[] = ["en", "fr", "it", "es", "hy"];
 
   return (
     <nav
