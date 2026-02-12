@@ -33,6 +33,7 @@ If deploy fails with **Authentication error [code: 10000]**, the token in **CLOU
 2. Click **Create Token** → choose **Create Custom Token** (do not use a preset).
 3. **Permissions:**
    - **Account** → **Cloudflare Pages** → **Edit**
+   - **User** → **Memberships** → **Read** (required so wrangler can call /memberships; Pages config cannot set account_id)
 4. **Account resources:** **Include** → **Your account** (the account that owns the Pages project).
 5. Create the token and **copy the value** (you won’t see it again).
 6. In your deployment platform (Replit, etc.), set **Environment variable**:
