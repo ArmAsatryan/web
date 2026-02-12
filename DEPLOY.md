@@ -40,7 +40,7 @@ If deploy fails with **Authentication error [code: 10000]**, the token in **CLOU
    - Value: the token you just copied (no spaces, full string).
 7. Redeploy.
 
-If your platform injected a “User API Token” or preset token automatically, replace it with this Custom token in the env vars so the deploy step uses it.
+If your platform injected a “User API Token” or preset token automatically, replace it with this Custom token in the env vars so the deploy step uses it. If the log still says "User API Token", the deploy is using another token (e.g. Replit’s): set CLOUDFLARE_API_TOKEN in **Tools → Secrets** and remove any other Cloudflare secret. Test locally: after `npm run build`, run `CLOUDFLARE_API_TOKEN=your_token npx wrangler pages deploy dist/public`.
 
 ---
 
