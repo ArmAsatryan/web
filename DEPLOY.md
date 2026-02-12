@@ -23,6 +23,20 @@ Save. Redeploy. The build should complete and your site will be live.
 
 ---
 
+## Fix "Authentication error [code: 10000]" (API token permissions)
+
+If deploy fails with **Authentication error [code: 10000]**, your **CLOUDFLARE_API_TOKEN** is missing Pages permissions.
+
+1. Go to [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens).
+2. Edit your token (or create one for deployments).
+3. Under **Account permissions**, add:
+   - **Cloudflare Pages** → **Edit**
+4. Save. Update the token in your deployment platform’s **Environment variables** (e.g. `CLOUDFLARE_API_TOKEN`).
+
+Redeploy after updating the token.
+
+---
+
 ## Custom domain (ballistiq.xyz)
 
 1. In your Pages project go to **Custom domains**.
