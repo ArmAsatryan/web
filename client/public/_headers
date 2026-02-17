@@ -1,0 +1,4 @@
+# BALLISTiQ - Cloudflare Pages headers
+# Hashed assets can be cached long-term
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

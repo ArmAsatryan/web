@@ -1,0 +1,6 @@
+# BALLISTiQ - Ballistic Calculator & Sniper Assistant App
+User-agent: *
+Allow: /
+Disallow: /api
+
+Sitemap: https://ballistiq.xyz/sitemap.xml

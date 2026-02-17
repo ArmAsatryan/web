@@ -1,0 +1,23 @@
+{
+  "name": "BALLISTiQ",
+  "short_name": "BALLISTiQ",
+  "description": "Ballistic calculator and sniper assistant app. Offline ballistic engine, thermal scope module, UGV and Smart Turret integration.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
