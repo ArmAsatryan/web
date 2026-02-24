@@ -27,7 +27,7 @@ export const features = [
     icon: "Focus" as const,
   },
   {
-    title: "BALLISTiQ PRO Mini-Apps",
+    title: "BALLISTiQ Premium Mini-Apps",
     description: "Specialized tools including unit converters, wind calculators, range estimation, and target log. Everything a precision shooter needs.",
     icon: "LayoutGrid" as const,
   },
@@ -43,39 +43,37 @@ export const features = [
   },
 ];
 
-export const pricingPlans = [
+export const pricingTiers = [
   {
-    name: "BALLISTiQ",
-    price: "Free",
-    description: "Essential ballistic tools for every shooter",
-    features: [
-      "Ballistic Calculator",
-      "Basic Ammo Database",
-      "Reticle Database",
-      "Offline Mode",
-      "Unit Converters",
-    ],
-    cta: "Download Free",
+    nameKey: "pricing.tier.weekly",
+    price: "$0.99",
+    periodKey: "pricing.period.week",
+    perMonthKey: "pricing.permonth.weekly",
     highlighted: false,
   },
   {
-    name: "BALLISTiQ PRO",
-    price: "Free",
-    priceSuffix: "(Beta)",
-    description: "Advanced features for precision shooters",
-    features: [
-      "Everything in Free",
-      "PRO Mini-Apps Suite",
-      "Kestrel Integration",
-      "Advanced Trajectory Modeling",
-      "Custom Ammo Profiles",
-      "Target Log & Analytics",
-      "Priority Support",
-    ],
-    cta: "Get PRO Beta",
+    nameKey: "pricing.tier.monthly",
+    price: "$3.99",
+    periodKey: "pricing.period.month",
+    perMonthKey: "pricing.permonth.monthly",
     highlighted: true,
-    badge: "Beta",
   },
+  {
+    nameKey: "pricing.tier.yearly",
+    price: "$34.99",
+    periodKey: "pricing.period.year",
+    perMonthKey: "pricing.permonth.yearly",
+    highlighted: false,
+  },
+];
+
+export const pricingFeatures = [
+  { nameKey: "pricing.feature.trajectory", free: true, premium: true },
+  { nameKey: "pricing.feature.shottimer", free: false, premium: true },
+  { nameKey: "pricing.feature.scorecalc", free: false, premium: true },
+  { nameKey: "pricing.feature.weathermeter", free: false, premium: true },
+  { nameKey: "pricing.feature.wez", free: false, premium: true },
+  { nameKey: "pricing.feature.watchapp", free: false, premium: true },
 ];
 
 export const b2bSolutions = [
@@ -113,7 +111,7 @@ export const reviews = [
     name: "Sarah T.",
     handle: "@competitiveshooter",
     rating: 5,
-    text: "The PRO features are incredible. The mini-apps suite covers everything I need during competitions. Clean interface and reliable calculations every time.",
+    text: "The premium features are incredible. The mini-apps suite covers everything I need during competitions. Clean interface and reliable calculations every time.",
   },
   {
     name: "James L.",
