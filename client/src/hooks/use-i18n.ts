@@ -98,6 +98,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "reviews.title1": "What Shooters",
     "reviews.title2": "Say",
     "reviews.subtitle": "Trusted by precision shooters, hunters, and professionals worldwide.",
+    "reviews.outOf": "out of 5",
+    "reviews.ratings": "Ratings",
 
     "team.title1": "Meet the",
     "team.title2": "Team",
@@ -203,6 +205,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "reviews.title1": "Ce que disent",
     "reviews.title2": "les Tireurs",
     "reviews.subtitle": "Approuvé par des tireurs de précision, des chasseurs et des professionnels du monde entier.",
+    "reviews.outOf": "sur 5",
+    "reviews.ratings": "Notes",
 
     "team.title1": "Découvrez",
     "team.title2": "l’Équipe",
@@ -308,6 +312,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "reviews.title1": "Cosa Dicono",
     "reviews.title2": "i Tiratori",
     "reviews.subtitle": "Apprezzato da tiratori di precisione, cacciatori e professionisti in tutto il mondo.",
+    "reviews.outOf": "su 5",
+    "reviews.ratings": "Valutazioni",
 
     "team.title1": "Incontra il",
     "team.title2": "Team",
@@ -518,6 +524,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "reviews.title1": "Ինչ են ասում",
     "reviews.title2": "հրաձիգները",
     "reviews.subtitle": "Վստահված է պրոֆեսիոնալ հրաձիգների, որսորդների և փորձագետների կողմից ամբողջ աշխարհում:",
+    "reviews.outOf": "5-ից",
+    "reviews.ratings": "Գնահատականներ",
 
     "team.title1": "Ծանոթացեք",
     "team.title2": "թիմին",
