@@ -68,6 +68,8 @@ export const pricingTiers = [
 ];
 
 export const pricingFeatures = [
+  { nameKey: "pricing.feature.ballisticcalc", free: true, premium: true },
+  { nameKey: "pricing.feature.customtable", free: true, premium: true },
   { nameKey: "pricing.feature.trajectory", free: true, premium: true },
   { nameKey: "pricing.feature.shottimer", free: false, premium: true },
   { nameKey: "pricing.feature.scorecalc", free: false, premium: true },
