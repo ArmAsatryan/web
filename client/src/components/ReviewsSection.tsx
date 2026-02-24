@@ -67,23 +67,22 @@ function RatingSummaryBlock() {
 function ReviewCard({ review, index }: { review: typeof reviews[0]; index: number }) {
   return (
     <div
-      className="py-5 border-b border-border/40 last:border-b-0"
+      className="bg-card/50 backdrop-blur-sm border border-border/40 rounded-2xl p-5 sm:p-6"
       data-testid={`card-review-${index}`}
     >
-      <div className="flex items-center justify-between mb-1.5">
-        <div className="flex items-center gap-2">
-          <StarRating rating={review.rating} />
-          <span className="text-sm font-semibold text-foreground">
-            {review.title}
-          </span>
-        </div>
+      <div className="flex items-center gap-2 mb-1.5">
+        <StarRating rating={review.rating} />
       </div>
 
-      <div className="flex items-center gap-2 mb-2.5">
+      <h4 className="text-sm font-semibold text-foreground mb-2">
+        {review.title}
+      </h4>
+
+      <div className="flex items-center gap-2 mb-3">
         <span className="text-xs text-muted-foreground font-medium">
           {review.name}
         </span>
-        <span className="text-xs text-muted-foreground/50">·</span>
+        <span className="text-xs text-muted-foreground/50">&middot;</span>
         <span className="text-xs text-muted-foreground/60">
           {review.date}
         </span>
@@ -108,7 +107,7 @@ export function ReviewsSection() {
 
   return (
     <section id="reviews" className="py-24 sm:py-32" data-testid="section-reviews">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimatedSection className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {t("reviews.title1")}{" "}
@@ -120,16 +119,16 @@ export function ReviewsSection() {
         </AnimatedSection>
 
         <AnimatedSection>
-          <div className="bg-card/50 backdrop-blur-sm border border-border/40 rounded-2xl p-6 sm:p-8">
+          <div className="bg-card/50 backdrop-blur-sm border border-border/40 rounded-2xl p-6 sm:p-8 mb-8">
             <RatingSummaryBlock />
-
-            <div className="mt-8 pt-2">
-              {reviews.map((review, i) => (
-                <ReviewCard key={i} review={review} index={i} />
-              ))}
-            </div>
           </div>
         </AnimatedSection>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {reviews.map((review, i) => (
+            <ReviewCard key={i} review={review} index={i} />
+          ))}
+        </div>
       </div>
     </section>
   );
