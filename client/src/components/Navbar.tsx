@@ -132,7 +132,7 @@ export function Navbar() {
               className="ml-2"
               data-testid="link-download-nav"
             >
-              <a href="https://apps.apple.com/am/app/ballistiq-pro/id6504687588" target="_blank">{t("nav.download")}</a>
+              <a href="https://apps.apple.com/us/app/ballistiq-shooters-assistant/id6476917854" target="_blank">{t("nav.download")}</a>
             </Button>
           </div>
 
