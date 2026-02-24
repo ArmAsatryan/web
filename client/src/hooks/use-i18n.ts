@@ -80,6 +80,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "pricing.feature.watchapp": "Watch App",
     "pricing.feature.ballisticcalc": "Ballistic Calculator",
     "pricing.feature.customtable": "Customizable Table",
+    "pricing.feature.unitconvertor": "Unit Convertor",
 
     "b2b.badge": "Enterprise Solutions",
     "b2b.title1": "BALLISTiQ",
@@ -184,6 +185,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "pricing.feature.watchapp": "App Montre",
     "pricing.feature.ballisticcalc": "Calculateur Balistique",
     "pricing.feature.customtable": "Tableau Personnalisable",
+    "pricing.feature.unitconvertor": "Convertisseur d'Unités",
 
     "b2b.badge": "Solutions Entreprise",
     "b2b.title1": "BALLISTiQ",
@@ -288,6 +290,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "pricing.feature.watchapp": "App Orologio",
     "pricing.feature.ballisticcalc": "Calcolatore Balistico",
     "pricing.feature.customtable": "Tabella Personalizzabile",
+    "pricing.feature.unitconvertor": "Convertitore di Unità",
 
     "b2b.badge": "Soluzioni Enterprise",
     "b2b.title1": "BALLISTiQ",
@@ -392,6 +395,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "pricing.feature.watchapp": "App Reloj",
     "pricing.feature.ballisticcalc": "Calculadora Balística",
     "pricing.feature.customtable": "Tabla Personalizable",
+    "pricing.feature.unitconvertor": "Conversor de Unidades",
 
     "b2b.badge": "Soluciones Empresariales",
     "b2b.title1": "BALLISTiQ",
@@ -496,6 +500,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "pricing.feature.watchapp": "Ժամացույցի հավելված",
     "pricing.feature.ballisticcalc": "Բալիստիկ հաշվիչ",
     "pricing.feature.customtable": "Հարմարեցվող աղյուսակ",
+    "pricing.feature.unitconvertor": "Միավորների փոխակերպիչ",
 
     "b2b.badge": "Կորպորատիվ լուծումներ",
     "b2b.title1": "BALLISTiQ",

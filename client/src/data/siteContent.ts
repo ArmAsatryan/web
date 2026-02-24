@@ -76,6 +76,7 @@ export const pricingFeatures = [
   { nameKey: "pricing.feature.weathermeter", free: false, premium: true },
   { nameKey: "pricing.feature.wez", free: false, premium: true },
   { nameKey: "pricing.feature.watchapp", free: false, premium: true },
+  { nameKey: "pricing.feature.unitconvertor", free: false, premium: true },
 ];
 
 export const b2bSolutions = [
