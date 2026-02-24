@@ -2,7 +2,7 @@
 # Or: npx wrangler pages deploy dist/public
 # First time: npx wrangler pages project create ballistiq (or your project name)
 #
-# Git deploy: In dashboard set Build command = "npm run build", Build output = "dist/public"
+# Git deploy / Wrangler deploy: Build command = "npm run build", then "npx wrangler deploy"
 # Custom domain: Dashboard → Custom domains → Add ballistiq.xyz (see DEPLOY.md)
 # Note: Pages config does not support "account_id" — do not add it.
 
@@ -11,3 +11,7 @@ compatibility_date = "2024-01-01"
 
 # Static output from npm run build (client → dist/public)
 pages_build_output_dir = "./dist/public"
+
+# Required when using "wrangler deploy" (e.g. Cloudflare Git/build): deploy built assets
+[assets]
+directory = "./dist/public"
