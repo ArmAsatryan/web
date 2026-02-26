@@ -14,6 +14,21 @@ export async function setupVite(server: Server, app: Express) {
   const clientPublic = path.resolve(import.meta.dirname, "..", "client", "public");
   app.use(express.static(clientPublic));
 
+  // Serve built admin-console at /admin-console in dev (run "npm run build:admin" first)
+  const adminPath = path.resolve(import.meta.dirname, "..", "dist", "public", "admin-console");
+  if (fs.existsSync(adminPath)) {
+    app.get("/admin-console", (_req, res) => {
+      res.sendFile(path.join(adminPath, "index.html"));
+    });
+    app.get("/admin-console/", (_req, res) => {
+      res.sendFile(path.join(adminPath, "index.html"));
+    });
+    app.use("/admin-console", express.static(adminPath, { index: false, redirect: false }));
+    app.use("/admin-console", (_req, res) => {
+      res.sendFile(path.join(adminPath, "index.html"));
+    });
+  }
+
   const serverOptions = {
     middlewareMode: true,
     hmr: { server, path: "/vite-hmr" },
@@ -37,6 +52,9 @@ export async function setupVite(server: Server, app: Express) {
   app.use(vite.middlewares);
 
   app.use("/{*path}", async (req, res, next) => {
+    if (req.path.startsWith("/admin-console") && fs.existsSync(adminPath)) {
+      return res.sendFile(path.join(adminPath, "index.html"));
+    }
     const url = req.originalUrl;
 
     try {
