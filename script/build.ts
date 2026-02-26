@@ -43,6 +43,8 @@ async function buildAll() {
 
   const adminDir = path.resolve(process.cwd(), "admin-console");
   if (existsSync(adminDir)) {
+    console.log("installing admin-console dependencies...");
+    execSync("npm install", { cwd: adminDir, stdio: "inherit" });
     console.log("building admin-console...");
     execSync("npm run build", { cwd: adminDir, stdio: "inherit" });
   }
