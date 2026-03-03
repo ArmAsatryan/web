@@ -65,7 +65,7 @@ The backend must expose:
 - `GET /admin/api/user-locations` — location points for the map.
 - `GET /admin/api/locales` — list of locale codes.
 - `POST /admin/api/notifications/user` — send notification to one user.
-- `POST /admin/api/notifications/locale` — send notification by locale.
+- `POST /admin/api/notifications/language` — send notification by language (FCM token language).
 - `POST /admin/api/bullets` — create bullet (AdminRestController).
 - `GET /admin/api/caliber-diameter` — list caliber diameters (AdminRestController).
 

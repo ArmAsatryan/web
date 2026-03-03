@@ -16,12 +16,12 @@ import TranslateIcon from '@mui/icons-material/Translate';
 import SendIcon from '@mui/icons-material/Send';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { getAdminUserById, getLocales, getUsers, sendNotificationToLocale, sendNotificationToUser } from '../api/api';
+import { getAdminUserById, getLocales, getUsers, sendNotificationToLanguage, sendNotificationToUser } from '../api/api';
 import PageHeader from '../components/PageHeader';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function Notifications() {
-  const [locale, setLocale] = useState('');
+  const [language, setLanguage] = useState('');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ export default function Notifications() {
   const [userMessage, setUserMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [activeTab, setActiveTab] = useState(0);
-  const [confirmOpen, setConfirmOpen] = useState<'user' | 'locale' | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState<'user' | 'language' | null>(null);
 
   const { data: locales } = useQuery({ queryKey: ['locales'], queryFn: async () => (await getLocales()).data });
   const { data: usersData } = useQuery({
@@ -50,13 +50,13 @@ export default function Notifications() {
     enabled: !!selectedUserIdNum && selectedUserIdNum > 0 && Number.isInteger(selectedUserIdNum),
   });
 
-  const handleSendByLocale = async () => {
-    if (!locale.trim() || !title.trim()) return;
+  const handleSendByLanguage = async () => {
+    if (!language.trim() || !title.trim()) return;
     setMessage(null);
     setLoading(true);
     try {
-      await sendNotificationToLocale({ locale: locale.trim(), title: title.trim(), body: body.trim() || undefined });
-      setMessage({ type: 'success', text: 'Notification sent to locale.' });
+      await sendNotificationToLanguage({ language: language.trim(), title: title.trim(), body: body.trim() || undefined });
+      setMessage({ type: 'success', text: 'Notification sent to language group.' });
       setTitle('');
       setBody('');
     } catch (e: unknown) {
@@ -209,7 +209,7 @@ export default function Notifications() {
               </Typography>
               <FormControl fullWidth>
                 <InputLabel>Language</InputLabel>
-                <Select value={locale} label="Language" onChange={(e) => setLocale(e.target.value)}>
+                <Select value={language} label="Language" onChange={(e) => setLanguage(e.target.value)}>
                   <MenuItem value="">Select language</MenuItem>
                   {(locales || []).map((l) => (
                     <MenuItem key={l} value={l}>
@@ -237,8 +237,8 @@ export default function Notifications() {
               />
               <Button
                 variant="contained"
-                onClick={() => setConfirmOpen('locale')}
-                disabled={!locale.trim() || !title.trim() || loading}
+                onClick={() => setConfirmOpen('language')}
+                disabled={!language.trim() || !title.trim() || loading}
                 startIcon={<SendIcon />}
                 sx={{ alignSelf: 'flex-start' }}
               >
@@ -265,11 +265,11 @@ export default function Notifications() {
       />
 
       <ConfirmDialog
-        open={confirmOpen === 'locale'}
+        open={confirmOpen === 'language'}
         title="Send Notification to Language Group"
-        message={`Are you sure you want to send this notification to all users with language "${locale}"? This action cannot be undone.`}
+        message={`Are you sure you want to send this notification to all users with language "${language}"? This action cannot be undone.`}
         confirmLabel="Send"
-        onConfirm={handleSendByLocale}
+        onConfirm={handleSendByLanguage}
         onCancel={() => setConfirmOpen(null)}
         loading={loading}
       />

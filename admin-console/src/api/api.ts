@@ -78,8 +78,8 @@ export function sendNotificationToUser(body: import('../types').AdminNotificatio
   return api.post('/admin/api/notifications/user', body);
 }
 
-export function sendNotificationToLocale(body: import('../types').AdminNotificationLocaleRequest) {
-  return api.post('/admin/api/notifications/locale', body);
+export function sendNotificationToLanguage(body: import('../types').AdminNotificationLanguageRequest) {
+  return api.post('/admin/api/notifications/language', body);
 }
 
 // Bullet create (AdminRestController)

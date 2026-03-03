@@ -55,8 +55,9 @@ export interface AdminNotificationUserRequest {
   data?: Record<string, string>;
 }
 
-export interface AdminNotificationLocaleRequest {
-  locale: string;
+/** Request for POST /admin/api/notifications/language (send by language from FCM token). */
+export interface AdminNotificationLanguageRequest {
+  language: string;
   title: string;
   body?: string;
   data?: Record<string, string>;
