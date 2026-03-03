@@ -1,4 +1,5 @@
 import MenuIcon from '@mui/icons-material/Menu';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PeopleIcon from '@mui/icons-material/People';
 import MapIcon from '@mui/icons-material/Map';
@@ -30,6 +31,7 @@ const DRAWER_WIDTH = 260;
 const COLLAPSED_WIDTH = 72;
 
 const nav = [
+  { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/', label: 'Users', icon: <PeopleIcon /> },
   { path: '/map', label: 'User Locations', icon: <MapIcon /> },
   { path: '/notifications', label: 'Notifications', icon: <NotificationsIcon /> },
@@ -39,6 +41,7 @@ const nav = [
 ];
 
 const pageTitles: Record<string, string> = {
+  '/dashboard': 'Dashboard',
   '/': 'Users',
   '/map': 'User Locations Map',
   '/notifications': 'Notifications',

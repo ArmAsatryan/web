@@ -1,0 +1,851 @@
+import {
+  Box,
+  Card,
+  CardContent,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Skeleton,
+  Typography,
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import RifleIcon from '@mui/icons-material/GpsFixed';
+import CategoryIcon from '@mui/icons-material/Category';
+import SmartphoneIcon from '@mui/icons-material/Smartphone';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import type { SelectChangeEvent } from '@mui/material';
+import {
+  getUsersLight,
+  getRiflesLight,
+  getBulletsLight,
+  getFcmTokensLight,
+  getDashboardPie,
+} from '../api/api';
+import PageHeader from '../components/PageHeader';
+import type { AdminUserLight, AdminBulletLight, AdminLightItem } from '../types';
+
+export type TimeRangeFilter = '7d' | 'year' | 'month' | 'lifetime';
+
+const PAGE_SIZE = 500;
+const CURRENT_YEAR = new Date().getFullYear();
+const START_YEAR = 2024; // first registration year
+const YEARS = Array.from(
+  { length: CURRENT_YEAR - START_YEAR + 3 },
+  (_, i) => START_YEAR + i
+); // 2024..current+2
+const MONTHS = [
+  { value: 1, label: 'January' }, { value: 2, label: 'February' }, { value: 3, label: 'March' },
+  { value: 4, label: 'April' }, { value: 5, label: 'May' }, { value: 6, label: 'June' },
+  { value: 7, label: 'July' }, { value: 8, label: 'August' }, { value: 9, label: 'September' },
+  { value: 10, label: 'October' }, { value: 11, label: 'November' }, { value: 12, label: 'December' },
+];
+
+/** Parse createdAt from backend (string, ISO, epoch ms, or [y,m,d,...] array) to a valid Date */
+function parseCreatedAt(value: string | number | number[] | undefined): Date | null {
+  if (value == null || value === '') return null;
+  if (typeof value === 'number') {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (Array.isArray(value) && value.length >= 3) {
+    const [y, m, d] = value;
+    const date = new Date(Number(y), Number(m) - 1, Number(d));
+    return isNaN(date.getTime()) ? null : date;
+  }
+  const s = String(value).trim();
+  if (!s || s === '[object Object]') return null;
+  // Normalize "YYYY-MM-DD HH:mm:ss.ffffff" to ISO "YYYY-MM-DDTHH:mm:ss.fff" for reliable parsing
+  const space = s.indexOf(' ');
+  let iso = s;
+  if (space > 0) {
+    iso = s.slice(0, space) + 'T' + s.slice(space + 1);
+  }
+  const fracMatch = iso.match(/(\.\d{3})\d*/);
+  if (fracMatch) iso = iso.replace(/(\.\d{3})\d*/, fracMatch[1]);
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/** Get created date from item (backend may send createdAt or created) */
+function getItemCreatedDate(item: { createdAt?: string | number | number[]; created?: string | number | number[] }): Date | null {
+  const raw = item.createdAt ?? item.created;
+  return parseCreatedAt(raw);
+}
+
+function dayKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function monthKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+
+function monthLabel(key: string): string {
+  const [y, m] = key.split('-');
+  const d = new Date(Number(y), Number(m) - 1, 1);
+  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+function dayLabel(key: string): string {
+  const [y, m, d] = key.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+interface ChartPoint {
+  key: string;
+  label: string;
+  count: number;
+  cumulative?: number;
+}
+
+function aggregateForChart<T extends { createdAt?: string | number | number[]; created?: string | number | number[] }>(
+  items: T[],
+  filter: TimeRangeFilter,
+  selectedYear: number,
+  selectedMonth: number
+): ChartPoint[] {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  if (filter === '7d') {
+    const byDay = new Map<string, number>();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(sevenDaysAgo);
+      d.setDate(d.getDate() + i);
+      byDay.set(dayKey(d), 0);
+    }
+    for (const item of items) {
+      const d = getItemCreatedDate(item);
+      if (!d || d < sevenDaysAgo) continue;
+      const key = dayKey(d);
+      if (byDay.has(key)) byDay.set(key, (byDay.get(key) ?? 0) + 1);
+    }
+    return Array.from(byDay.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, count]) => ({ key, label: dayLabel(key), count }));
+  }
+
+  if (filter === 'year') {
+    const byMonth = new Map<string, number>();
+    for (let m = 1; m <= 12; m++) {
+      const key = `${selectedYear}-${String(m).padStart(2, '0')}`;
+      byMonth.set(key, 0);
+    }
+    for (const item of items) {
+      const d = getItemCreatedDate(item);
+      if (!d || d.getFullYear() !== selectedYear) continue;
+      const key = monthKey(d);
+      byMonth.set(key, (byMonth.get(key) ?? 0) + 1);
+    }
+    let cumulative = 0;
+    return Array.from(byMonth.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, count]) => {
+        cumulative += count;
+        return {
+          key: month,
+          label: monthLabel(month),
+          count,
+          cumulative,
+        };
+      });
+  }
+
+  if (filter === 'month') {
+    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+    const byDay = new Map<string, number>();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(selectedYear, selectedMonth - 1, d);
+      byDay.set(dayKey(date), 0);
+    }
+    for (const item of items) {
+      const d = getItemCreatedDate(item);
+      if (!d || d.getFullYear() !== selectedYear || d.getMonth() !== selectedMonth - 1) continue;
+      const key = dayKey(d);
+      if (byDay.has(key)) byDay.set(key, (byDay.get(key) ?? 0) + 1);
+    }
+    return Array.from(byDay.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, count]) => ({ key, label: dayLabel(key), count }));
+  }
+
+  if (filter === 'lifetime') {
+    const byMonth = new Map<string, number>();
+    for (const item of items) {
+      const d = getItemCreatedDate(item);
+      if (!d) continue;
+      const key = monthKey(d);
+      byMonth.set(key, (byMonth.get(key) ?? 0) + 1);
+    }
+    const sorted = Array.from(byMonth.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    let cumulative = 0;
+    return sorted.map(([month, count]) => {
+      cumulative += count;
+      return {
+        key: month,
+        label: monthLabel(month),
+        count,
+        cumulative,
+      };
+    });
+  }
+
+  return [];
+}
+
+/** Shared line chart for user registration and rifle creation (same UX). */
+function ProgressLineChart<T extends { createdAt?: string | number | number[]; created?: string | number | number[] }>({
+  items,
+  filter,
+  selectedYear,
+  selectedMonth,
+  totalLabel,
+  countLineName,
+  emptyMessage,
+}: {
+  items: T[];
+  filter: TimeRangeFilter;
+  selectedYear: number;
+  selectedMonth: number;
+  totalLabel: string;
+  countLineName: string;
+  emptyMessage: string;
+}) {
+  const chartData = aggregateForChart(items, filter, selectedYear, selectedMonth);
+
+  if (chartData.length === 0) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        {emptyMessage}
+      </Typography>
+    );
+  }
+
+  return (
+    <Box sx={{ width: '100%', height: 280 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        {totalLabel}
+      </Typography>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          data={chartData}
+          margin={{ top: 8, right: 8, left: 0, bottom: 8 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+          <XAxis
+            dataKey="label"
+            tick={{ fontSize: 11 }}
+            tickMargin={8}
+          />
+          <YAxis allowDecimals={false} tick={{ fontSize: 11 }} tickMargin={8} />
+          <Tooltip
+            formatter={(value: number | undefined) => [value ?? 0, 'Count']}
+            labelFormatter={(label) => label}
+          />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="count"
+            name={countLineName}
+            stroke="var(--mui-palette-primary-main, #1976d2)"
+            strokeWidth={2}
+            dot={{ r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </Box>
+  );
+}
+
+function UserRegistrationProgress({
+  filter,
+  selectedYear,
+  selectedMonth,
+}: {
+  filter: TimeRangeFilter;
+  selectedYear: number;
+  selectedMonth: number;
+}) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['dashboard-users-light'],
+    queryFn: async () => {
+      const res = await getUsersLight();
+      const body = res.data;
+      return {
+        items: body?.items ?? [],
+        totalItems: body?.totalUsers ?? 0,
+      };
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <Box>
+        <Skeleton variant="text" width={120} height={28} sx={{ mb: 1 }} />
+        <Skeleton variant="rectangular" height={280} sx={{ borderRadius: 1 }} />
+      </Box>
+    );
+  }
+  if (error) {
+    return (
+      <Typography color="error" variant="body2">
+        Failed to load user data.
+      </Typography>
+    );
+  }
+
+  const items: AdminUserLight[] = data?.items ?? [];
+  const totalUsers = data?.totalItems ?? 0;
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <PeopleIcon color="primary" />
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          User registration progress
+        </Typography>
+      </Box>
+      <ProgressLineChart
+        items={items}
+        filter={filter}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        totalLabel={`Total users: ${totalUsers}`}
+        countLineName="Registrations"
+        emptyMessage="No registration data for the selected period."
+      />
+    </Box>
+  );
+}
+
+function RifleCreationProgress({
+  filter,
+  selectedYear,
+  selectedMonth,
+}: {
+  filter: TimeRangeFilter;
+  selectedYear: number;
+  selectedMonth: number;
+}) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['dashboard-rifles-light'],
+    queryFn: async () => {
+      const res = await getRiflesLight();
+      const body = res.data;
+      return {
+        items: body?.items ?? [],
+        totalItems: body?.totalRifles ?? 0,
+      };
+    },
+    retry: false,
+  });
+
+  if (isLoading) {
+    return (
+      <Box>
+        <Skeleton variant="text" width={140} height={28} sx={{ mb: 1 }} />
+        <Skeleton variant="rectangular" height={280} sx={{ borderRadius: 1 }} />
+      </Box>
+    );
+  }
+  if (error) {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <RifleIcon color="primary" />
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Rifle creation progress
+          </Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          Rifle list is not available. Ensure the backend exposes GET /admin/api/rifles/light.
+        </Typography>
+      </Box>
+    );
+  }
+
+  const items: AdminLightItem[] = data?.items ?? [];
+  const totalRifles = data?.totalItems ?? 0;
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <RifleIcon color="primary" />
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Rifle creation progress
+        </Typography>
+      </Box>
+      <ProgressLineChart
+        items={items}
+        filter={filter}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        totalLabel={`Total rifles: ${totalRifles}`}
+        countLineName="Created"
+        emptyMessage="No rifle creation data for the selected period."
+      />
+    </Box>
+  );
+}
+
+function BulletCreationProgress({
+  filter,
+  selectedYear,
+  selectedMonth,
+}: {
+  filter: TimeRangeFilter;
+  selectedYear: number;
+  selectedMonth: number;
+}) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['dashboard-bullets-light'],
+    queryFn: async () => {
+      const res = await getBulletsLight();
+      const body = res.data;
+      return {
+        items: body?.items ?? [],
+        totalItems: body?.totalBullets ?? 0,
+      };
+    },
+    retry: false,
+  });
+
+  if (isLoading) {
+    return (
+      <Box>
+        <Skeleton variant="text" width={140} height={28} sx={{ mb: 1 }} />
+        <Skeleton variant="rectangular" height={280} sx={{ borderRadius: 1 }} />
+      </Box>
+    );
+  }
+  if (error) {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <CategoryIcon color="primary" />
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Bullet creation progress
+          </Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          Bullet list is not available. Ensure the backend exposes GET /admin/api/bullets/light.
+        </Typography>
+      </Box>
+    );
+  }
+
+  const items: AdminBulletLight[] = data?.items ?? [];
+  const totalBullets = data?.totalItems ?? 0;
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <CategoryIcon color="primary" />
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Bullet creation progress
+        </Typography>
+      </Box>
+      <ProgressLineChart
+        items={items}
+        filter={filter}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        totalLabel={`Total bullets: ${totalBullets}`}
+        countLineName="Created"
+        emptyMessage="No bullet creation data for the selected period."
+      />
+    </Box>
+  );
+}
+
+/** Single pie chart card with title and data (name, value). Percent shown in label when total > 0. */
+function PieChartCard({
+  title,
+  icon,
+  data,
+  colors,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  data: Array<{ name: string; value: number }>;
+  colors: string[];
+}) {
+  const total = data.reduce((s, d) => s + d.value, 0);
+  const dataWithPercent = data.map((d) => ({
+    ...d,
+    percent: total > 0 ? Math.round((d.value / total) * 100) : 0,
+  }));
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        {icon}
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>{title}</Typography>
+      </Box>
+      {total === 0 ? (
+        <Typography color="text.secondary">No data</Typography>
+      ) : (
+        <ResponsiveContainer width="100%" height={240}>
+          <PieChart>
+            <Pie
+              data={dataWithPercent}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              label={({ name, percent }) => `${name}: ${percent}%`}
+            >
+              {dataWithPercent.map((_, index) => (
+                <Cell key={index} fill={colors[index % colors.length]} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(value: number, name: string, props: { payload: { percent: number } }) => [`${value} (${props.payload.percent}%)`, name]} />
+          </PieChart>
+        </ResponsiveContainer>
+      )}
+    </Box>
+  );
+}
+
+/** Reusable chart card for light endpoints (fcm tokens). */
+function LightChartCard({
+  title,
+  icon,
+  queryKey,
+  fetchFn,
+  totalLabelKey,
+  filter,
+  selectedYear,
+  selectedMonth,
+  countLineName,
+  emptyMessage,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  queryKey: string;
+  fetchFn: () => Promise<{ data?: { items?: AdminLightItem[]; [k: string]: number | AdminLightItem[] | undefined } }>;
+  totalLabelKey: string;
+  filter: TimeRangeFilter;
+  selectedYear: number;
+  selectedMonth: number;
+  countLineName: string;
+  emptyMessage: string;
+}) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: [queryKey],
+    queryFn: async () => {
+      const res = await fetchFn();
+      const body = res.data as { items?: AdminLightItem[]; [k: string]: number | AdminLightItem[] | undefined } | undefined;
+      const total = body && typeof body[totalLabelKey] === 'number' ? (body[totalLabelKey] as number) : 0;
+      return { items: body?.items ?? [], totalItems: total };
+    },
+    retry: false,
+  });
+
+  if (isLoading) {
+    return (
+      <Box>
+        <Skeleton variant="text" width={140} height={28} sx={{ mb: 1 }} />
+        <Skeleton variant="rectangular" height={280} sx={{ borderRadius: 1 }} />
+      </Box>
+    );
+  }
+  if (error) {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          {icon}
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>{title}</Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary">Data not available.</Typography>
+      </Box>
+    );
+  }
+
+  const items: AdminLightItem[] = data?.items ?? [];
+  const total = data?.totalItems ?? 0;
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        {icon}
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>{title}</Typography>
+      </Box>
+      <ProgressLineChart
+        items={items}
+        filter={filter}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        totalLabel={`Total: ${total}`}
+        countLineName={countLineName}
+        emptyMessage={emptyMessage}
+      />
+    </Box>
+  );
+}
+
+export default function Dashboard() {
+  const [filter, setFilter] = useState<TimeRangeFilter>('7d');
+  const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+
+  const handleFilterChange = (event: SelectChangeEvent<TimeRangeFilter>) => {
+    setFilter(event.target.value as TimeRangeFilter);
+  };
+
+  return (
+    <Box>
+      <PageHeader
+        title="Dashboard"
+        subtitle="Overview: users, rifles, bullets, FCM tokens"
+        action={
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel id="dashboard-time-range">Time range</InputLabel>
+              <Select
+                labelId="dashboard-time-range"
+                value={filter}
+                label="Time range"
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="7d">Last 7 days</MenuItem>
+                <MenuItem value="year">Year</MenuItem>
+                <MenuItem value="month">Month</MenuItem>
+                <MenuItem value="lifetime">Lifetime</MenuItem>
+              </Select>
+            </FormControl>
+            {filter === 'year' && (
+              <FormControl size="small" sx={{ minWidth: 100 }}>
+                <InputLabel id="dashboard-year">Year</InputLabel>
+                <Select
+                  labelId="dashboard-year"
+                  value={String(selectedYear)}
+                  label="Year"
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                >
+                  {YEARS.map((y) => (
+                    <MenuItem key={y} value={String(y)}>
+                      {y}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            {filter === 'month' && (
+              <>
+                <FormControl size="small" sx={{ minWidth: 100 }}>
+                  <InputLabel id="dashboard-month-year">Year</InputLabel>
+                  <Select
+                    labelId="dashboard-month-year"
+                    value={String(selectedYear)}
+                    label="Year"
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  >
+                    {YEARS.map((y) => (
+                      <MenuItem key={y} value={String(y)}>
+                        {y}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel id="dashboard-month">Month</InputLabel>
+                  <Select
+                    labelId="dashboard-month"
+                    value={String(selectedMonth)}
+                    label="Month"
+                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                  >
+                    {MONTHS.map((m) => (
+                      <MenuItem key={m.value} value={String(m.value)}>
+                        {m.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </>
+            )}
+          </Box>
+        }
+      />
+
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' },
+          gap: 3,
+        }}
+      >
+        <Card>
+          <CardContent>
+            <UserRegistrationProgress
+              filter={filter}
+              selectedYear={selectedYear}
+              selectedMonth={selectedMonth}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <RifleCreationProgress
+              filter={filter}
+              selectedYear={selectedYear}
+              selectedMonth={selectedMonth}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <BulletCreationProgress
+              filter={filter}
+              selectedYear={selectedYear}
+              selectedMonth={selectedMonth}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <LightChartCard
+              title="FCM tokens (devices)"
+              icon={<SmartphoneIcon color="primary" />}
+              queryKey="dashboard-fcm-tokens-light"
+              fetchFn={getFcmTokensLight}
+              totalLabelKey="totalFcmTokens"
+              filter={filter}
+              selectedYear={selectedYear}
+              selectedMonth={selectedMonth}
+              countLineName="Registered"
+              emptyMessage="No FCM tokens for the selected period."
+            />
+          </CardContent>
+        </Card>
+      </Box>
+
+      <Typography variant="h6" sx={{ mt: 4, mb: 2, fontWeight: 600 }}>Pie charts</Typography>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr 1fr' },
+          gap: 3,
+        }}
+      >
+        <DashboardPieCharts />
+      </Box>
+    </Box>
+  );
+}
+
+function DashboardPieCharts() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['dashboard-pie'],
+    queryFn: async () => {
+      const res = await getDashboardPie();
+      return res.data;
+    },
+  });
+  if (isLoading) {
+    return (
+      <>
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardContent>
+              <Skeleton variant="rectangular" height={280} />
+            </CardContent>
+          </Card>
+        ))}
+      </>
+    );
+  }
+  if (error || !data) {
+    return (
+      <Card sx={{ gridColumn: '1 / -1' }}>
+        <CardContent>
+          <Typography color="error">Failed to load pie chart data.</Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+  const riflesData = [
+    { name: 'Active', value: data.rifles.active },
+    { name: 'Deleted', value: data.rifles.deleted },
+  ];
+  const bulletsData = [
+    { name: 'Active', value: data.bullets.active },
+    { name: 'Deleted', value: data.bullets.deleted },
+  ];
+  const usersRifleData = [
+    { name: 'With rifle', value: data.usersWithRifle.usersWithRifle },
+    { name: 'Without rifle', value: data.usersWithRifle.usersWithoutRifle },
+  ];
+  const bulletsAttachedData = [
+    { name: 'Attached to rifle', value: data.bulletsAttached.attachedToRifle },
+    { name: 'Not attached', value: data.bulletsAttached.notAttached },
+  ];
+  return (
+    <>
+      <Card>
+        <CardContent>
+          <PieChartCard
+            title="Rifles: active vs deleted"
+            icon={<RifleIcon color="primary" />}
+            data={riflesData}
+            colors={['#2e7d32', '#c62828']}
+          />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent>
+          <PieChartCard
+            title="Bullets: active vs deleted"
+            icon={<CategoryIcon color="primary" />}
+            data={bulletsData}
+            colors={['#2e7d32', '#c62828']}
+          />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent>
+          <PieChartCard
+            title="Users: with rifle %"
+            icon={<PeopleIcon color="primary" />}
+            data={usersRifleData}
+            colors={['#1565c0', '#78909c']}
+          />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent>
+          <PieChartCard
+            title="Bullets: attached to rifle %"
+            icon={<CategoryIcon color="primary" />}
+            data={bulletsAttachedData}
+            colors={['#00897b', '#ef6c00']}
+          />
+        </CardContent>
+      </Card>
+    </>
+  );
+}

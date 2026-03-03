@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://api.ballistiq.xyz';
+/** Backend API base URL. Override with VITE_API_BASE_URL in .env. */
+const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.ballistiq.xyz';
 
 export const api = axios.create({
   baseURL,
@@ -50,6 +51,11 @@ export function getUsers(params: {
   q?: string;
 }) {
   return api.get<import('../types').PageResponse<import('../types').AdminUser>>('/admin/api/users', { params });
+}
+
+// Admin users light (fast: id + createdAt only, totalUsers = last id)
+export function getUsersLight() {
+  return api.get<import('../types').AdminUsersLightResponse>('/admin/api/users/light');
 }
 
 // Admin user by ID (includes locale from FCM token)
@@ -118,4 +124,29 @@ export function getAllVendors(params?: { page?: number; size?: number }) {
 // Create vendor (AdminController POST /vendors — ROLE_ADMIN, ROLE_USER_ADMIN)
 export function createVendor(body: import('../types').VendorCreateRequest) {
   return api.post<import('../types').VendorItem>('/admin/api/vendors', body);
+}
+
+// Bullets light (fast: id + createdAt only, totalBullets = last id)
+export function getBulletsLight() {
+  return api.get<import('../types').AdminBulletsLightResponse>('/admin/api/bullets/light');
+}
+
+// Rifles list for dashboard (BallisticBE admin)
+export function getRifles(params: { page?: number; size?: number; sortBy?: string; sortDir?: string }) {
+  return api.get<import('../types').PageResponse<import('../types').AdminRifle>>('/admin/api/rifles', { params });
+}
+
+// Rifles light (fast: id + created only, totalRifles = last id)
+export function getRiflesLight() {
+  return api.get<import('../types').AdminRifflesLightResponse>('/admin/api/rifles/light');
+}
+
+// Dashboard light endpoints (id + createdAt for charts)
+export function getFcmTokensLight() {
+  return api.get<import('../types').FcmTokensLightResponse>('/admin/api/fcm-tokens/light');
+}
+
+// Dashboard pie charts (rifles/bullets deleted %, users with rifle %, bullets attached %)
+export function getDashboardPie() {
+  return api.get<import('../types').DashboardPieResponse>('/admin/api/dashboard/pie');
 }

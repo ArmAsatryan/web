@@ -36,8 +36,21 @@ export interface AdminUser {
   imageUrl?: string;
   /** Language from user's most recent FCM token (for notification language). */
   locale?: string;
-  createdAt?: string;
+  /** Registration date (API may send createdAt or created; string, number, or array). */
+  createdAt?: string | number | number[];
+  created?: string | number | number[];
   roles?: string[];
+}
+
+/** Lightweight user for dashboard: id and createdAt only (GET /admin/api/users/light). */
+export interface AdminUserLight {
+  id: number;
+  createdAt?: string | number | number[];
+}
+
+export interface AdminUsersLightResponse {
+  totalUsers: number;
+  items: AdminUserLight[];
 }
 
 export interface UserLocationPoint {
@@ -134,3 +147,49 @@ export interface Bullet {
   createdAt?: string;
   [key: string]: unknown;
 }
+
+/** Rifle from GET /admin/api/rifles (for dashboard progress) */
+export interface AdminRifle {
+  id: number;
+  name?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
+/** Lightweight bullet for dashboard: id and createdAt only (GET /admin/api/bullets/light). */
+export interface AdminBulletLight {
+  id: number;
+  createdAt?: string | number | number[];
+}
+
+export interface AdminBulletsLightResponse {
+  totalBullets: number;
+  items: AdminBulletLight[];
+}
+
+/** Light items for dashboard charts (id + createdAt or created). */
+export interface AdminLightItem {
+  id: number;
+  createdAt?: string | number | number[];
+  created?: string | number | number[];
+}
+
+/** Response from GET /admin/api/rifles/light (id + created only). */
+export interface AdminRifflesLightResponse {
+  totalRifles: number;
+  items: AdminLightItem[];
+}
+
+export interface FcmTokensLightResponse {
+  totalFcmTokens: number;
+  items: AdminLightItem[];
+}
+
+/** Dashboard pie charts data. */
+export interface DashboardPieResponse {
+  rifles: { active: number; deleted: number };
+  bullets: { active: number; deleted: number };
+  usersWithRifle: { totalUsers: number; usersWithRifle: number; usersWithoutRifle: number };
+  bulletsAttached: { totalBullets: number; attachedToRifle: number; notAttached: number };
+}
+

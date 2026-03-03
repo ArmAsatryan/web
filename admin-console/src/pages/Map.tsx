@@ -13,10 +13,13 @@ import PlaceIcon from '@mui/icons-material/Place';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import { getUserLocations, getLocales } from '../api/api';
 import type { UserLocationPoint } from '../types';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import PageHeader from '../components/PageHeader';
 
 const DefaultIcon = L.icon({
@@ -155,17 +158,19 @@ export default function MapPage() {
         <Box sx={{ height: 560, width: '100%' }}>
           <MapContainer center={center} zoom={6} style={{ height: '100%', width: '100%', borderRadius: 'inherit' }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' />
-            {(points || []).map((p, i) => (
-              <Marker key={i} position={[p.latitude, p.longitude]}>
-                <Popup>
-                  <Box sx={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', lineHeight: 1.6 }}>
-                    <strong>User ID:</strong> {p.userId}<br />
-                    <strong>Time:</strong> {p.timestamp ? new Date(p.timestamp).toLocaleString() : '—'}<br />
-                    <strong>Language:</strong> {p.locale ?? '—'}
-                  </Box>
-                </Popup>
-              </Marker>
-            ))}
+            <MarkerClusterGroup chunkedLoading>
+              {(points || []).map((p, i) => (
+                <Marker key={`${p.userId}-${p.latitude}-${p.longitude}-${i}`} position={[p.latitude, p.longitude]}>
+                  <Popup>
+                    <Box sx={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', lineHeight: 1.6 }}>
+                      <strong>User ID:</strong> {p.userId}<br />
+                      <strong>Time:</strong> {p.timestamp ? new Date(p.timestamp).toLocaleString() : '—'}<br />
+                      <strong>Language:</strong> {p.locale ?? '—'}
+                    </Box>
+                  </Popup>
+                </Marker>
+              ))}
+            </MarkerClusterGroup>
           </MapContainer>
         </Box>
       </Card>

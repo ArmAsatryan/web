@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './auth/AuthContext';
 import Layout from './components/Layout';
 import AccessDenied from './pages/AccessDenied';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import MapPage from './pages/Map';
 import Notifications from './pages/Notifications';
 import Users from './pages/Users';
@@ -25,6 +26,16 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Dashboard />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/"
         element={
@@ -85,7 +96,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

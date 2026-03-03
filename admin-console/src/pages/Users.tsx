@@ -43,6 +43,19 @@ const SORT_OPTIONS = [
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
+function formatCreatedAt(value: string | number | number[] | undefined): string {
+  if (value == null) return '—';
+  if (Array.isArray(value) && value.length >= 3) {
+    const d = new Date(Number(value[0]), Number(value[1]) - 1, Number(value[2]));
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+  }
+  if (typeof value === 'string' || typeof value === 'number') {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+  }
+  return '—';
+}
+
 export default function Users() {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(20);
@@ -235,7 +248,7 @@ export default function Users() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}
+                        {formatCreatedAt(u.createdAt)}
                       </Typography>
                     </TableCell>
                     <TableCell>
