@@ -41,7 +41,6 @@ import type { AdminUserLight, AdminBulletLight, AdminLightItem } from '../types'
 
 export type TimeRangeFilter = '7d' | 'year' | 'month' | 'lifetime';
 
-const PAGE_SIZE = 500;
 const CURRENT_YEAR = new Date().getFullYear();
 const START_YEAR = 2024; // first registration year
 const YEARS = Array.from(
@@ -522,7 +521,12 @@ function PieChartCard({
                 <Cell key={index} fill={colors[index % colors.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number, name: string, props: { payload: { percent: number } }) => [`${value} (${props.payload.percent}%)`, name]} />
+            <Tooltip
+              formatter={(value, name, item) => {
+                const percent = (item as { payload?: { percent?: number } })?.payload?.percent ?? 0;
+                return [`${Number(value) ?? 0} (${percent}%)`, String(name ?? '')];
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       )}
@@ -546,7 +550,7 @@ function LightChartCard({
   title: string;
   icon: React.ReactNode;
   queryKey: string;
-  fetchFn: () => Promise<{ data?: { items?: AdminLightItem[]; [k: string]: number | AdminLightItem[] | undefined } }>;
+  fetchFn: () => Promise<{ data?: unknown }>;
   totalLabelKey: string;
   filter: TimeRangeFilter;
   selectedYear: number;
@@ -558,9 +562,10 @@ function LightChartCard({
     queryKey: [queryKey],
     queryFn: async () => {
       const res = await fetchFn();
-      const body = res.data as { items?: AdminLightItem[]; [k: string]: number | AdminLightItem[] | undefined } | undefined;
+      const body = res.data as Record<string, unknown> | undefined;
       const total = body && typeof body[totalLabelKey] === 'number' ? (body[totalLabelKey] as number) : 0;
-      return { items: body?.items ?? [], totalItems: total };
+      const items = (body?.items as AdminLightItem[] | undefined) ?? [];
+      return { items, totalItems: total };
     },
     retry: false,
   });
