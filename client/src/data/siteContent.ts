@@ -152,7 +152,7 @@ export const ratingDistribution = [
 
 export const ratingSummary = {
   average: 4.8,
-  total: 180,
+  total: 196,
 };
 
 export const teamMembers = [
@@ -177,7 +177,7 @@ export const teamMembers = [
     image: "Ishkhan_Gevorgyan",
   },
   {
-    name: "Andranik Eghoyan",
+    name: "Andranik Yeghoyan",
     role: "Android Magician",
     image: "Andranik_Eghoyan",
   },

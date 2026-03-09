@@ -1,4 +1,3 @@
-import { Link } from "wouter";
 import { Logo } from "./Logo";
 import { useI18n } from "@/hooks/use-i18n";
 
@@ -17,13 +16,13 @@ export function Footer() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground/60">
-            <Link href="/privacy-policy" className="hover:text-foreground transition-colors" data-testid="link-privacy">
+            <a href="/privacy-policy" className="hover:text-foreground transition-colors" data-testid="link-privacy">
               {t("footer.privacy")}
-            </Link>
+            </a>
             <span className="text-border">|</span>
-            <Link href="/terms-of-service" className="hover:text-foreground transition-colors" data-testid="link-terms">
+            <a href="/terms-of-service" className="hover:text-foreground transition-colors" data-testid="link-terms">
               {t("footer.terms")}
-            </Link>
+            </a>
             <span className="text-border">|</span>
             <a href="#features" className="hover:text-foreground transition-colors" data-testid="link-footer-features">
               {t("nav.features")}
