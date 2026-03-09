@@ -8,12 +8,7 @@
 
 name = "web1"
 compatibility_date = "2024-01-01"
-main = "./worker/index.ts"
 
 # Static output from npm run build (client + admin-console → dist/public)
 # For Pages Git deploy: set Build output directory to "dist/public" in Dashboard if not using this file.
 pages_build_output_dir = "./dist/public"
-
-[assets]
-directory = "./dist/public"
-binding = "STATIC_ASSETS"
