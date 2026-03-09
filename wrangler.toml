@@ -2,7 +2,7 @@
 # Or: npx wrangler pages deploy dist/public
 # First time: npx wrangler pages project create ballistiq (or your project name)
 #
-# Git deploy / Wrangler deploy: Build command = "npm run build", then "npx wrangler deploy"
+# Git deploy / Wrangler Pages deploy: Build command = "npm run build", then "npx wrangler pages deploy dist/public"
 # Custom domain: Dashboard → Custom domains → Add ballistiq.xyz (see DEPLOY.md)
 # Note: Pages config does not support "account_id" — do not add it.
 
