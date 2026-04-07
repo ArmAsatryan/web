@@ -152,7 +152,7 @@ export const ratingDistribution = [
 
 export const ratingSummary = {
   average: 4.8,
-  total: 196,
+  total: 214,
 };
 
 export const teamMembers = [

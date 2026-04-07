@@ -36,6 +36,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.appstore.bottom": "App Store",
     "hero.google.top": "Get it on",
     "hero.google.bottom": "Google Play",
+    "hero.garmin.top": "Get it on",
+    "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Download User Manual",
 
     "features.title1": "Powerful",
@@ -143,6 +145,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.appstore.bottom": "App Store",
     "hero.google.top": "Disponible sur",
     "hero.google.bottom": "Google Play",
+    "hero.garmin.top": "Disponible sur",
+    "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Télécharger le Manuel d'Utilisation",
 
     "features.title1": "Fonctionnalités",
@@ -250,6 +254,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.appstore.bottom": "App Store",
     "hero.google.top": "Disponibile su",
     "hero.google.bottom": "Google Play",
+    "hero.garmin.top": "Disponibile su",
+    "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Scarica il Manuale Utente",
 
     "features.title1": "Funzionalit\u00e0",
@@ -357,6 +363,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.appstore.bottom": "App Store",
     "hero.google.top": "Obt\u00e9nlo en",
     "hero.google.bottom": "Google Play",
+    "hero.garmin.top": "Cons\u00edguelo en",
+    "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Descargar Manual de Usuario",
 
     "features.title1": "Funciones",
@@ -462,6 +470,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.appstore.bottom": "App Store-ից",
     "hero.google.top": "Ներբեռնեք",
     "hero.google.bottom": "Google Play-ից",
+    "hero.garmin.top": "Ներբեռնեք",
+    "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Ներբեռնել օգտագործողի ձեռնարկը",
 
     "features.title1": "Հզոր",

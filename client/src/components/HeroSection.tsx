@@ -2,17 +2,37 @@ import { useState, useEffect, useRef } from "react";
 import { SiApple, SiGoogleplay } from "react-icons/si";
 import { FileText, Crosshair, Wind, ArrowUpRight, ArrowUpLeft, ArrowRight, ArrowLeft, ArrowDownRight, ArrowDownLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
 import { useMagneticButton } from "@/hooks/use-magnetic-button";
 import { useTiltCard } from "@/hooks/use-tilt-card";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { HeroBackground } from "./HeroBackground";
 import bgImage from "@assets/Background1_1770884231570.jpg";
+import garminIqLogo from "@assets/Garmin_Connect_IQ_logo.png";
 
-function MagneticWrapper({ children }: { children: React.ReactNode }) {
+/** Shared layout for App Store / Google Play / Garmin hero CTAs */
+const heroStoreButtonClass =
+  "bg-white text-black border-white/80 backdrop-blur-sm h-14 min-h-14 w-full justify-start gap-2 px-2.5 sm:gap-3 sm:px-4 [&_svg]:!size-5";
+
+function StoreIconSlot({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="flex size-10 shrink-0 items-center justify-center [&_img]:max-h-full [&_img]:max-w-full [&_img]:object-contain">
+      {children}
+    </span>
+  );
+}
+
+function MagneticWrapper({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   const { ref, style } = useMagneticButton(8);
   return (
-    <div ref={ref} style={style} className="inline-block">
+    <div ref={ref} style={style} className={cn("inline-block", className)}>
       {children}
     </div>
   );
@@ -172,48 +192,87 @@ export function HeroSection() {
               {t("hero.subtitle")}
             </p>
 
-            <div className="flex flex-wrap gap-3 mb-8">
-              <MagneticWrapper>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="bg-white text-black border-white/80 backdrop-blur-sm"
-                >
-                  <a
-                    href="https://apps.apple.com/us/app/ballistiq-shooters-assistant/id6476917854"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="link-appstore"
+            <div className="mb-8 flex w-full max-w-full flex-nowrap gap-2 overflow-x-auto pb-1 sm:gap-3 sm:overflow-visible sm:pb-0">
+              <div className="min-w-0 flex-1 basis-0">
+                <MagneticWrapper className="block w-full min-w-0">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className={heroStoreButtonClass}
                   >
-                    <SiApple className="w-5 h-5" />
-                    <div className="text-left">
-                      <div className="text-[10px] font-normal leading-none opacity-70">{t("hero.appstore.top")}</div>
-                      <div className="text-sm leading-tight">{t("hero.appstore.bottom")}</div>
-                    </div>
-                  </a>
-                </Button>
-              </MagneticWrapper>
+                    <a
+                      href="https://apps.apple.com/us/app/ballistiq-shooters-assistant/id6476917854"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid="link-appstore"
+                    >
+                      <StoreIconSlot>
+                        <SiApple className="size-5" />
+                      </StoreIconSlot>
+                      <div className="min-w-0 flex-1 text-left">
+                        <div className="text-[10px] font-normal leading-none opacity-70">{t("hero.appstore.top")}</div>
+                        <div className="text-sm leading-tight">{t("hero.appstore.bottom")}</div>
+                      </div>
+                    </a>
+                  </Button>
+                </MagneticWrapper>
+              </div>
 
-              <MagneticWrapper>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="bg-white text-black border-white/80 backdrop-blur-sm"
-                >
-                  <a
-                    href="https://play.google.com/store/apps/details?id=com.zeniq.ballistiq.mobile"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="link-googleplay"
+              <div className="min-w-0 flex-1 basis-0">
+                <MagneticWrapper className="block w-full min-w-0">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className={heroStoreButtonClass}
                   >
-                    <SiGoogleplay className="w-5 h-5" />
-                    <div className="text-left">
-                      <div className="text-[10px] font-normal leading-none opacity-70">{t("hero.google.top")}</div>
-                      <div className="text-sm leading-tight">{t("hero.google.bottom")}</div>
-                    </div>
-                  </a>
-                </Button>
-              </MagneticWrapper>
+                    <a
+                      href="https://play.google.com/store/apps/details?id=com.zeniq.ballistiq.mobile"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid="link-googleplay"
+                    >
+                      <StoreIconSlot>
+                        <SiGoogleplay className="size-5" />
+                      </StoreIconSlot>
+                      <div className="min-w-0 flex-1 text-left">
+                        <div className="text-[10px] font-normal leading-none opacity-70">{t("hero.google.top")}</div>
+                        <div className="text-sm leading-tight">{t("hero.google.bottom")}</div>
+                      </div>
+                    </a>
+                  </Button>
+                </MagneticWrapper>
+              </div>
+
+              <div className="min-w-0 flex-1 basis-0">
+                <MagneticWrapper className="block w-full min-w-0">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className={heroStoreButtonClass}
+                  >
+                    <a
+                      href="https://apps.garmin.com/apps/718c49c2-19cf-4ac7-9d7e-65084e038f36?tid=2"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid="link-garmin-iq"
+                    >
+                      <StoreIconSlot>
+                        <img
+                          src={garminIqLogo}
+                          alt=""
+                          width={40}
+                          height={40}
+                          aria-hidden
+                        />
+                      </StoreIconSlot>
+                      <div className="min-w-0 flex-1 text-left">
+                        <div className="text-[10px] font-normal leading-none opacity-70">{t("hero.garmin.top")}</div>
+                        <div className="text-sm leading-tight">{t("hero.garmin.bottom")}</div>
+                      </div>
+                    </a>
+                  </Button>
+                </MagneticWrapper>
+              </div>
             </div>
 
             <Button
