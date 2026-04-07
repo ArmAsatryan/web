@@ -48,7 +48,7 @@ export function PricingSection() {
 
         <AnimatedSection>
           <Card className="glass-card border-primary/20 border overflow-hidden" data-testid="card-pricing-main">
-            <div className="p-8 text-center border-b border-border/50">
+            <div className="border-b border-border/50 p-5 text-center sm:p-8">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <img
                   src={logoImg}
@@ -67,7 +67,7 @@ export function PricingSection() {
               <p className="text-muted-foreground text-sm">{t("pricing.desc")}</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 p-6 sm:p-8">
+            <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3 sm:p-6 md:p-8">
               {pricingTiers.map((tier, i) => (
                 <div
                   key={i}
@@ -96,38 +96,42 @@ export function PricingSection() {
               ))}
             </div>
 
-            <div className="px-6 sm:px-8 pb-8">
-              <div className="rounded-xl border border-border/50 overflow-hidden">
-                <div className="grid grid-cols-[1fr_60px_60px] sm:grid-cols-[1fr_80px_80px] items-center px-4 sm:px-6 py-3 bg-muted/30 border-b border-border/50">
-                  <span className="text-sm font-semibold text-foreground">{t("pricing.options")}</span>
-                  <span className="text-xs font-semibold text-muted-foreground text-center">{t("pricing.free")}</span>
-                  <span className="text-xs font-semibold text-primary text-center">{t("pricing.premium")}</span>
-                </div>
-                {pricingFeatures.map((feature, i) => (
-                  <div
-                    key={i}
-                    className={`grid grid-cols-[1fr_60px_60px] sm:grid-cols-[1fr_80px_80px] items-center px-4 sm:px-6 py-3 ${
-                      i < pricingFeatures.length - 1 ? "border-b border-border/30" : ""
-                    }`}
-                    data-testid={`row-pricing-feature-${i}`}
-                  >
-                    <span className="text-sm text-muted-foreground">{t(feature.nameKey)}</span>
-                    <div className="flex justify-center">
-                      {feature.free ? (
-                        <Check className="w-5 h-5 text-primary" />
-                      ) : (
-                        <Minus className="w-5 h-5 text-muted-foreground/40" />
-                      )}
+            <div className="px-4 pb-8 sm:px-6 md:px-8">
+              <div className="-mx-1 overflow-x-auto px-1 sm:mx-0 sm:px-0">
+                <div className="min-w-[280px]">
+                  <div className="overflow-hidden rounded-xl border border-border/50">
+                    <div className="grid grid-cols-[1fr_52px_52px] items-center bg-muted/30 px-3 py-3 border-b border-border/50 sm:grid-cols-[1fr_80px_80px] sm:px-6">
+                      <span className="text-sm font-semibold text-foreground">{t("pricing.options")}</span>
+                      <span className="text-center text-xs font-semibold text-muted-foreground">{t("pricing.free")}</span>
+                      <span className="text-center text-xs font-semibold text-primary">{t("pricing.premium")}</span>
                     </div>
-                    <div className="flex justify-center">
-                      <Check className="w-5 h-5 text-primary" />
-                    </div>
+                    {pricingFeatures.map((feature, i) => (
+                      <div
+                        key={i}
+                        className={`grid grid-cols-[1fr_52px_52px] items-center px-3 py-3 sm:grid-cols-[1fr_80px_80px] sm:px-6 ${
+                          i < pricingFeatures.length - 1 ? "border-b border-border/30" : ""
+                        }`}
+                        data-testid={`row-pricing-feature-${i}`}
+                      >
+                        <span className="text-xs text-muted-foreground sm:text-sm">{t(feature.nameKey)}</span>
+                        <div className="flex justify-center">
+                          {feature.free ? (
+                            <Check className="h-5 w-5 text-primary" />
+                          ) : (
+                            <Minus className="h-5 w-5 text-muted-foreground/40" />
+                          )}
+                        </div>
+                        <div className="flex justify-center">
+                          <Check className="h-5 w-5 text-primary" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
 
-            <div className="px-6 sm:px-8 pb-8">
+            <div className="px-4 pb-8 sm:px-6 md:px-8">
               <Button
                 asChild
                 variant="default"

@@ -67,8 +67,8 @@ export function ContactSection() {
 
         <AnimatedSection delay={0.15}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <Card className="p-8 glass-card">
-              <h3 className="text-xl font-semibold text-foreground mb-6">{t("contact.form.title")}</h3>
+            <Card className="glass-card p-5 sm:p-8">
+              <h3 className="mb-6 text-xl font-semibold text-foreground">{t("contact.form.title")}</h3>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
@@ -131,8 +131,8 @@ export function ContactSection() {
             </Card>
 
             <div className="space-y-6">
-              <Card className="p-8 glass-card">
-                <h3 className="text-xl font-semibold text-foreground mb-6">{t("contact.info.title")}</h3>
+              <Card className="glass-card p-5 sm:p-8">
+                <h3 className="mb-6 text-xl font-semibold text-foreground">{t("contact.info.title")}</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 shrink-0 text-muted-foreground" aria-hidden/>
@@ -142,16 +142,16 @@ export function ContactSection() {
                       <span className="text-sm text-foreground">{t("contact.info.address.value")}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
                     <a
                         href="mailto:support@ballistiq.xyz"
-                        className="inline-flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                        className="inline-flex min-w-0 items-center gap-2 text-muted-foreground transition-colors hover:text-primary sm:gap-3"
                         data-testid="link-email"
                     >
 
-                      <Mail className="w-5 h-5 shrink-0"/>
+                      <Mail className="h-5 w-5 shrink-0"/>
 
-                      <span className="text-sm">support@ballistiq.xyz</span>
+                      <span className="text-sm break-all">support@ballistiq.xyz</span>
                     </a>
                     <Button
                         variant="ghost"

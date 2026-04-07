@@ -28,9 +28,12 @@ function RatingSummaryBlock() {
   const maxCount = Math.max(...ratingDistribution.map((r) => r.count));
 
   return (
-    <div className="flex items-start gap-8" data-testid="rating-summary">
-      <div className="text-center flex-shrink-0">
-        <div className="text-6xl font-bold text-foreground leading-none">
+    <div
+      className="flex flex-col items-center gap-8 sm:flex-row sm:items-start"
+      data-testid="rating-summary"
+    >
+      <div className="flex-shrink-0 text-center">
+        <div className="text-5xl font-bold leading-none text-foreground sm:text-6xl">
           {ratingSummary.average}
         </div>
         <div className="text-muted-foreground text-xs mt-1">
@@ -42,7 +45,7 @@ function RatingSummaryBlock() {
         </div>
       </div>
 
-      <div className="flex-1 space-y-1.5 pt-1">
+      <div className="w-full min-w-0 flex-1 space-y-1.5 pt-1 sm:pt-0">
         {ratingDistribution.map((row) => (
           <div key={row.stars} className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground w-3 text-right">
@@ -119,7 +122,7 @@ export function ReviewsSection() {
         </AnimatedSection>
 
         <AnimatedSection>
-          <div className="bg-card/50 backdrop-blur-sm border border-border/40 rounded-2xl p-6 sm:p-8 mb-8">
+          <div className="mb-8 rounded-2xl border border-border/40 bg-card/50 p-4 backdrop-blur-sm sm:p-6 md:p-8">
             <RatingSummaryBlock />
           </div>
         </AnimatedSection>

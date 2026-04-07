@@ -22,7 +22,7 @@ const HOME_META = {
 export function HomePage() {
   usePageMeta(HOME_META);
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen w-full bg-background text-foreground">
       <PageBackground />
       <Navbar />
       <HeroSection />

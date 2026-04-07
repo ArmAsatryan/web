@@ -59,11 +59,11 @@ function MetricItem({ metric, started, reduced }: { metric: Metric; started: boo
   const isSupport = metric.labelKey === "metrics.support";
 
   return (
-    <div className="text-center px-6 py-4" data-testid={`metric-${metric.labelKey.split(".")[1]}`}>
-      <div className="text-3xl sm:text-4xl font-bold text-foreground mb-1">
+    <div className="px-4 py-4 text-center sm:px-6" data-testid={`metric-${metric.labelKey.split(".")[1]}`}>
+      <div className="mb-1 text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
         {isSupport ? "24/7" : `${count.toLocaleString()}${metric.suffix}`}
       </div>
-      <div className="text-sm text-muted-foreground">{label}</div>
+      <div className="text-xs text-muted-foreground sm:text-sm">{label}</div>
     </div>
   );
 }

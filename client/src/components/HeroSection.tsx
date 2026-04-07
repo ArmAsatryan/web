@@ -13,11 +13,11 @@ import garminIqLogo from "@assets/Garmin_Connect_IQ_logo.png";
 
 /** Shared layout for App Store / Google Play / Garmin hero CTAs */
 const heroStoreButtonClass =
-  "bg-white text-black border-white/80 backdrop-blur-sm h-14 min-h-14 w-full justify-start gap-2 px-2.5 sm:gap-3 sm:px-4 [&_svg]:!size-5";
+  "bg-white text-black border-white/80 backdrop-blur-sm h-9 min-h-9 w-full justify-center gap-1.5 rounded-md px-1.5 sm:gap-2 sm:px-2.5 lg:h-10 lg:min-h-10 lg:justify-start lg:px-3 [&_svg]:!size-3.5";
 
 function StoreIconSlot({ children }: { children: React.ReactNode }) {
   return (
-    <span className="flex size-10 shrink-0 items-center justify-center [&_img]:max-h-full [&_img]:max-w-full [&_img]:object-contain">
+    <span className="flex size-7 shrink-0 items-center justify-center [&_img]:max-h-full [&_img]:max-w-full [&_img]:object-contain">
       {children}
     </span>
   );
@@ -167,7 +167,7 @@ export function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative min-h-screen overflow-hidden"
       data-testid="section-hero"
     >
       <div
@@ -178,22 +178,25 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
       <HeroBackground />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 pb-16">
-        <div className="flex items-center gap-12 xl:gap-16">
-          <div className="max-w-2xl flex-1">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col px-4 pb-8 pt-24 sm:px-6 lg:min-h-screen lg:justify-center lg:py-16 lg:pb-16">
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col lg:flex-none lg:flex-row lg:items-center lg:gap-12 xl:gap-16">
+          <div className="flex min-h-0 w-full max-w-2xl flex-1 flex-col text-center lg:flex-1 lg:text-left">
 
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-6">
+            <h1 className="mb-6 text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
               {t("hero.title1")}{" "}
               <span className="text-primary">{t("hero.title2")}</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/70 leading-relaxed mb-10 max-w-lg">
+            <p className="mx-auto mb-6 max-w-lg text-lg leading-relaxed text-white/70 sm:text-xl lg:mx-0 lg:mb-10">
               {t("hero.subtitle")}
             </p>
 
-            <div className="mb-8 flex w-full max-w-full flex-nowrap gap-2 overflow-x-auto pb-1 sm:gap-3 sm:overflow-visible sm:pb-0">
-              <div className="min-w-0 flex-1 basis-0">
+            {/* Grows on phone/tablet so store CTAs sit toward the bottom of the viewport */}
+            <div className="min-h-8 flex-1 lg:hidden" aria-hidden />
+
+            <div className="mx-auto mb-4 grid w-full max-w-[min(17.5rem,88vw)] grid-cols-1 gap-2 pb-1 lg:mx-0 lg:mb-8 lg:max-w-none lg:grid-cols-3 lg:gap-3 lg:pb-0">
+              <div className="min-w-0">
                 <MagneticWrapper className="block w-full min-w-0">
                   <Button
                     asChild
@@ -207,18 +210,18 @@ export function HeroSection() {
                       data-testid="link-appstore"
                     >
                       <StoreIconSlot>
-                        <SiApple className="size-5" />
+                        <SiApple className="size-3.5" />
                       </StoreIconSlot>
-                      <div className="min-w-0 flex-1 text-left">
-                        <div className="text-[10px] font-normal leading-none opacity-70">{t("hero.appstore.top")}</div>
-                        <div className="text-sm leading-tight">{t("hero.appstore.bottom")}</div>
+                      <div className="min-w-0 flex-1 text-center lg:text-left">
+                        <div className="text-[9px] font-normal leading-none opacity-70 sm:text-[10px]">{t("hero.appstore.top")}</div>
+                        <div className="text-xs leading-tight sm:text-[13px] lg:text-sm">{t("hero.appstore.bottom")}</div>
                       </div>
                     </a>
                   </Button>
                 </MagneticWrapper>
               </div>
 
-              <div className="min-w-0 flex-1 basis-0">
+              <div className="min-w-0">
                 <MagneticWrapper className="block w-full min-w-0">
                   <Button
                     asChild
@@ -232,18 +235,18 @@ export function HeroSection() {
                       data-testid="link-googleplay"
                     >
                       <StoreIconSlot>
-                        <SiGoogleplay className="size-5" />
+                        <SiGoogleplay className="size-3.5" />
                       </StoreIconSlot>
-                      <div className="min-w-0 flex-1 text-left">
-                        <div className="text-[10px] font-normal leading-none opacity-70">{t("hero.google.top")}</div>
-                        <div className="text-sm leading-tight">{t("hero.google.bottom")}</div>
+                      <div className="min-w-0 flex-1 text-center lg:text-left">
+                        <div className="text-[9px] font-normal leading-none opacity-70 sm:text-[10px]">{t("hero.google.top")}</div>
+                        <div className="text-xs leading-tight sm:text-[13px] lg:text-sm">{t("hero.google.bottom")}</div>
                       </div>
                     </a>
                   </Button>
                 </MagneticWrapper>
               </div>
 
-              <div className="min-w-0 flex-1 basis-0">
+              <div className="min-w-0">
                 <MagneticWrapper className="block w-full min-w-0">
                   <Button
                     asChild
@@ -260,14 +263,14 @@ export function HeroSection() {
                         <img
                           src={garminIqLogo}
                           alt=""
-                          width={40}
-                          height={40}
+                          width={28}
+                          height={28}
                           aria-hidden
                         />
                       </StoreIconSlot>
-                      <div className="min-w-0 flex-1 text-left">
-                        <div className="text-[10px] font-normal leading-none opacity-70">{t("hero.garmin.top")}</div>
-                        <div className="text-sm leading-tight">{t("hero.garmin.bottom")}</div>
+                      <div className="min-w-0 flex-1 text-center lg:text-left">
+                        <div className="text-[9px] font-normal leading-none opacity-70 sm:text-[10px]">{t("hero.garmin.top")}</div>
+                        <div className="text-xs leading-tight sm:text-[13px] lg:text-sm">{t("hero.garmin.bottom")}</div>
                       </div>
                     </a>
                   </Button>
@@ -278,10 +281,11 @@ export function HeroSection() {
             <Button
               asChild
               variant="ghost"
-              className="text-white/60"
+              size="sm"
+              className="h-8 text-white/60 justify-center text-xs lg:justify-start"
             >
               <a href="https://drive.google.com/uc?export=download&id=1vfUtcI7Angr2WvJgG6oJtmSgend1ZPCi" data-testid="link-user-manual">
-                <FileText className="w-4 h-4" />
+                <FileText className="h-3.5 w-3.5" />
                 {t("hero.manual")}
               </a>
             </Button>
