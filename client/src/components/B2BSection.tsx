@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield } from "lucide-react";
 import { useI18n } from "@/hooks/use-i18n";
 import { AnimatedSection, StaggeredGrid } from "./AnimatedSection";
-import thermalImg from "@assets/ThermalScope_1770884062208.png";
+import thermalImg from "@assets/thermal_scope_cpp_engine.png";
 import ugvImg from "@assets/UGV_1770884064333.png";
 import turretImg from "@assets/SmartTurret_1770884055178.png";
 import bg2 from "@assets/Background_2_1770884266453.png";

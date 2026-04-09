@@ -1,5 +1,4 @@
 import { SiApple, SiGoogleplay } from "react-icons/si";
-import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
@@ -171,18 +170,6 @@ export function HeroSection() {
                 </MagneticWrapper>
               </div>
             </div>
-
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="h-8 text-white/60 justify-center text-xs lg:justify-start"
-            >
-              <a href="https://drive.google.com/uc?export=download&id=1vfUtcI7Angr2WvJgG6oJtmSgend1ZPCi" data-testid="link-user-manual">
-                <FileText className="h-3.5 w-3.5" />
-                {t("hero.manual")}
-              </a>
-            </Button>
           </div>
 
           <div className="hidden min-w-0 flex-1 justify-center lg:flex lg:max-w-[min(100%,28rem)] xl:max-w-[min(100%,32rem)] 2xl:max-w-[min(100%,36rem)]">

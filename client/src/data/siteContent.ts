@@ -10,6 +10,10 @@ export const navLinks = [
   { label: "Contact", href: "#contact" },
 ];
 
+/** Google Drive direct download for the BALLISTiQ user manual (PDF). */
+export const USER_MANUAL_DOWNLOAD_URL =
+  "https://drive.google.com/uc?export=download&id=1vfUtcI7Angr2WvJgG6oJtmSgend1ZPCi";
+
 export const features = [
   {
     title: "Ballistic Calculator",
