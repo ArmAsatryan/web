@@ -9,32 +9,36 @@ export function FeaturesSection() {
   const { t } = useI18n();
 
   return (
-    <section id="features" className="py-24 sm:py-32" data-testid="section-features">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AnimatedSection className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+    <section
+      id="features"
+      className="relative pb-6 pt-24 sm:pb-8 sm:pt-32"
+      data-testid="section-features"
+    >
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <AnimatedSection className="mb-16 text-center">
+          <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl">
             {t("features.title1")}{" "}
             <span className="text-primary">{t("features.title2")}</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
             {t("features.subtitle")}
           </p>
         </AnimatedSection>
 
-        <StaggeredGrid className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StaggeredGrid className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {icons.map((Icon, i) => (
             <Card
               key={i}
-              className="group p-6 glass-card hover-elevate transition-all duration-300"
+              className="group glass-card p-6"
               data-testid={`card-feature-${i}`}
             >
-              <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-5">
-                <Icon className="w-6 h-6 text-primary" />
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-md bg-primary/10">
+                <Icon className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-3">
+              <h3 className="mb-3 text-lg font-semibold text-foreground">
                 {t(`features.${i}.title`)}
               </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {t(`features.${i}.desc`)}
               </p>
             </Card>

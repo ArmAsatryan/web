@@ -34,22 +34,26 @@ export function PricingSection() {
   const rotation = useScrollRotation();
 
   return (
-    <section id="pricing" className="py-24 sm:py-32" data-testid="section-pricing">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AnimatedSection className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            {t("pricing.title1")}{" "}
-            <span className="text-primary">{t("pricing.title2")}</span>
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            {t("pricing.subtitle")}
-          </p>
-        </AnimatedSection>
-
-        <AnimatedSection>
-          <Card className="glass-card border-primary/20 border overflow-hidden" data-testid="card-pricing-main">
-            <div className="border-b border-border/50 p-5 text-center sm:p-8">
-              <div className="flex items-center justify-center gap-3 mb-4">
+    <section
+      id="pricing"
+      className="relative z-10 pb-24 pt-12 sm:pb-32 sm:pt-16"
+      data-testid="section-pricing"
+    >
+      <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <AnimatedSection className="flex flex-col gap-6">
+          <Card
+            className="border border-primary/20 bg-card shadow-md [backdrop-filter:none] [-webkit-backdrop-filter:none] dark:bg-card"
+            data-testid="card-pricing-intro"
+          >
+            <div className="p-5 text-center sm:p-8">
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
+                {t("pricing.title1")}{" "}
+                <span className="text-primary">{t("pricing.title2")}</span>
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground sm:mt-4 sm:text-lg">
+                {t("pricing.subtitle")}
+              </p>
+              <div className="mt-8 flex items-center justify-center gap-3 sm:mt-10">
                 <img
                   src={logoImg}
                   alt="BALLISTiQ logo"
@@ -64,90 +68,98 @@ export function PricingSection() {
                 />
                 <h3 className="text-2xl font-bold text-foreground">BALLISTiQ</h3>
               </div>
-              <p className="text-muted-foreground text-sm">{t("pricing.desc")}</p>
+              <p className="mt-3 text-sm text-muted-foreground sm:mt-4">{t("pricing.desc")}</p>
             </div>
+          </Card>
 
-            <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3 sm:p-6 md:p-8">
-              {pricingTiers.map((tier, i) => (
-                <div
-                  key={i}
-                  className={`relative rounded-xl p-4 sm:p-6 text-center transition-all duration-300 ${
-                    tier.highlighted
-                      ? "bg-primary/10 border-2 border-primary/30 shadow-lg"
-                      : "bg-card/50 border border-border/50"
-                  }`}
-                  data-testid={`card-pricing-tier-${i}`}
-                >
-                  {tier.highlighted && (
-                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs no-default-hover-elevate no-default-active-elevate">
-                      {t("pricing.popular")}
-                    </Badge>
-                  )}
-                  <p className="text-sm font-medium text-muted-foreground mb-2">
+          {/* Narrower column: smaller horizontal footprint, vertical spacing unchanged */}
+          <div className="mx-auto flex w-full max-w-lg flex-col gap-6 sm:max-w-xl md:max-w-2xl">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4">
+            {pricingTiers.map((tier, i) => (
+              <Card
+                key={i}
+                data-testid={`card-pricing-tier-${i}`}
+                className={`relative border bg-card shadow-md [backdrop-filter:none] [-webkit-backdrop-filter:none] dark:bg-card ${
+                  tier.highlighted
+                    ? "border-2 border-primary/40 shadow-lg ring-1 ring-primary/20"
+                    : "border border-primary/20"
+                }`}
+              >
+                {tier.highlighted && (
+                  <Badge className="absolute -top-3 left-1/2 z-[1] -translate-x-1/2 bg-primary text-primary-foreground text-xs no-default-hover-elevate no-default-active-elevate">
+                    {t("pricing.popular")}
+                  </Badge>
+                )}
+                <div className="p-5 text-center sm:p-6">
+                  <p className="text-sm font-medium text-muted-foreground">
                     {t(tier.nameKey)}
                   </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
+                  <p className="mt-2 text-2xl font-bold text-foreground sm:text-3xl">
                     {tier.price}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {t(tier.perMonthKey)}
                   </p>
                 </div>
-              ))}
-            </div>
+              </Card>
+            ))}
+          </div>
 
-            <div className="px-4 pb-8 sm:px-6 md:px-8">
-              <div className="-mx-1 overflow-x-auto px-1 sm:mx-0 sm:px-0">
-                <div className="min-w-[280px]">
-                  <div className="overflow-hidden rounded-xl border border-border/50">
-                    <div className="grid grid-cols-[1fr_52px_52px] items-center bg-muted/30 px-3 py-3 border-b border-border/50 sm:grid-cols-[1fr_80px_80px] sm:px-6">
-                      <span className="text-sm font-semibold text-foreground">{t("pricing.options")}</span>
-                      <span className="text-center text-xs font-semibold text-muted-foreground">{t("pricing.free")}</span>
-                      <span className="text-center text-xs font-semibold text-primary">{t("pricing.premium")}</span>
-                    </div>
-                    {pricingFeatures.map((feature, i) => (
-                      <div
-                        key={i}
-                        className={`grid grid-cols-[1fr_52px_52px] items-center px-3 py-3 sm:grid-cols-[1fr_80px_80px] sm:px-6 ${
-                          i < pricingFeatures.length - 1 ? "border-b border-border/30" : ""
-                        }`}
-                        data-testid={`row-pricing-feature-${i}`}
-                      >
-                        <span className="text-xs text-muted-foreground sm:text-sm">{t(feature.nameKey)}</span>
-                        <div className="flex justify-center">
-                          {feature.free ? (
-                            <Check className="h-5 w-5 text-primary" />
-                          ) : (
-                            <Minus className="h-5 w-5 text-muted-foreground/40" />
-                          )}
-                        </div>
-                        <div className="flex justify-center">
-                          <Check className="h-5 w-5 text-primary" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="px-4 pb-8 sm:px-6 md:px-8">
-              <Button
-                asChild
-                variant="default"
-                className="w-full"
-                data-testid="button-pricing-cta"
-              >
-                <a
-                  href="https://apps.apple.com/us/app/ballistiq-shooters-assistant/id6476917854"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t("pricing.cta")}
-                </a>
-              </Button>
+          <Card
+            className="border border-primary/20 bg-card shadow-md [backdrop-filter:none] [-webkit-backdrop-filter:none] dark:bg-card"
+            data-testid="card-pricing-feature-legend"
+          >
+            <div className="grid grid-cols-[1fr_44px_44px] items-center gap-2 px-4 py-4 sm:grid-cols-[1fr_72px_72px] sm:px-6 sm:py-5">
+              <span className="text-sm font-semibold text-foreground">{t("pricing.options")}</span>
+              <span className="text-center text-xs font-semibold text-muted-foreground">{t("pricing.free")}</span>
+              <span className="text-center text-xs font-semibold text-primary">{t("pricing.premium")}</span>
             </div>
           </Card>
+
+          <div className="flex flex-col gap-4">
+            {pricingFeatures.map((feature, i) => (
+              <Card
+                key={i}
+                data-testid={`row-pricing-feature-${i}`}
+                className="border border-primary/20 bg-card shadow-md [backdrop-filter:none] [-webkit-backdrop-filter:none] dark:bg-card"
+              >
+                <div className="grid grid-cols-[1fr_44px_44px] items-center gap-2 px-4 py-4 sm:grid-cols-[1fr_72px_72px] sm:px-6 sm:py-5">
+                  <span className="min-w-0 text-xs text-foreground sm:text-sm">{t(feature.nameKey)}</span>
+                  <div className="flex justify-center">
+                    {feature.free ? (
+                      <Check className="h-5 w-5 shrink-0 text-primary" />
+                    ) : (
+                      <Minus className="h-5 w-5 shrink-0 text-muted-foreground/40" />
+                    )}
+                  </div>
+                  <div className="flex justify-center">
+                    <Check className="h-5 w-5 shrink-0 text-primary" />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <Card
+            className="border border-primary/20 bg-card p-4 shadow-md [backdrop-filter:none] [-webkit-backdrop-filter:none] sm:p-6 dark:bg-card"
+            data-testid="card-pricing-main"
+          >
+            <Button
+              asChild
+              variant="default"
+              className="w-full"
+              data-testid="button-pricing-cta"
+            >
+              <a
+                href="https://apps.apple.com/us/app/ballistiq-shooters-assistant/id6476917854"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("pricing.cta")}
+              </a>
+            </Button>
+          </Card>
+          </div>
         </AnimatedSection>
       </div>
     </section>

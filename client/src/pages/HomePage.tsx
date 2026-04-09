@@ -2,6 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { MetricsStrip } from "@/components/MetricsStrip";
 import { FeaturesSection } from "@/components/FeaturesSection";
+import { FeaturesPricingDivider } from "@/components/FeaturesPricingDivider";
 import { PricingSection } from "@/components/PricingSection";
 import { B2BSection } from "@/components/B2BSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
@@ -28,6 +29,7 @@ export function HomePage() {
       <HeroSection />
       <MetricsStrip />
       <FeaturesSection />
+      <FeaturesPricingDivider />
       <PricingSection />
       <B2BSection />
       <ReviewsSection />
