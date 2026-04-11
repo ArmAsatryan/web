@@ -15,6 +15,10 @@ export interface PageMetaOptions {
   index?: boolean;
   /** Override OG/Twitter image (absolute URL). */
   image?: string;
+  /** Optional meta keywords (legacy / minor crawlers). */
+  keywords?: string;
+  /** Open Graph / Twitter image alt text. */
+  imageAlt?: string;
 }
 
 function getOrCreateMeta(name: string, attr: "name" | "property"): HTMLMetaElement {
@@ -33,12 +37,30 @@ function setMeta(name: string, content: string, attr: "name" | "property" = "nam
   el.setAttribute("content", content);
 }
 
-export function setPageMeta({ title, description, path, index = true, image }: PageMetaOptions) {
+function removeMeta(name: string, attr: "name" | "property" = "name") {
+  const selector = attr === "name" ? `meta[name="${name}"]` : `meta[property="${name}"]`;
+  document.querySelector(selector)?.remove();
+}
+
+export function setPageMeta({
+  title,
+  description,
+  path,
+  index = true,
+  image,
+  keywords,
+  imageAlt,
+}: PageMetaOptions) {
   const canonical = path === "/" ? SITE_URL + "/" : SITE_URL + path;
   const imageUrl = image || `${SITE_URL}/og-image.png`;
 
   document.title = title;
   setMeta("description", description);
+  if (keywords !== undefined) {
+    setMeta("keywords", keywords);
+  } else {
+    removeMeta("keywords");
+  }
   setMeta("robots", index ? "index, follow" : "noindex, nofollow");
 
   let linkCanonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
@@ -53,6 +75,13 @@ export function setPageMeta({ title, description, path, index = true, image }: P
   setMeta("og:description", description, "property");
   setMeta("og:url", canonical, "property");
   setMeta("og:image", imageUrl, "property");
+  if (imageAlt) {
+    setMeta("og:image:alt", imageAlt, "property");
+    setMeta("twitter:image:alt", imageAlt);
+  } else {
+    removeMeta("og:image:alt", "property");
+    removeMeta("twitter:image:alt");
+  }
   setMeta("twitter:title", title);
   setMeta("twitter:description", description);
   setMeta("twitter:image", imageUrl);

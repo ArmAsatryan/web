@@ -1,6 +1,6 @@
-import { ArrowDown } from "lucide-react";
 import pricingPremiumBg from "@assets/pricing_premium_background.svg";
 import { Button } from "@/components/ui/button";
+import { ReticleFinderDialog } from "@/components/ReticleFinderDialog";
 import { USER_MANUAL_DOWNLOAD_URL } from "@/data/siteContent";
 import { useI18n } from "@/hooks/use-i18n";
 
@@ -25,30 +25,22 @@ export function FeaturesPricingDivider() {
           aria-hidden
         />
 
-        <div
-          className="mt-1 flex flex-col items-center gap-2 sm:mt-2 sm:gap-3"
-          aria-hidden
-        >
-          <ArrowDown
-            className="h-9 w-9 text-primary sm:h-11 sm:w-11"
-            strokeWidth={2.75}
-            aria-hidden
-          />
-        </div>
-
-        <Button
-          asChild
-          variant="outline"
-          className="mt-2 rounded-full border-2 border-foreground/80 bg-background/90 px-7 py-2.5 text-sm font-semibold text-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-background sm:mt-3 sm:px-8 sm:text-base dark:border-foreground/70 dark:bg-background/80"
-        >
-          <a
-            href={USER_MANUAL_DOWNLOAD_URL}
-            data-testid="link-features-pricing-manual"
-            rel="noopener noreferrer"
+        <div className="mt-2 flex w-full max-w-xl flex-col items-stretch gap-2 sm:mt-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
+          <Button
+            asChild
+            variant="outline"
+            className="rounded-full border-2 border-foreground/80 bg-background/90 px-7 py-2.5 text-sm font-semibold text-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-background sm:px-8 sm:text-base dark:border-foreground/70 dark:bg-background/80"
           >
-            {t("hero.manual")}
-          </a>
-        </Button>
+            <a
+              href={USER_MANUAL_DOWNLOAD_URL}
+              data-testid="link-features-pricing-manual"
+              rel="noopener noreferrer"
+            >
+              {t("hero.manual")}
+            </a>
+          </Button>
+          <ReticleFinderDialog />
+        </div>
       </div>
     </div>
   );

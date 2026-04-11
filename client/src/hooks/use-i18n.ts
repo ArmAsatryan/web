@@ -39,6 +39,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.garmin.top": "Get it on",
     "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Download User Manual",
+    "reticles.finder.cta": "Find available reticles ({count})",
+    "reticles.finder.title": "Available reticles",
+    "reticles.finder.searchPlaceholder": "Search by brand, model, reticle name…",
+    "reticles.finder.randomHint":
+      "Showing 10 random entries. Search the full database — punctuation and capitalization are ignored.",
+    "reticles.finder.noResults": "No reticles matched your search.",
+    "reticles.finder.resultsCount": "{count} matches (showing up to 200)",
 
     "features.title1": "Powerful",
     "features.title2": "Features",
@@ -148,6 +155,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.garmin.top": "Disponible sur",
     "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Télécharger le Manuel d'Utilisation",
+    "reticles.finder.cta": "Trouver des réticules disponibles ({count})",
+    "reticles.finder.title": "Réticules disponibles",
+    "reticles.finder.searchPlaceholder": "Rechercher par marque, modèle, réticule…",
+    "reticles.finder.randomHint":
+      "10 entrées au hasard. Recherchez dans toute la base — ponctuation et majuscules ignorées.",
+    "reticles.finder.noResults": "Aucun réticule ne correspond à votre recherche.",
+    "reticles.finder.resultsCount": "{count} résultats (jusqu'à 200 affichés)",
 
     "features.title1": "Fonctionnalités",
     "features.title2": "Puissantes",
@@ -257,6 +271,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.garmin.top": "Disponibile su",
     "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Scarica il Manuale Utente",
+    "reticles.finder.cta": "Trova reticoli disponibili ({count})",
+    "reticles.finder.title": "Reticoli disponibili",
+    "reticles.finder.searchPlaceholder": "Cerca per marca, modello, reticolo…",
+    "reticles.finder.randomHint":
+      "10 voci casuali. Cerca nell'intero database — punteggiatura e maiuscole ignorate.",
+    "reticles.finder.noResults": "Nessun reticolo corrisponde alla ricerca.",
+    "reticles.finder.resultsCount": "{count} corrispondenze (max 200)",
 
     "features.title1": "Funzionalit\u00e0",
     "features.title2": "Potenti",
@@ -366,6 +387,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.garmin.top": "Cons\u00edguelo en",
     "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Descargar Manual de Usuario",
+    "reticles.finder.cta": "Buscar retículas disponibles ({count})",
+    "reticles.finder.title": "Retículas disponibles",
+    "reticles.finder.searchPlaceholder": "Buscar por marca, modelo, retícula…",
+    "reticles.finder.randomHint":
+      "10 entradas aleatorias. Busca en toda la base — se ignoran puntuación y mayúsculas.",
+    "reticles.finder.noResults": "Ninguna retícula coincide con tu búsqueda.",
+    "reticles.finder.resultsCount": "{count} coincidencias (hasta 200)",
 
     "features.title1": "Funciones",
     "features.title2": "Potentes",
@@ -473,6 +501,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.garmin.top": "Ներբեռնեք",
     "hero.garmin.bottom": "Garmin IQ Store",
     "hero.manual": "Ներբեռնել օգտագործողի ձեռնարկը",
+    "reticles.finder.cta": "Գտնել հասանելի նշանաձևեր ({count})",
+    "reticles.finder.title": "Հասանելի նշանաձևեր",
+    "reticles.finder.searchPlaceholder": "Որոնում ըստ ապրանքանիշի, մոդելի, նշանաձևի…",
+    "reticles.finder.randomHint":
+      "Ցուցադրվում է 10 պատահական գրառում։ Որոնեք ամբողջ բազայում — կետադրությունը և մեծատառերը չեն հաշվվում։",
+    "reticles.finder.noResults": "Ձեր որոնմանը համապատասխան նշանաձև չի գտնվել։",
+    "reticles.finder.resultsCount": "{count} համընկնում (մինչև 200)",
 
     "features.title1": "Հզոր",
     "features.title2": "Հնարավորություններ",

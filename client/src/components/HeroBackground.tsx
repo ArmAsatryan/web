@@ -5,32 +5,27 @@ export function HeroBackground() {
       <div className="hero-noise absolute inset-0" />
 
       <div
-        className="hero-orb absolute w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.15]"
+        className="absolute h-[500px] w-[500px] rounded-full blur-[120px] opacity-[0.15]"
         style={{
           background: "radial-gradient(circle, hsl(188 100% 35%) 0%, transparent 70%)",
           top: "10%",
           left: "15%",
-          animationDuration: "45s",
         }}
       />
       <div
-        className="hero-orb absolute w-[400px] h-[400px] rounded-full blur-[100px] opacity-[0.1]"
+        className="absolute h-[400px] w-[400px] rounded-full blur-[100px] opacity-[0.1]"
         style={{
           background: "radial-gradient(circle, hsl(142 76% 40%) 0%, transparent 70%)",
           bottom: "20%",
           right: "10%",
-          animationDuration: "55s",
-          animationDelay: "-15s",
         }}
       />
       <div
-        className="hero-orb absolute w-[300px] h-[300px] rounded-full blur-[80px] opacity-[0.08]"
+        className="absolute h-[300px] w-[300px] rounded-full blur-[80px] opacity-[0.08]"
         style={{
           background: "radial-gradient(circle, hsl(188 100% 50%) 0%, transparent 70%)",
           top: "50%",
           right: "35%",
-          animationDuration: "35s",
-          animationDelay: "-25s",
         }}
       />
 
@@ -62,15 +57,9 @@ export function HeroBackground() {
           strokeDasharray="8 6"
           opacity="0.5"
         />
-        <circle cx="400" cy="400" r="3" fill="hsl(188 100% 45%)" filter="url(#glow)" opacity="0.8">
-          <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="800" cy="300" r="3" fill="hsl(188 100% 45%)" filter="url(#glow)" opacity="0.6">
-          <animate attributeName="opacity" values="0.3;0.9;0.3" dur="4s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="1100" cy="220" r="2.5" fill="hsl(142 76% 50%)" filter="url(#glow)" opacity="0.5">
-          <animate attributeName="opacity" values="0.2;0.8;0.2" dur="5s" repeatCount="indefinite" />
-        </circle>
+        <circle cx="400" cy="400" r="3" fill="hsl(188 100% 45%)" filter="url(#glow)" opacity="0.75" />
+        <circle cx="800" cy="300" r="3" fill="hsl(188 100% 45%)" filter="url(#glow)" opacity="0.6" />
+        <circle cx="1100" cy="220" r="2.5" fill="hsl(142 76% 50%)" filter="url(#glow)" opacity="0.5" />
       </svg>
     </div>
   );

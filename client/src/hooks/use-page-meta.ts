@@ -8,5 +8,13 @@ import { setPageMeta, type PageMetaOptions } from "@/lib/seo";
 export function usePageMeta(options: PageMetaOptions) {
   useEffect(() => {
     setPageMeta(options);
-  }, [options.title, options.description, options.path, options.index, options.image]);
+  }, [
+    options.title,
+    options.description,
+    options.path,
+    options.index,
+    options.image,
+    options.keywords,
+    options.imageAlt,
+  ]);
 }

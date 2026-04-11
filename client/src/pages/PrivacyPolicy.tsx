@@ -14,8 +14,9 @@ export function PrivacyPolicyPage() {
     path: "/privacy-policy",
   });
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="relative min-h-screen bg-background text-foreground">
       <PageBackground />
+      <div className="relative z-10">
       <Navbar />
       <main className="pt-24 sm:pt-28 pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -178,6 +179,7 @@ export function PrivacyPolicyPage() {
       </main>
       <Footer />
       <ScrollProgress />
+      </div>
     </div>
   );
 }

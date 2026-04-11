@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
+import { PageBackground } from "@/components/PageBackground";
 import { setPageMeta } from "@/lib/seo";
 
 export default function NotFound() {
@@ -13,8 +14,9 @@ export default function NotFound() {
     });
   }, []);
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
+    <div className="relative flex min-h-screen w-full items-center justify-center bg-background text-foreground">
+      <PageBackground />
+      <Card className="relative z-10 mx-4 w-full max-w-md">
         <CardContent className="pt-6">
           <div className="flex mb-4 gap-2">
             <AlertCircle className="h-8 w-8 text-red-500" />
