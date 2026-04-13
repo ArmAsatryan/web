@@ -25,6 +25,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
+import LinearProgress from '@mui/material/LinearProgress';
 import PersonIcon from '@mui/icons-material/Person';
 import TranslateIcon from '@mui/icons-material/Translate';
 import SendIcon from '@mui/icons-material/Send';
@@ -50,16 +51,43 @@ import type { ScheduledNotification } from '../types';
 import PageHeader from '../components/PageHeader';
 import ConfirmDialog from '../components/ConfirmDialog';
 
-/** Backend expects yyyy-MM-dd'T'HH:mm:ss; datetime-local omits seconds. */
-function toScheduledAtPayload(localValue: string): string {
+/** datetime-local is local wall time; backend stores and compares UTC instants. */
+function localDatetimeToUtcIso(localValue: string): string {
   if (!localValue) return '';
-  return localValue.length === 16 ? `${localValue}:00` : localValue;
+  const normalized = localValue.length === 16 ? `${localValue}:00` : localValue;
+  const d = new Date(normalized);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toISOString();
 }
 
-function scheduledAtToDatetimeLocal(iso: string): string {
+function isoUtcToDatetimeLocal(iso: string): string {
   if (!iso) return '';
-  const s = iso.replace('Z', '').replace(/\.\d{3}$/, '');
-  return s.length >= 16 ? s.slice(0, 16) : s;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function formatScheduledAtDisplay(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString();
+}
+
+/** FCM counts are per device token (not deduplicated users). */
+function formatDeviceDeliverySummary(row: ScheduledNotification): { primary: string; secondary?: string; progress: number | null } {
+  if (row.status !== 'SENT' || row.recipientsTotal == null) {
+    return { primary: '—', progress: null };
+  }
+  const t = row.recipientsTotal;
+  const s = row.recipientsSuccess ?? 0;
+  const f = row.recipientsFailed ?? 0;
+  if (t === 0) {
+    return { primary: 'No devices', progress: 100 };
+  }
+  const secondary = f > 0 ? `${f} failed` : undefined;
+  const progress = Math.min(100, Math.round((s / t) * 100));
+  return { primary: `${s} / ${t} devices`, secondary, progress };
 }
 
 function extractApiError(e: unknown): string {
@@ -168,6 +196,12 @@ export default function Notifications() {
 
   const handleScheduleByLanguage = async () => {
     if (!language.trim() || !title.trim() || !scheduledAtLocal.trim()) return;
+    const scheduledAtIso = localDatetimeToUtcIso(scheduledAtLocal.trim());
+    if (!scheduledAtIso) {
+      setScheduleMessage({ type: 'error', text: 'Invalid date or time.' });
+      setConfirmOpen(null);
+      return;
+    }
     setScheduleMessage(null);
     setScheduleLoading(true);
     try {
@@ -175,7 +209,7 @@ export default function Notifications() {
         language: language.trim(),
         title: title.trim(),
         body: body.trim() || undefined,
-        scheduledAt: toScheduledAtPayload(scheduledAtLocal.trim()),
+        scheduledAt: scheduledAtIso,
       });
       setScheduleMessage({ type: 'success', text: 'Notification scheduled.' });
       setScheduledAtLocal('');
@@ -191,14 +225,16 @@ export default function Notifications() {
   const openEditTime = (row: ScheduledNotification) => {
     patchMutation.reset();
     setEditTimeRow(row);
-    setEditTimeLocal(scheduledAtToDatetimeLocal(row.scheduledAt));
+    setEditTimeLocal(isoUtcToDatetimeLocal(row.scheduledAt));
   };
 
   const handleSaveEditTime = () => {
     if (!editTimeRow || !editTimeLocal.trim()) return;
+    const scheduledAtIso = localDatetimeToUtcIso(editTimeLocal.trim());
+    if (!scheduledAtIso) return;
     patchMutation.mutate({
       id: editTimeRow.id,
-      scheduledAt: toScheduledAtPayload(editTimeLocal.trim()),
+      scheduledAt: scheduledAtIso,
     });
   };
 
@@ -386,7 +422,8 @@ export default function Notifications() {
                 Schedule for later
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Same title and body as above. Choose a date and time in the future; seconds default to :00.
+                Same title and body as above. Time is your device&apos;s local time; the server runs the job at that
+                instant (UTC), so it matches the clock you see here.
               </Typography>
               <TextField
                 fullWidth
@@ -436,6 +473,9 @@ export default function Notifications() {
                     <MenuItem value="CANCELLED">CANCELLED</MenuItem>
                   </Select>
                 </FormControl>
+                <Typography variant="caption" sx={{ color: 'text.secondary', alignSelf: 'center', maxWidth: 360 }}>
+                  Delivery counts are FCM device tokens (a user can have several). Shown after the job finishes.
+                </Typography>
               </Box>
               {scheduledTabError && (
                 <Alert severity="error" onClose={() => setScheduledTabError(null)}>
@@ -451,6 +491,7 @@ export default function Notifications() {
                       <TableCell>Title</TableCell>
                       <TableCell>Status</TableCell>
                       <TableCell>Scheduled at</TableCell>
+                      <TableCell sx={{ minWidth: 160 }}>Delivery (devices)</TableCell>
                       <TableCell>Details</TableCell>
                       <TableCell align="right">Actions</TableCell>
                     </TableRow>
@@ -458,12 +499,12 @@ export default function Notifications() {
                   <TableBody>
                     {scheduledListLoading && (
                       <TableRow>
-                        <TableCell colSpan={7}>Loading…</TableCell>
+                        <TableCell colSpan={8}>Loading…</TableCell>
                       </TableRow>
                     )}
                     {!scheduledListLoading && scheduledList.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={7}>
+                        <TableCell colSpan={8}>
                           <Typography variant="body2" color="text.secondary">
                             No scheduled notifications.
                           </Typography>
@@ -479,7 +520,32 @@ export default function Notifications() {
                           <TableCell>
                             <Chip size="small" label={row.status} color={statusChipColor(row.status)} variant="outlined" />
                           </TableCell>
-                          <TableCell>{row.scheduledAt}</TableCell>
+                          <TableCell>{formatScheduledAtDisplay(row.scheduledAt)}</TableCell>
+                          <TableCell>
+                            {(() => {
+                              const d = formatDeviceDeliverySummary(row);
+                              return (
+                                <Box sx={{ minWidth: 140 }}>
+                                  <Typography variant="caption" display="block">
+                                    {d.primary}
+                                  </Typography>
+                                  {d.secondary != null && (
+                                    <Typography variant="caption" color="error" display="block">
+                                      {d.secondary}
+                                    </Typography>
+                                  )}
+                                  {d.progress != null && (
+                                    <LinearProgress
+                                      variant="determinate"
+                                      value={d.progress}
+                                      sx={{ mt: 0.5, height: 6, borderRadius: 1 }}
+                                      color={d.progress >= 100 ? 'success' : 'primary'}
+                                    />
+                                  )}
+                                </Box>
+                              );
+                            })()}
+                          </TableCell>
                           <TableCell sx={{ maxWidth: 280 }}>
                             {row.status === 'FAILED' && row.errorMessage ? (
                               <Tooltip title={row.errorMessage}>

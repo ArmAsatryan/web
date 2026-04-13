@@ -82,6 +82,7 @@ export interface AdminScheduleLanguageNotificationRequest {
   title: string;
   body?: string;
   data?: Record<string, string>;
+  /** ISO-8601 UTC instant, e.g. from `new Date(local).toISOString()`. */
   scheduledAt: string;
 }
 
@@ -98,12 +99,17 @@ export interface ScheduledNotification {
   title: string;
   body?: string;
   data?: Record<string, string>;
+  /** ISO-8601 UTC instant from the API. */
   scheduledAt: string;
   status: string;
   createdAt: string;
   updatedAt: string;
   sentAt?: string;
   errorMessage?: string;
+  /** FCM tokens targeted (devices), not unique users. Set when status is SENT. */
+  recipientsTotal?: number | null;
+  recipientsSuccess?: number | null;
+  recipientsFailed?: number | null;
 }
 
 // Admin bullet & caliber (BallisticBE AdminRestController)
