@@ -88,6 +88,28 @@ export function sendNotificationToLanguage(body: import('../types').AdminNotific
   return api.post('/admin/api/notifications/language', body);
 }
 
+export function scheduleNotificationByLanguage(body: import('../types').AdminScheduleLanguageNotificationRequest) {
+  return api.post<import('../types').ScheduledNotification>('/admin/api/notifications/language/schedule', body);
+}
+
+export function listScheduledNotifications(status?: string) {
+  return api.get<import('../types').ScheduledNotification[]>('/admin/api/notifications/scheduled', {
+    params: status ? { status } : undefined,
+  });
+}
+
+export function patchScheduledNotificationTime(id: number, body: import('../types').AdminScheduledNotificationPatchRequest) {
+  return api.patch<import('../types').ScheduledNotification>(`/admin/api/notifications/scheduled/${id}`, body);
+}
+
+export function cancelScheduledNotification(id: number) {
+  return api.post(`/admin/api/notifications/scheduled/${id}/cancel`);
+}
+
+export function deleteScheduledNotification(id: number) {
+  return api.delete(`/admin/api/notifications/scheduled/${id}`);
+}
+
 // Bullet create (AdminRestController)
 export function createBullet(body: import('../types').BulletCreateRequest) {
   return api.post<import('../types').Bullet>('/admin/api/bullets', body);

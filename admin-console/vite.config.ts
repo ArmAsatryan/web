@@ -10,7 +10,9 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 5001,
+    // Default 3001 so `npm run dev:all` can run main app on 3000 at the same time.
+    // Admin only on 3000: ADMIN_CONSOLE_DEV_PORT=3000 npm run dev
+    port: parseInt(process.env.ADMIN_CONSOLE_DEV_PORT ?? '3001', 10),
     allowedHosts: ['.replit.dev', '.repl.co'],
   },
 })

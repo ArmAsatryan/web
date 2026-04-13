@@ -76,6 +76,36 @@ export interface AdminNotificationLanguageRequest {
   data?: Record<string, string>;
 }
 
+/** Request for POST /admin/api/notifications/language/schedule */
+export interface AdminScheduleLanguageNotificationRequest {
+  language: string;
+  title: string;
+  body?: string;
+  data?: Record<string, string>;
+  scheduledAt: string;
+}
+
+/** PATCH /admin/api/notifications/scheduled/{id} */
+export interface AdminScheduledNotificationPatchRequest {
+  scheduledAt: string;
+}
+
+/** Row from GET /admin/api/notifications/scheduled */
+export interface ScheduledNotification {
+  id: number;
+  adminUserId: number;
+  language: string;
+  title: string;
+  body?: string;
+  data?: Record<string, string>;
+  scheduledAt: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  sentAt?: string;
+  errorMessage?: string;
+}
+
 // Admin bullet & caliber (BallisticBE AdminRestController)
 export interface CaliberDiameter {
   id: number;
