@@ -6,7 +6,8 @@ import { useMagneticButton } from "@/hooks/use-magnetic-button";
 import { HeroBackground } from "./HeroBackground";
 import bgImage from "@assets/Background1_1770884231570.jpg";
 import garminIqLogo from "@assets/Garmin_Connect_IQ_logo.png";
-import homeHeroVisual from "@assets/home_hero_visual.svg";
+
+const HERO_YOUTUBE_VIDEO_ID = "PmFLgurcXHQ";
 
 /** Shared layout for App Store / Google Play / Garmin hero CTAs */
 const heroStoreButtonClass =
@@ -35,17 +36,22 @@ function MagneticWrapper({
   );
 }
 
-function HeroVisual() {
+function HeroVideo({ title }: { title: string }) {
   return (
-    <img
-      src={homeHeroVisual}
-      alt="BALLISTiQ app on phone and Garmin watch"
-      width={1179}
-      height={2556}
-      className="mx-auto h-auto w-full max-h-[min(52vh,28rem)] object-contain object-center [filter:drop-shadow(0_20px_45px_rgba(0,0,0,0.45))] sm:max-h-[min(56vh,32rem)] lg:max-h-[min(78vh,44rem)] xl:max-h-[min(82vh,48rem)]"
-      draggable={false}
-      data-testid="hero-visual-svg"
-    />
+    <div
+      className="mx-auto w-full overflow-hidden rounded-xl border border-white/10 bg-black/25 shadow-[0_20px_45px_rgba(0,0,0,0.45)] backdrop-blur-[2px]"
+      data-testid="hero-youtube"
+    >
+      <div className="relative aspect-video w-full">
+        <iframe
+          className="absolute inset-0 h-full w-full"
+          src={`https://www.youtube.com/embed/${HERO_YOUTUBE_VIDEO_ID}?rel=0&modestbranding=1`}
+          title={title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    </div>
   );
 }
 
@@ -82,7 +88,7 @@ export function HeroSection() {
             </p>
 
             <div className="mb-6 w-full lg:hidden">
-              <HeroVisual />
+              <HeroVideo title={t("hero.video.iframeTitle")} />
             </div>
 
             {/* Grows on phone/tablet so store CTAs sit toward the bottom of the viewport */}
@@ -173,7 +179,7 @@ export function HeroSection() {
           </div>
 
           <div className="hidden min-w-0 flex-1 justify-center lg:flex lg:max-w-[min(100%,28rem)] xl:max-w-[min(100%,32rem)] 2xl:max-w-[min(100%,36rem)]">
-            <HeroVisual />
+            <HeroVideo title={t("hero.video.iframeTitle")} />
           </div>
         </div>
       </div>
