@@ -7,7 +7,11 @@ import { HeroBackground } from "./HeroBackground";
 import bgImage from "@assets/Background1_1770884231570.jpg";
 import garminIqLogo from "@assets/Garmin_Connect_IQ_logo.png";
 
-const HERO_YOUTUBE_VIDEO_ID = "PmFLgurcXHQ";
+const HERO_YOUTUBE_VIDEO_ID = "J4DlqiyZ69U";
+
+/** Params tuned for a clean player; larger iframe width (below) helps YouTube pick higher rungs. */
+const HERO_YOUTUBE_EMBED_PARAMS =
+  "rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&theme=dark&color=white";
 
 /** Shared layout for App Store / Google Play / Garmin hero CTAs */
 const heroStoreButtonClass =
@@ -45,7 +49,7 @@ function HeroVideo({ title }: { title: string }) {
       <div className="relative aspect-video w-full">
         <iframe
           className="absolute inset-0 h-full w-full"
-          src={`https://www.youtube.com/embed/${HERO_YOUTUBE_VIDEO_ID}?rel=0&modestbranding=1`}
+          src={`https://www.youtube.com/embed/${HERO_YOUTUBE_VIDEO_ID}?${HERO_YOUTUBE_EMBED_PARAMS}`}
           title={title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
@@ -178,7 +182,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="hidden min-w-0 flex-1 justify-center lg:flex lg:max-w-[min(100%,28rem)] xl:max-w-[min(100%,32rem)] 2xl:max-w-[min(100%,36rem)]">
+          <div className="hidden min-w-0 flex-1 justify-center lg:flex lg:max-w-[min(100%,32rem)] xl:max-w-[min(100%,38rem)] 2xl:max-w-[min(100%,44rem)]">
             <HeroVideo title={t("hero.video.iframeTitle")} />
           </div>
         </div>
