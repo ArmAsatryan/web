@@ -7,6 +7,7 @@ import MapIcon from '@mui/icons-material/Map';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import AppleIcon from '@mui/icons-material/Apple';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import AppBar from '@mui/material/AppBar';
@@ -42,6 +43,10 @@ const nav = [
   { path: '/create-vendor', label: 'Create vendor', icon: <StorefrontIcon /> },
 ];
 
+const secondaryNav = [
+  { path: '/app-store', label: 'App Store Connect', icon: <AppleIcon /> },
+];
+
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/': 'Users',
@@ -51,6 +56,8 @@ const pageTitles: Record<string, string> = {
   '/create-bullet': 'Create bullet',
   '/create-caliber': 'Create caliber',
   '/create-vendor': 'Create vendor',
+  '/app-store': 'App Store Connect',
+  '/app-store/credentials': 'App Store Connect credentials',
 };
 
 /** Description under the AppBar title (per route). */
@@ -64,7 +71,27 @@ const pageSubtitles: Record<string, string> = {
   '/create-bullet': 'Add a new bullet with name, caliber, weight, length and ballistic coefficient',
   '/create-caliber': 'Add a new caliber diameter (e.g. 17 WSM, 0.17)',
   '/create-vendor': 'Add a new vendor with name and optional image URL',
+  '/app-store': 'Manage your App Store Connect apps, versions and localized metadata',
+  '/app-store/credentials': 'Store the issuer ID, key ID and .p8 signing key used to sign JWTs',
 };
+
+/** Prefix-based titles for dynamic nested routes. First match wins. */
+const pageTitlePrefixes: Array<{ prefix: string; title: string; subtitle?: string }> = [
+  {
+    prefix: '/app-store/apps/',
+    title: 'App Store Connect',
+    subtitle: 'Manage versions, metadata and App Store submissions',
+  },
+];
+
+function resolveTitles(pathname: string): { title: string; subtitle?: string } {
+  if (pageTitles[pathname]) {
+    return { title: pageTitles[pathname], subtitle: pageSubtitles[pathname] };
+  }
+  const prefix = pageTitlePrefixes.find((p) => pathname.startsWith(p.prefix));
+  if (prefix) return { title: prefix.title, subtitle: prefix.subtitle };
+  return { title: 'Dashboard' };
+}
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -74,14 +101,73 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { auth, logout } = useAuth();
 
   const currentWidth = collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH;
-  const pageTitle = pageTitles[location.pathname] || 'Dashboard';
-  const pageSubtitle = pageSubtitles[location.pathname];
+  const { title: pageTitle, subtitle: pageSubtitle } = resolveTitles(location.pathname);
   /** Pages that manage their own internal scrolling and must fill the viewport. */
   const isFullHeightPage = location.pathname === '/assistant-detections';
 
   const userInitial = auth.user?.name?.charAt(0)?.toUpperCase()
     || auth.user?.emailAddress?.charAt(0)?.toUpperCase()
     || 'A';
+
+  const isNavActive = (itemPath: string) => {
+    if (itemPath === '/') return location.pathname === '/';
+    return location.pathname === itemPath || location.pathname.startsWith(`${itemPath}/`);
+  };
+
+  const renderNavItem = (
+    item: { path: string; label: string; icon: React.ReactNode },
+    isMobile: boolean,
+  ) => {
+    const isActive = isNavActive(item.path);
+    return (
+      <ListItemButton
+        key={item.path}
+        selected={isActive}
+        onClick={() => {
+          navigate(item.path);
+          setMobileOpen(false);
+        }}
+        sx={{
+          borderRadius: '8px',
+          mb: 0.5,
+          px: collapsed && !isMobile ? 1.5 : 2,
+          py: 1,
+          minHeight: 44,
+          justifyContent: collapsed && !isMobile ? 'center' : 'flex-start',
+          color: isActive ? '#fff' : SIDEBAR_TEXT,
+          bgcolor: isActive ? alpha(SIDEBAR_ACTIVE, 0.2) : 'transparent',
+          '&:hover': {
+            bgcolor: isActive ? alpha(SIDEBAR_ACTIVE, 0.25) : alpha('#fff', 0.06),
+          },
+          '&.Mui-selected': {
+            bgcolor: alpha(SIDEBAR_ACTIVE, 0.2),
+            '&:hover': { bgcolor: alpha(SIDEBAR_ACTIVE, 0.25) },
+          },
+        }}
+      >
+        <Tooltip title={collapsed && !isMobile ? item.label : ''} placement="right">
+          <ListItemIcon
+            sx={{
+              color: isActive ? SIDEBAR_ACTIVE : SIDEBAR_TEXT,
+              minWidth: collapsed && !isMobile ? 0 : 40,
+              justifyContent: 'center',
+            }}
+          >
+            {item.icon}
+          </ListItemIcon>
+        </Tooltip>
+        {(!collapsed || isMobile) && (
+          <ListItemText
+            primary={item.label}
+            primaryTypographyProps={{
+              fontSize: '0.8125rem',
+              fontWeight: isActive ? 600 : 400,
+            }}
+          />
+        )}
+      </ListItemButton>
+    );
+  };
 
   const sidebarContent = (isMobile: boolean) => (
     <Box
@@ -155,57 +241,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Divider sx={{ borderColor: alpha('#fff', 0.08), mx: 2 }} />
 
       <List sx={{ flex: 1, px: 1.5, py: 2 }}>
-        {nav.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <ListItemButton
-              key={item.path}
-              selected={isActive}
-              onClick={() => {
-                navigate(item.path);
-                setMobileOpen(false);
-              }}
-              sx={{
-                borderRadius: '8px',
-                mb: 0.5,
-                px: collapsed && !isMobile ? 1.5 : 2,
-                py: 1,
-                minHeight: 44,
-                justifyContent: collapsed && !isMobile ? 'center' : 'flex-start',
-                color: isActive ? '#fff' : SIDEBAR_TEXT,
-                bgcolor: isActive ? alpha(SIDEBAR_ACTIVE, 0.2) : 'transparent',
-                '&:hover': {
-                  bgcolor: isActive ? alpha(SIDEBAR_ACTIVE, 0.25) : alpha('#fff', 0.06),
-                },
-                '&.Mui-selected': {
-                  bgcolor: alpha(SIDEBAR_ACTIVE, 0.2),
-                  '&:hover': { bgcolor: alpha(SIDEBAR_ACTIVE, 0.25) },
-                },
-              }}
-            >
-              <Tooltip title={collapsed && !isMobile ? item.label : ''} placement="right">
-                <ListItemIcon
-                  sx={{
-                    color: isActive ? SIDEBAR_ACTIVE : SIDEBAR_TEXT,
-                    minWidth: collapsed && !isMobile ? 0 : 40,
-                    justifyContent: 'center',
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-              </Tooltip>
-              {(!collapsed || isMobile) && (
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    fontSize: '0.8125rem',
-                    fontWeight: isActive ? 600 : 400,
-                  }}
-                />
-              )}
-            </ListItemButton>
-          );
-        })}
+        {nav.map((item) => renderNavItem(item, isMobile))}
+        <Divider sx={{ borderColor: alpha('#fff', 0.08), my: 1.5 }} />
+        {secondaryNav.map((item) => renderNavItem(item, isMobile))}
       </List>
 
       <Divider sx={{ borderColor: alpha('#fff', 0.08), mx: 2 }} />

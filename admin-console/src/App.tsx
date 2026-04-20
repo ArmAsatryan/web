@@ -12,6 +12,11 @@ import Users from './pages/Users';
 import CreateBullet from './pages/CreateBullet';
 import CreateCaliber from './pages/CreateCaliber';
 import CreateVendor from './pages/CreateVendor';
+import AppListPage from './features/app-store/AppListPage';
+import AppStoreCredentialsPage from './features/app-store/AppStoreCredentialsPage';
+import AppDetailsPage from './features/app-store/AppDetailsPage';
+import ManageContentPage from './features/app-store/ManageContentPage';
+import SubmitForReviewPage from './features/app-store/SubmitForReviewPage';
 
 const queryClient = new QueryClient();
 
@@ -103,6 +108,56 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <CreateVendor />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app-store"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <AppListPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app-store/credentials"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <AppStoreCredentialsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app-store/apps/:appId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <AppDetailsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app-store/apps/:appId/versions/:versionId/content"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ManageContentPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app-store/apps/:appId/versions/:versionId/submit"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <SubmitForReviewPage />
             </Layout>
           </ProtectedRoute>
         }
