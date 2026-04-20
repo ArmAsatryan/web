@@ -12,7 +12,8 @@
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "db:push": "drizzle-kit push",
-    "deploy": "npm run build && npx wrangler pages deploy dist/public"
+    "deploy": "npm run build && npx wrangler pages deploy dist/public",
+    "deploy:worker": "npm run build && npx wrangler deploy"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

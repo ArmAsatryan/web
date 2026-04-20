@@ -1,9 +1,13 @@
 # Deploy to Cloudflare Pages (ballistiq.xyz)
 
-## Deploy command (fix "run wrangler pages deploy instead")
+## Deploy command (Workers vs Pages)
 
-Set **Deploy command** to: `npx wrangler pages deploy dist/public`  
-Do **not** use `npx wrangler deploy` (Workers) — use **pages deploy**.
+This repo’s `wrangler.toml` is set up so **`wrangler deploy` (Workers + static assets)** works after `npm run build`: it uploads `dist/public` and uses a tiny Worker for SPA fallbacks (same idea as `_redirects` on Pages).
+
+- **Cloudflare Workers** (Git integration that runs `wrangler deploy`): use **Build command** `npm run build` and **no** separate deploy step if your pipeline runs `wrangler deploy` automatically, or set deploy to `npx wrangler deploy`.
+- **Cloudflare Pages** (recommended if your project is a **Pages** project): use **`npx wrangler pages deploy dist/public`** after `npm run build`. Do **not** point a Pages-only project at `wrangler deploy` unless you intend to use Workers + assets as above.
+
+If you see **“Missing entry-point to Worker script or to assets directory”**, the build ran **`wrangler deploy`** without a valid `wrangler.toml` `main` + `[assets]` (this repo now defines both).
 
 ---
 

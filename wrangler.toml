@@ -1,14 +1,15 @@
-# Cloudflare Pages – deploy with: npm run deploy
-# Or: npx wrangler pages deploy dist/public
-# First time: npx wrangler pages project create ballistiq (or your project name)
+# Cloudflare: static site from `npm run build` (client + admin-console → dist/public).
 #
-# Git deploy / Wrangler Pages deploy: Build command = "npm run build", then "npx wrangler pages deploy dist/public"
-# Custom domain: Dashboard → Custom domains → Add ballistiq.xyz (see DEPLOY.md)
-# Note: Pages config does not support "account_id" — do not add it.
+# - Workers (Git "Deploy to Workers" / `wrangler deploy`): uses `main` + [assets] below.
+# - Pages: run `npx wrangler pages deploy dist/public` (output path is explicit; see DEPLOY.md).
+#
+# `pages_build_output_dir` alone is not enough for `wrangler deploy` — Wrangler requires
+# either `main` or `[assets].directory` (see Workers static assets docs).
 
 name = "web"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-11-01"
+main = "workers/static-site.ts"
 
-# Static output from npm run build (client + admin-console → dist/public)
-# For Pages Git deploy: set Build output directory to "dist/public" in Dashboard if not using this file.
-pages_build_output_dir = "./dist/public"
+[assets]
+directory = "./dist/public"
+binding = "ASSETS"
