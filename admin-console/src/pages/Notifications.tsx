@@ -3,8 +3,11 @@ import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -14,112 +17,211 @@ import Tabs from '@mui/material/Tabs';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableContainer from '@mui/material/TableContainer';
 import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
 import LinearProgress from '@mui/material/LinearProgress';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+import Tooltip from '@mui/material/Tooltip';
 import PersonIcon from '@mui/icons-material/Person';
-import TranslateIcon from '@mui/icons-material/Translate';
 import SendIcon from '@mui/icons-material/Send';
 import ScheduleIcon from '@mui/icons-material/Schedule';
-import EditCalendarIcon from '@mui/icons-material/EditCalendar';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import HistoryIcon from '@mui/icons-material/History';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import { alpha } from '@mui/material/styles';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  cancelScheduledNotification,
-  deleteScheduledNotification,
+  cancelNotificationBatch,
+  deleteNotificationBatch,
   getAdminUserById,
   getLocales,
+  getNotificationHistory,
   getUsers,
-  listScheduledNotifications,
-  patchScheduledNotificationTime,
-  scheduleNotificationByLanguage,
-  sendNotificationToLanguage,
+  scheduleNotificationBatch,
+  sendNotificationBatch,
   sendNotificationToUser,
+  translateNotification,
 } from '../api/api';
-import type { ScheduledNotification } from '../types';
+import type { AdminNotificationBatchLanguagePayload, AdminNotificationBatchResponse } from '../types';
 import PageHeader from '../components/PageHeader';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { languageCodeToLabel, localeTagToLabel } from '../utils/languageDisplay';
 
-/** datetime-local is local wall time; backend stores and compares UTC instants. */
-function localDatetimeToUtcIso(localValue: string): string {
-  if (!localValue) return '';
-  const normalized = localValue.length === 16 ? `${localValue}:00` : localValue;
-  const d = new Date(normalized);
-  if (Number.isNaN(d.getTime())) return '';
-  return d.toISOString();
-}
-
-function isoUtcToDatetimeLocal(iso: string): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function formatScheduledAtDisplay(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString();
-}
-
-/** FCM counts are per device token (not deduplicated users). */
-function formatDeviceDeliverySummary(row: ScheduledNotification): { primary: string; secondary?: string; progress: number | null } {
-  if (row.status !== 'SENT' || row.recipientsTotal == null) {
-    return { primary: '—', progress: null };
-  }
-  const t = row.recipientsTotal;
-  const s = row.recipientsSuccess ?? 0;
-  const f = row.recipientsFailed ?? 0;
-  if (t === 0) {
-    return { primary: 'No devices', progress: 100 };
-  }
-  const secondary = f > 0 ? `${f} failed` : undefined;
-  const progress = Math.min(100, Math.round((s / t) * 100));
-  return { primary: `${s} / ${t} devices`, secondary, progress };
-}
+const DEFAULT_LANG = 'en';
 
 function extractApiError(e: unknown): string {
   const err = e as { response?: { data?: { message?: string; debugMessage?: string } }; message?: string };
   return err.response?.data?.debugMessage ?? err.response?.data?.message ?? err.message ?? 'Request failed';
 }
 
-export default function Notifications() {
-  const [language, setLanguage] = useState('');
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+/** Parse datetime-local value into yyyy-MM-dd and HH:mm in the browser's local timezone. */
+function localDatetimeToParts(localValue: string): { scheduledDate: string; scheduledWallTime: string } | null {
+  if (!localValue) return null;
+  const normalized = localValue.length === 16 ? `${localValue}:00` : localValue;
+  const d = new Date(normalized);
+  if (Number.isNaN(d.getTime())) return null;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const scheduledDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const scheduledWallTime = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return { scheduledDate, scheduledWallTime };
+}
 
-  const [userId, setUserId] = useState<string>('');
+function formatBatchDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString();
+}
+
+function DevicePreviewPanel(props: {
+  title: string;
+  body: string;
+  imageUrl: string;
+  tab: 'initial' | 'expanded';
+}) {
+  const { title, body, imageUrl, tab } = props;
+  const showExpanded = tab === 'expanded';
+  return (
+    <Box
+      sx={{
+        position: { md: 'sticky' },
+        top: { md: 16 },
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 2,
+        bgcolor: 'background.paper',
+        overflow: 'hidden',
+      }}
+    >
+      <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="subtitle2" fontWeight={600}>
+          Preview
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          Approximate layout only — verify on a device.
+        </Typography>
+      </Box>
+      <Box sx={{ p: 2 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 1.5,
+            bgcolor: alpha('#000', 0.06),
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="subtitle2" fontWeight={700} noWrap>
+                {title || 'Notification title'}
+              </Typography>
+              {showExpanded && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {body || 'Notification text'}
+                </Typography>
+              )}
+            </Box>
+            {imageUrl ? (
+              <Box
+                component="img"
+                src={imageUrl}
+                alt=""
+                sx={{ width: 40, height: 40, borderRadius: 1, objectFit: 'cover' }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 1,
+                  bgcolor: 'action.hover',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ImageOutlinedIcon color="disabled" fontSize="small" />
+              </Box>
+            )}
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
+  );
+}
+
+function buildLanguagePayloads(
+  enTitle: string,
+  enBody: string,
+  imageUrl: string,
+  extraLangs: string[],
+  translations: Record<string, { title: string; body: string }>
+): AdminNotificationBatchLanguagePayload[] {
+  const langs: AdminNotificationBatchLanguagePayload[] = [
+    {
+      languageCode: DEFAULT_LANG,
+      title: enTitle.trim(),
+      body: enBody.trim() || undefined,
+      imageUrl: imageUrl.trim() || undefined,
+    },
+  ];
+  for (const code of extraLangs) {
+    const t = translations[code];
+    if (!t?.title?.trim()) continue;
+    langs.push({
+      languageCode: code,
+      title: t.title.trim(),
+      body: t.body?.trim() || undefined,
+      imageUrl: imageUrl.trim() || undefined,
+    });
+  }
+  return langs;
+}
+
+export default function Notifications() {
+  const [activeTab, setActiveTab] = useState(0);
+
+  /** Tab 0 — send to user */
+  const [userId, setUserId] = useState('');
   const [userTitle, setUserTitle] = useState('');
   const [userBody, setUserBody] = useState('');
   const [userLoading, setUserLoading] = useState(false);
   const [userMessage, setUserMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [confirmUser, setConfirmUser] = useState(false);
 
-  const [activeTab, setActiveTab] = useState(0);
-  const [confirmOpen, setConfirmOpen] = useState<'user' | 'language' | 'schedule' | null>(null);
-  const [scheduledAtLocal, setScheduledAtLocal] = useState('');
-  const [scheduleLoading, setScheduleLoading] = useState(false);
-  const [scheduleMessage, setScheduleMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [scheduledStatusFilter, setScheduledStatusFilter] = useState<string>('');
-  const [editTimeRow, setEditTimeRow] = useState<ScheduledNotification | null>(null);
-  const [editTimeLocal, setEditTimeLocal] = useState('');
-  const [scheduledConfirm, setScheduledConfirm] = useState<{ action: 'cancel' | 'delete'; id: number } | null>(null);
+  /** Tab 1 — wizard */
+  const [activeStep, setActiveStep] = useState(0);
+  const [previewTab, setPreviewTab] = useState<'initial' | 'expanded'>('initial');
+  const [enTitle, setEnTitle] = useState('');
+  const [enBody, setEnBody] = useState('');
+  const [enImageUrl, setEnImageUrl] = useState('');
+  const [extraLangs, setExtraLangs] = useState<string[]>([]);
+  const [translations, setTranslations] = useState<Record<string, { title: string; body: string }>>({});
+  const [langToAdd, setLangToAdd] = useState('');
+  const [translatingAll, setTranslatingAll] = useState(false);
+  const [translateProgress, setTranslateProgress] = useState(0);
+  const [scheduleMode, setScheduleMode] = useState<'now' | 'later'>('now');
+  const [scheduledLocal, setScheduledLocal] = useState('');
+  const [batchLoading, setBatchLoading] = useState(false);
+  const [batchMessage, setBatchMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [confirmSend, setConfirmSend] = useState(false);
+  const [confirmSchedule, setConfirmSchedule] = useState(false);
 
   const queryClient = useQueryClient();
-
   const { data: locales } = useQuery({ queryKey: ['locales'], queryFn: async () => (await getLocales()).data });
   const { data: usersData } = useQuery({
     queryKey: ['users-notifications'],
@@ -134,22 +236,18 @@ export default function Notifications() {
     enabled: !!selectedUserIdNum && selectedUserIdNum > 0 && Number.isInteger(selectedUserIdNum),
   });
 
-  const handleSendByLanguage = async () => {
-    if (!language.trim() || !title.trim()) return;
-    setMessage(null);
-    setLoading(true);
-    try {
-      await sendNotificationToLanguage({ language: language.trim(), title: title.trim(), body: body.trim() || undefined });
-      setMessage({ type: 'success', text: 'Notification sent to language group.' });
-      setTitle('');
-      setBody('');
-    } catch (e: unknown) {
-      setMessage({ type: 'error', text: extractApiError(e) });
-    } finally {
-      setLoading(false);
-      setConfirmOpen(null);
-    }
-  };
+  const { data: history = [], isLoading: historyLoading } = useQuery({
+    queryKey: ['notification-batch-history'],
+    queryFn: async () => (await getNotificationHistory()).data,
+    enabled: activeTab === 2,
+  });
+
+  const availableToAdd = useMemo(() => {
+    const list = locales ?? [];
+    return list.filter((l) => l !== DEFAULT_LANG && !extraLangs.includes(l));
+  }, [locales, extraLangs]);
+
+  const adminZoneId = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC', []);
 
   const handleSendToUser = async () => {
     const id = userId.trim() ? Number(userId.trim()) : null;
@@ -169,109 +267,182 @@ export default function Notifications() {
       setUserMessage({ type: 'error', text: extractApiError(e) });
     } finally {
       setUserLoading(false);
-      setConfirmOpen(null);
+      setConfirmUser(false);
     }
   };
 
-  const selectedUserId = selectedUserIdNum;
-  const canSendToUser = selectedUserId != null && selectedUserId > 0 && userTitle.trim() && !userLoading;
-
-  const { data: scheduledList = [], isLoading: scheduledListLoading } = useQuery({
-    queryKey: ['scheduled-notifications', scheduledStatusFilter],
-    queryFn: async () => (await listScheduledNotifications(scheduledStatusFilter || undefined)).data,
-    enabled: activeTab === 2,
-  });
-
-  const patchMutation = useMutation({
-    mutationFn: ({ id, scheduledAt }: { id: number; scheduledAt: string }) =>
-      patchScheduledNotificationTime(id, { scheduledAt }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['scheduled-notifications'] });
-      setEditTimeRow(null);
-    },
-  });
-
-  const [scheduledActionLoading, setScheduledActionLoading] = useState(false);
-  const [scheduledTabError, setScheduledTabError] = useState<string | null>(null);
-
-  const handleScheduleByLanguage = async () => {
-    if (!language.trim() || !title.trim() || !scheduledAtLocal.trim()) return;
-    const scheduledAtIso = localDatetimeToUtcIso(scheduledAtLocal.trim());
-    if (!scheduledAtIso) {
-      setScheduleMessage({ type: 'error', text: 'Invalid date or time.' });
-      setConfirmOpen(null);
-      return;
-    }
-    setScheduleMessage(null);
-    setScheduleLoading(true);
-    try {
-      await scheduleNotificationByLanguage({
-        language: language.trim(),
-        title: title.trim(),
-        body: body.trim() || undefined,
-        scheduledAt: scheduledAtIso,
-      });
-      setScheduleMessage({ type: 'success', text: 'Notification scheduled.' });
-      setScheduledAtLocal('');
-      await queryClient.invalidateQueries({ queryKey: ['scheduled-notifications'] });
-    } catch (e: unknown) {
-      setScheduleMessage({ type: 'error', text: extractApiError(e) });
-    } finally {
-      setScheduleLoading(false);
-      setConfirmOpen(null);
-    }
+  const addLanguage = () => {
+    if (!langToAdd) return;
+    if (langToAdd === DEFAULT_LANG || extraLangs.includes(langToAdd)) return;
+    setExtraLangs((prev) => [...prev, langToAdd]);
+    setTranslations((prev) => ({
+      ...prev,
+      [langToAdd]: { title: '', body: '' },
+    }));
+    setLangToAdd('');
   };
 
-  const openEditTime = (row: ScheduledNotification) => {
-    patchMutation.reset();
-    setEditTimeRow(row);
-    setEditTimeLocal(isoUtcToDatetimeLocal(row.scheduledAt));
-  };
-
-  const handleSaveEditTime = () => {
-    if (!editTimeRow || !editTimeLocal.trim()) return;
-    const scheduledAtIso = localDatetimeToUtcIso(editTimeLocal.trim());
-    if (!scheduledAtIso) return;
-    patchMutation.mutate({
-      id: editTimeRow.id,
-      scheduledAt: scheduledAtIso,
+  const removeLanguage = (code: string) => {
+    setExtraLangs((prev) => prev.filter((c) => c !== code));
+    setTranslations((prev) => {
+      const next = { ...prev };
+      delete next[code];
+      return next;
     });
   };
 
-  const handleScheduledConfirmAction = async () => {
-    if (!scheduledConfirm) return;
-    setScheduledTabError(null);
-    setScheduledActionLoading(true);
+  const translateAll = async () => {
+    if (!enTitle.trim()) return;
+    const raw = locales ?? [];
+    const targets = Array.from(
+      new Set(raw.filter((l) => typeof l === 'string' && l.trim() !== '' && l !== DEFAULT_LANG))
+    ).sort();
+    if (targets.length === 0) {
+      setBatchMessage({ type: 'error', text: 'No languages available to translate (check locales API).' });
+      return;
+    }
+    setTranslatingAll(true);
+    setTranslateProgress(0);
+    setExtraLangs(targets);
+    setTranslations((prev) => {
+      const next = { ...prev };
+      for (const lang of targets) {
+        if (!next[lang]) next[lang] = { title: '', body: '' };
+      }
+      return next;
+    });
     try {
-      if (scheduledConfirm.action === 'cancel') await cancelScheduledNotification(scheduledConfirm.id);
-      else await deleteScheduledNotification(scheduledConfirm.id);
-      await queryClient.invalidateQueries({ queryKey: ['scheduled-notifications'] });
-      setScheduledConfirm(null);
+      let done = 0;
+      for (const lang of targets) {
+        const { data } = await translateNotification({
+          targetLanguage: lang,
+          title: enTitle.trim(),
+          body: enBody.trim() || undefined,
+        });
+        setTranslations((prev) => ({
+          ...prev,
+          [lang]: { title: data.title, body: data.body ?? '' },
+        }));
+        done += 1;
+        setTranslateProgress(Math.round((done / targets.length) * 100));
+      }
     } catch (e: unknown) {
-      setScheduledTabError(extractApiError(e));
+      setBatchMessage({ type: 'error', text: extractApiError(e) });
     } finally {
-      setScheduledActionLoading(false);
+      setTranslatingAll(false);
     }
   };
 
-  const statusChipColor = (status: string): 'default' | 'success' | 'error' | 'warning' => {
+  const runBatchSend = async () => {
+    const langs = buildLanguagePayloads(enTitle, enBody, enImageUrl, extraLangs, translations);
+    setBatchMessage(null);
+    setBatchLoading(true);
+    try {
+      await sendNotificationBatch({ languages: langs, testMode: false });
+      setBatchMessage({ type: 'success', text: 'Notification batch sent.' });
+      await queryClient.invalidateQueries({ queryKey: ['notification-batch-history'] });
+      setActiveStep(0);
+      setEnTitle('');
+      setEnBody('');
+      setEnImageUrl('');
+      setExtraLangs([]);
+      setTranslations({});
+      setScheduleMode('now');
+      setScheduledLocal('');
+    } catch (e: unknown) {
+      setBatchMessage({ type: 'error', text: extractApiError(e) });
+    } finally {
+      setBatchLoading(false);
+      setConfirmSend(false);
+    }
+  };
+
+  const runBatchSchedule = async () => {
+    const parts = localDatetimeToParts(scheduledLocal.trim());
+    if (!parts) {
+      setBatchMessage({ type: 'error', text: 'Invalid date or time.' });
+      setConfirmSchedule(false);
+      return;
+    }
+    const langs = buildLanguagePayloads(enTitle, enBody, enImageUrl, extraLangs, translations);
+    setBatchMessage(null);
+    setBatchLoading(true);
+    try {
+      await scheduleNotificationBatch({
+        languages: langs,
+        testMode: false,
+        scheduledDate: parts.scheduledDate,
+        scheduledWallTime: parts.scheduledWallTime,
+        adminZoneId,
+      });
+      setBatchMessage({
+        type: 'success',
+        text: 'Notification scheduled. Same local clock time in each recipient region.',
+      });
+      await queryClient.invalidateQueries({ queryKey: ['notification-batch-history'] });
+      setActiveStep(0);
+      setEnTitle('');
+      setEnBody('');
+      setEnImageUrl('');
+      setExtraLangs([]);
+      setTranslations({});
+      setScheduleMode('now');
+      setScheduledLocal('');
+    } catch (e: unknown) {
+      setBatchMessage({ type: 'error', text: extractApiError(e) });
+    } finally {
+      setBatchLoading(false);
+      setConfirmSchedule(false);
+    }
+  };
+
+  const cancelMutation = useMutation({
+    mutationFn: (id: number) => cancelNotificationBatch(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notification-batch-history'] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteNotificationBatch(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notification-batch-history'] }),
+  });
+
+  const steps = ['Notification', 'Translations', 'Scheduling'];
+
+  const canNextStep0 = enTitle.trim().length > 0;
+  const canConfirmSend = canNextStep0 && scheduleMode === 'now';
+  const canConfirmSchedule =
+    canNextStep0 && scheduleMode === 'later' && scheduledLocal.trim().length > 0;
+
+  const statusChip = (status: string): 'default' | 'success' | 'error' | 'warning' => {
     switch (status) {
       case 'SENT':
+      case 'COMPLETED':
         return 'success';
       case 'FAILED':
         return 'error';
       case 'PENDING':
+      case 'IN_PROGRESS':
         return 'warning';
       default:
         return 'default';
     }
   };
 
+  const deliverySummary = (row: AdminNotificationBatchResponse['items'][0]) => {
+    if (row.status !== 'SENT' || row.recipientsTotal == null) {
+      return { primary: '—', progress: null as number | null };
+    }
+    const t = row.recipientsTotal;
+    const s = row.recipientsSuccess ?? 0;
+    if (t === 0) return { primary: 'No devices', progress: 100 };
+    return { primary: `${s} / ${t} devices`, progress: Math.min(100, Math.round((s / t) * 100)) };
+  };
+
   return (
     <Box>
       <PageHeader
         title="Notifications"
-        subtitle="Send push notifications to users or language groups, and manage scheduled language broadcasts"
+        subtitle="Send push notifications, schedule multi-language broadcasts, and view history"
       />
 
       <Card>
@@ -282,17 +453,12 @@ export default function Notifications() {
             borderBottom: '1px solid',
             borderColor: 'divider',
             px: 2,
-            '& .MuiTab-root': {
-              textTransform: 'none',
-              fontWeight: 500,
-              fontSize: '0.875rem',
-              minHeight: 48,
-            },
+            '& .MuiTab-root': { textTransform: 'none', fontWeight: 500, fontSize: '0.875rem', minHeight: 48 },
           }}
         >
           <Tab icon={<PersonIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Send to User" />
-          <Tab icon={<TranslateIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Send by Language" />
-          <Tab icon={<ScheduleIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Scheduled" />
+          <Tab icon={<ScheduleIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Send / Schedule" />
+          <Tab icon={<HistoryIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="History" />
         </Tabs>
 
         <CardContent sx={{ p: 3 }}>
@@ -320,7 +486,7 @@ export default function Notifications() {
                   {users.map((u) => (
                     <MenuItem key={u.id} value={String(u.id)}>
                       {[u.name, u.surname].filter(Boolean).join(' ') || u.emailAddress || `User ${u.id}`} ({u.emailAddress})
-                      {u.locale ? ` · ${u.locale}` : ''}
+                      {u.locale ? ` · ${localeTagToLabel(u.locale)}` : ''}
                     </MenuItem>
                   ))}
                 </Select>
@@ -335,20 +501,16 @@ export default function Notifications() {
                 inputProps={{ min: 1 }}
                 helperText="Enter a numeric user ID directly"
               />
-              {selectedUserId != null && selectedUserId > 0 && (
+              {selectedUserIdNum != null && selectedUserIdNum > 0 && (
                 <Alert severity="info" variant="outlined" sx={{ py: 0.5 }}>
-                  This user&apos;s language: <strong>{selectedUser?.locale ?? 'Unknown (no device registered)'}</strong>
+                  This user&apos;s language:{' '}
+                  <strong>
+                    {selectedUser?.locale ? localeTagToLabel(selectedUser.locale) : 'Unknown (no device registered)'}
+                  </strong>
                   {selectedUser?.locale && ' — use this language for the notification content.'}
                 </Alert>
               )}
-              <TextField
-                fullWidth
-                label="Title"
-                required
-                value={userTitle}
-                onChange={(e) => setUserTitle(e.target.value)}
-                helperText="Required. This appears as the notification headline."
-              />
+              <TextField fullWidth label="Title" required value={userTitle} onChange={(e) => setUserTitle(e.target.value)} />
               <TextField
                 fullWidth
                 label="Body"
@@ -356,344 +518,391 @@ export default function Notifications() {
                 rows={3}
                 value={userBody}
                 onChange={(e) => setUserBody(e.target.value)}
-                helperText="Optional. Additional message content."
               />
               <Button
                 variant="contained"
-                onClick={() => setConfirmOpen('user')}
-                disabled={!canSendToUser}
+                onClick={() => setConfirmUser(true)}
+                disabled={!userId.trim() || !userTitle.trim() || userLoading}
                 startIcon={<SendIcon />}
                 sx={{ alignSelf: 'flex-start' }}
               >
                 {userLoading ? 'Sending...' : 'Send to User'}
               </Button>
               {userMessage && (
-                <Alert severity={userMessage.type === 'error' ? 'error' : 'success'} sx={{ mt: 0.5 }}>
-                  {userMessage.text}
-                </Alert>
+                <Alert severity={userMessage.type === 'error' ? 'error' : 'success'}>{userMessage.text}</Alert>
               )}
             </Box>
           )}
 
           {activeTab === 1 && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, maxWidth: 520 }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Send a push notification to all users with the selected language (from their FCM token).
-              </Typography>
-              <FormControl fullWidth>
-                <InputLabel>Language</InputLabel>
-                <Select value={language} label="Language" onChange={(e) => setLanguage(e.target.value)}>
-                  <MenuItem value="">Select language</MenuItem>
-                  {(locales || []).map((l) => (
-                    <MenuItem key={l} value={l}>
-                      {l}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <TextField
-                fullWidth
-                label="Title"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                helperText="Required. This appears as the notification headline."
-              />
-              <TextField
-                fullWidth
-                label="Body"
-                multiline
-                rows={3}
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                helperText="Optional. Additional message content."
-              />
-              <Button
-                variant="contained"
-                onClick={() => setConfirmOpen('language')}
-                disabled={!language.trim() || !title.trim() || loading}
-                startIcon={<SendIcon />}
-                sx={{ alignSelf: 'flex-start' }}
-              >
-                {loading ? 'Sending...' : 'Send to Language Group'}
-              </Button>
-              <Divider sx={{ my: 1 }} />
-              <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                Schedule for later
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Same title and body as above. Time is your device&apos;s local time; the server runs the job at that
-                instant (UTC), so it matches the clock you see here.
-              </Typography>
-              <TextField
-                fullWidth
-                label="Send at (local)"
-                type="datetime-local"
-                value={scheduledAtLocal}
-                onChange={(e) => setScheduledAtLocal(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                inputProps={{ step: 60 }}
-              />
-              <Button
-                variant="outlined"
-                onClick={() => setConfirmOpen('schedule')}
-                disabled={!language.trim() || !title.trim() || !scheduledAtLocal.trim() || scheduleLoading}
-                startIcon={<ScheduleIcon />}
-                sx={{ alignSelf: 'flex-start' }}
-              >
-                {scheduleLoading ? 'Scheduling...' : 'Schedule notification'}
-              </Button>
-              {scheduleMessage && (
-                <Alert severity={scheduleMessage.type === 'error' ? 'error' : 'success'} sx={{ mt: 0.5 }}>
-                  {scheduleMessage.text}
+            <Box>
+              {batchMessage && (
+                <Alert severity={batchMessage.type === 'error' ? 'error' : 'success'} sx={{ mb: 2 }} onClose={() => setBatchMessage(null)}>
+                  {batchMessage.text}
                 </Alert>
               )}
-              {message && (
-                <Alert severity={message.type === 'error' ? 'error' : 'success'} sx={{ mt: 0.5 }}>
-                  {message.text}
-                </Alert>
-              )}
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', lg: 'row' },
+                  gap: 3,
+                  alignItems: 'flex-start',
+                }}
+              >
+                <Box sx={{ width: { xs: '100%', lg: 200 }, flexShrink: 0 }}>
+                  <Stepper activeStep={activeStep} orientation="vertical">
+                    {steps.map((label) => (
+                      <Step key={label}>
+                        <StepLabel
+                          sx={{
+                            '& .MuiStepLabel-label': {
+                              fontWeight: activeStep === steps.indexOf(label) ? 600 : 400,
+                            },
+                          }}
+                        >
+                          {label}
+                        </StepLabel>
+                      </Step>
+                    ))}
+                  </Stepper>
+                </Box>
+
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  {activeStep === 0 && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 560 }}>
+                      <TextField
+                        fullWidth
+                        label="Notification title (English)"
+                        required
+                        value={enTitle}
+                        onChange={(e) => setEnTitle(e.target.value)}
+                        placeholder="Enter title"
+                      />
+                      <TextField
+                        fullWidth
+                        label="Notification text (English)"
+                        multiline
+                        rows={3}
+                        value={enBody}
+                        onChange={(e) => setEnBody(e.target.value)}
+                        placeholder="Enter notification text"
+                      />
+                      <TextField
+                        fullWidth
+                        label="Notification image URL (optional)"
+                        value={enImageUrl}
+                        onChange={(e) => setEnImageUrl(e.target.value)}
+                        placeholder="https://..."
+                        InputProps={{
+                          endAdornment: <ImageOutlinedIcon color="action" fontSize="small" sx={{ mr: 0.5 }} />,
+                        }}
+                      />
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        <Button variant="contained" disabled={!canNextStep0} onClick={() => setActiveStep(1)}>
+                          Next
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+
+                  {activeStep === 1 && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 560 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Add individual languages below, or use <strong>Translate all with AI</strong> to fill every locale from the
+                        server (except English) from your English text. Skip to send English only.
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <FormControl sx={{ minWidth: 200 }} size="small">
+                          <InputLabel>Add language</InputLabel>
+                          <Select
+                            value={langToAdd}
+                            label="Add language"
+                            onChange={(e) => setLangToAdd(e.target.value)}
+                            displayEmpty
+                            renderValue={(v) => (v ? languageCodeToLabel(v) : '')}
+                          >
+                            <MenuItem value="">
+                              <em>Choose…</em>
+                            </MenuItem>
+                            {availableToAdd.map((l) => (
+                              <MenuItem key={l} value={l}>
+                                {languageCodeToLabel(l)}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                        <Button variant="outlined" onClick={addLanguage} disabled={!langToAdd}>
+                          Add
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          startIcon={<AutoAwesomeIcon />}
+                          onClick={translateAll}
+                          disabled={translatingAll || !enTitle.trim()}
+                        >
+                          {translatingAll ? 'Translating…' : 'Translate all with AI'}
+                        </Button>
+                      </Box>
+                      {translatingAll && <LinearProgress variant="determinate" value={translateProgress} />}
+                      {extraLangs.map((code) => (
+                        <Paper key={`lang-${code}`} variant="outlined" sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                            <Typography fontWeight={600}>{languageCodeToLabel(code)}</Typography>
+                            <Button size="small" color="inherit" onClick={() => removeLanguage(code)}>
+                              Remove
+                            </Button>
+                          </Box>
+                          <TextField
+                            key={`tr-title-${code}`}
+                            id={`tr-title-${code}`}
+                            name={`tr-title-${code}`}
+                            fullWidth
+                            size="small"
+                            label="Title"
+                            autoComplete="off"
+                            value={(translations[code] ?? { title: '', body: '' }).title}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setTranslations((p) => {
+                                const prev = p[code] ?? { title: '', body: '' };
+                                return { ...p, [code]: { ...prev, title: v } };
+                              });
+                            }}
+                            sx={{ mb: 1 }}
+                          />
+                          <TextField
+                            key={`tr-body-${code}`}
+                            id={`tr-body-${code}`}
+                            name={`tr-body-${code}`}
+                            fullWidth
+                            size="small"
+                            label="Body"
+                            multiline
+                            rows={2}
+                            autoComplete="off"
+                            value={(translations[code] ?? { title: '', body: '' }).body}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setTranslations((p) => {
+                                const prev = p[code] ?? { title: '', body: '' };
+                                return { ...p, [code]: { ...prev, body: v } };
+                              });
+                            }}
+                          />
+                        </Paper>
+                      ))}
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button onClick={() => setActiveStep(0)}>Back</Button>
+                        <Button variant="contained" onClick={() => setActiveStep(2)}>
+                          Next
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+
+                  {activeStep === 2 && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 560 }}>
+                      <FormControl>
+                        <Typography variant="subtitle2" gutterBottom>
+                          When to send
+                        </Typography>
+                        <RadioGroup
+                          value={scheduleMode}
+                          onChange={(e) => setScheduleMode(e.target.value as 'now' | 'later')}
+                        >
+                          <FormControlLabel value="now" control={<Radio />} label="Send now" />
+                          <FormControlLabel value="later" control={<Radio />} label="Schedule for later" />
+                        </RadioGroup>
+                      </FormControl>
+                      {scheduleMode === 'later' && (
+                        <TextField
+                          fullWidth
+                          label="Send at (local)"
+                          type="datetime-local"
+                          value={scheduledLocal}
+                          onChange={(e) => setScheduledLocal(e.target.value)}
+                          InputLabelProps={{ shrink: true }}
+                          inputProps={{ step: 60 }}
+                          helperText={`Your timezone: ${adminZoneId}. Recipients get the same clock time in their region.`}
+                        />
+                      )}
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        <Button onClick={() => setActiveStep(1)}>Back</Button>
+                        {scheduleMode === 'now' ? (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<SendIcon />}
+                            disabled={!canConfirmSend || batchLoading}
+                            onClick={() => setConfirmSend(true)}
+                          >
+                            Send
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<ScheduleIcon />}
+                            disabled={!canConfirmSchedule || batchLoading}
+                            onClick={() => setConfirmSchedule(true)}
+                          >
+                            Schedule
+                          </Button>
+                        )}
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+
+                <Box sx={{ width: { xs: '100%', lg: 340 }, flexShrink: 0 }}>
+                  <Tabs
+                    value={previewTab}
+                    onChange={(_, v) => setPreviewTab(v)}
+                    sx={{ minHeight: 36, mb: 1 }}
+                  >
+                    <Tab value="initial" label="Initial state" sx={{ minHeight: 36, py: 0 }} />
+                    <Tab value="expanded" label="Expanded view" sx={{ minHeight: 36, py: 0 }} />
+                  </Tabs>
+                  <DevicePreviewPanel
+                    title={enTitle}
+                    body={enBody}
+                    imageUrl={enImageUrl.trim()}
+                    tab={previewTab}
+                  />
+                </Box>
+              </Box>
             </Box>
           )}
 
           {activeTab === 2 && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-                <FormControl sx={{ minWidth: 200 }}>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={scheduledStatusFilter}
-                    label="Status"
-                    onChange={(e) => setScheduledStatusFilter(e.target.value)}
-                  >
-                    <MenuItem value="">All</MenuItem>
-                    <MenuItem value="PENDING">PENDING</MenuItem>
-                    <MenuItem value="SENT">SENT</MenuItem>
-                    <MenuItem value="FAILED">FAILED</MenuItem>
-                    <MenuItem value="CANCELLED">CANCELLED</MenuItem>
-                  </Select>
-                </FormControl>
-                <Typography variant="caption" sx={{ color: 'text.secondary', alignSelf: 'center', maxWidth: 360 }}>
-                  Delivery counts are FCM device tokens (a user can have several). Shown after the job finishes.
-                </Typography>
-              </Box>
-              {scheduledTabError && (
-                <Alert severity="error" onClose={() => setScheduledTabError(null)}>
-                  {scheduledTabError}
-                </Alert>
+              {historyLoading && <Typography color="text.secondary">Loading…</Typography>}
+              {!historyLoading && history.length === 0 && (
+                <Typography color="text.secondary">No notification campaigns yet.</Typography>
               )}
-              <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 560 }}>
-                <Table size="small" stickyHeader>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>Language</TableCell>
-                      <TableCell>Title</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Scheduled at</TableCell>
-                      <TableCell sx={{ minWidth: 160 }}>Delivery (devices)</TableCell>
-                      <TableCell>Details</TableCell>
-                      <TableCell align="right">Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {scheduledListLoading && (
-                      <TableRow>
-                        <TableCell colSpan={8}>Loading…</TableCell>
-                      </TableRow>
-                    )}
-                    {!scheduledListLoading && scheduledList.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={8}>
-                          <Typography variant="body2" color="text.secondary">
-                            No scheduled notifications.
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {!scheduledListLoading &&
-                      scheduledList.map((row) => (
-                        <TableRow key={row.id} hover>
-                          <TableCell>{row.id}</TableCell>
-                          <TableCell>{row.language}</TableCell>
-                          <TableCell sx={{ maxWidth: 200 }}>{row.title}</TableCell>
-                          <TableCell>
-                            <Chip size="small" label={row.status} color={statusChipColor(row.status)} variant="outlined" />
-                          </TableCell>
-                          <TableCell>{formatScheduledAtDisplay(row.scheduledAt)}</TableCell>
-                          <TableCell>
-                            {(() => {
-                              const d = formatDeviceDeliverySummary(row);
-                              return (
-                                <Box sx={{ minWidth: 140 }}>
+              {history.map((batch: AdminNotificationBatchResponse) => (
+                <Accordion key={batch.id} defaultExpanded={false} variant="outlined">
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1, width: '100%', pr: 1 }}>
+                      <Typography fontWeight={600}>#{batch.id}</Typography>
+                      <Chip size="small" label={batch.batchType} variant="outlined" />
+                      <Chip size="small" label={batch.overallStatus} color={statusChip(batch.overallStatus)} variant="outlined" />
+                      <Typography variant="body2" color="text.secondary">
+                        {formatBatchDate(batch.createdAt)}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {batch.items.length} item(s)
+                        {batch.testMode ? ' · test mode' : ''}
+                      </Typography>
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <TableContainer component={Paper} variant="outlined">
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Language</TableCell>
+                            <TableCell>Locale</TableCell>
+                            <TableCell>Title</TableCell>
+                            <TableCell>Status</TableCell>
+                            <TableCell>Scheduled (UTC)</TableCell>
+                            <TableCell>Delivery</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {batch.items.map((row) => {
+                            const d = deliverySummary(row);
+                            return (
+                              <TableRow key={row.id}>
+                                <TableCell>{languageCodeToLabel(row.languageCode)}</TableCell>
+                                <TableCell>{row.locale ? localeTagToLabel(row.locale) : '—'}</TableCell>
+                                <TableCell sx={{ maxWidth: 200 }}>{row.title}</TableCell>
+                                <TableCell>
+                                  <Chip size="small" label={row.status} color={statusChip(row.status)} variant="outlined" />
+                                </TableCell>
+                                <TableCell>
+                                  {row.scheduledAt ? new Date(row.scheduledAt).toISOString() : '—'}
+                                </TableCell>
+                                <TableCell>
                                   <Typography variant="caption" display="block">
                                     {d.primary}
                                   </Typography>
-                                  {d.secondary != null && (
-                                    <Typography variant="caption" color="error" display="block">
-                                      {d.secondary}
-                                    </Typography>
-                                  )}
                                   {d.progress != null && (
-                                    <LinearProgress
-                                      variant="determinate"
-                                      value={d.progress}
-                                      sx={{ mt: 0.5, height: 6, borderRadius: 1 }}
-                                      color={d.progress >= 100 ? 'success' : 'primary'}
-                                    />
+                                    <LinearProgress variant="determinate" value={d.progress} sx={{ mt: 0.5, height: 6 }} />
                                   )}
-                                </Box>
-                              );
-                            })()}
-                          </TableCell>
-                          <TableCell sx={{ maxWidth: 280 }}>
-                            {row.status === 'FAILED' && row.errorMessage ? (
-                              <Tooltip title={row.errorMessage}>
-                                <Typography variant="caption" color="error" sx={{ display: 'block', cursor: 'help' }}>
-                                  {row.errorMessage}
-                                </Typography>
-                              </Tooltip>
-                            ) : (
-                              <Typography variant="caption" color="text.secondary">
-                                —
-                              </Typography>
-                            )}
-                          </TableCell>
-                          <TableCell align="right">
-                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
-                              <Tooltip title="Change time (PENDING only)">
-                                <span>
-                                  <Button
-                                    size="small"
-                                    onClick={() => openEditTime(row)}
-                                    disabled={row.status !== 'PENDING'}
-                                    startIcon={<EditCalendarIcon fontSize="small" />}
-                                  >
-                                    Time
-                                  </Button>
-                                </span>
-                              </Tooltip>
-                              <Tooltip title="Cancel (PENDING only)">
-                                <span>
-                                  <Button
-                                    size="small"
-                                    color="warning"
-                                    onClick={() => setScheduledConfirm({ action: 'cancel', id: row.id })}
-                                    disabled={row.status !== 'PENDING'}
-                                    startIcon={<CancelIcon fontSize="small" />}
-                                  >
-                                    Cancel
-                                  </Button>
-                                </span>
-                              </Tooltip>
-                              <Tooltip title="Remove row">
-                                <Button
-                                  size="small"
-                                  color="error"
-                                  onClick={() => setScheduledConfirm({ action: 'delete', id: row.id })}
-                                  startIcon={<DeleteOutlineIcon fontSize="small" />}
-                                >
-                                  Remove
-                                </Button>
-                              </Tooltip>
-                            </Box>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                    <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
+                      <Tooltip title="Cancel pending scheduled batch">
+                        <span>
+                          <Button
+                            size="small"
+                            color="warning"
+                            disabled={
+                              cancelMutation.isPending ||
+                              (batch.overallStatus !== 'PENDING' && batch.overallStatus !== 'IN_PROGRESS')
+                            }
+                            onClick={() => cancelMutation.mutate(batch.id)}
+                          >
+                            Cancel
+                          </Button>
+                        </span>
+                      </Tooltip>
+                      <Button
+                        size="small"
+                        color="error"
+                        disabled={deleteMutation.isPending}
+                        onClick={() => {
+                          if (window.confirm('Remove this batch from history?')) deleteMutation.mutate(batch.id);
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </Box>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
             </Box>
           )}
         </CardContent>
       </Card>
 
       <ConfirmDialog
-        open={confirmOpen === 'user'}
-        title="Send Notification to User"
-        message={`Are you sure you want to send this notification to User ID ${userId}? This action cannot be undone.`}
+        open={confirmUser}
+        title="Send notification to user"
+        message={`Send this notification to user ID ${userId}?`}
         confirmLabel="Send"
         onConfirm={handleSendToUser}
-        onCancel={() => setConfirmOpen(null)}
+        onCancel={() => setConfirmUser(false)}
         loading={userLoading}
       />
 
       <ConfirmDialog
-        open={confirmOpen === 'language'}
-        title="Send Notification to Language Group"
-        message={`Are you sure you want to send this notification to all users with language "${language}"? This action cannot be undone.`}
+        open={confirmSend}
+        title="Send notification batch"
+        message="Send this notification to all configured language groups now?"
         confirmLabel="Send"
-        onConfirm={handleSendByLanguage}
-        onCancel={() => setConfirmOpen(null)}
-        loading={loading}
+        onConfirm={runBatchSend}
+        onCancel={() => setConfirmSend(false)}
+        loading={batchLoading}
       />
 
       <ConfirmDialog
-        open={confirmOpen === 'schedule'}
-        title="Schedule notification"
-        message={`Schedule this notification for language "${language}" at ${scheduledAtLocal || '(no time selected)'}? You can change or cancel it from the Scheduled tab while it is still pending.`}
+        open={confirmSchedule}
+        title="Schedule notification batch"
+        message={`Schedule for ${scheduledLocal || '(no time)'} (${adminZoneId})?`}
         confirmLabel="Schedule"
-        onConfirm={handleScheduleByLanguage}
-        onCancel={() => setConfirmOpen(null)}
-        loading={scheduleLoading}
+        onConfirm={runBatchSchedule}
+        onCancel={() => setConfirmSchedule(false)}
+        loading={batchLoading}
       />
-
-      <ConfirmDialog
-        open={!!scheduledConfirm}
-        title={scheduledConfirm?.action === 'cancel' ? 'Cancel scheduled notification' : 'Remove scheduled notification'}
-        message={
-          scheduledConfirm?.action === 'cancel'
-            ? 'Cancel this pending notification? It will not be sent.'
-            : 'Permanently remove this scheduled notification record?'
-        }
-        confirmLabel={scheduledConfirm?.action === 'cancel' ? 'Cancel job' : 'Remove'}
-        variant={scheduledConfirm?.action === 'delete' ? 'danger' : 'primary'}
-        onConfirm={handleScheduledConfirmAction}
-        onCancel={() => setScheduledConfirm(null)}
-        loading={scheduledActionLoading}
-      />
-
-      <Dialog
-        open={!!editTimeRow}
-        onClose={() => {
-          if (!patchMutation.isPending) {
-            patchMutation.reset();
-            setEditTimeRow(null);
-          }
-        }}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>Change scheduled time</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-          {patchMutation.isError && (
-            <Alert severity="error">{extractApiError(patchMutation.error)}</Alert>
-          )}
-          <TextField
-            fullWidth
-            label="Send at (local)"
-            type="datetime-local"
-            value={editTimeLocal}
-            onChange={(e) => setEditTimeLocal(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            inputProps={{ step: 60 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              patchMutation.reset();
-              setEditTimeRow(null);
-            }}
-            disabled={patchMutation.isPending}
-          >
-            Close
-          </Button>
-          <Button variant="contained" onClick={handleSaveEditTime} disabled={patchMutation.isPending || !editTimeLocal.trim()}>
-            {patchMutation.isPending ? 'Saving…' : 'Save'}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

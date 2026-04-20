@@ -21,6 +21,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import PageHeader from '../components/PageHeader';
+import { languageCodeToLabel } from '../utils/languageDisplay';
 
 const DefaultIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -96,13 +97,19 @@ export default function MapPage() {
               InputLabelProps={{ shrink: true }}
               sx={{ minWidth: 190 }}
             />
-            <FormControl size="small" sx={{ minWidth: 120 }}>
+            <FormControl size="small" sx={{ minWidth: 200 }}>
               <InputLabel>Language</InputLabel>
-              <Select value={locale} label="Language" onChange={(e) => setLocale(e.target.value)}>
+              <Select
+                value={locale}
+                label="Language"
+                onChange={(e) => setLocale(e.target.value)}
+                displayEmpty
+                renderValue={(v) => (v ? languageCodeToLabel(v) : 'All')}
+              >
                 <MenuItem value="">All</MenuItem>
                 {(locales || []).map((l) => (
                   <MenuItem key={l} value={l}>
-                    {l}
+                    {languageCodeToLabel(l)}
                   </MenuItem>
                 ))}
               </Select>
