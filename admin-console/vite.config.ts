@@ -1,6 +1,11 @@
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { Plugin } from 'vite'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Vite's dev server rejects requests to `base` without a trailing slash when `base` ends with `/`.
@@ -31,8 +36,29 @@ function redirectBaseWithoutTrailingSlash(base: string): Plugin {
 
 const ADMIN_CONSOLE_BASE = '/admin-console/'
 
+/**
+ * Writes web/dist/public/_redirects for Cloudflare Pages so deep links like
+ * /admin-console/app-store/apps/123 load admin index.html (not the root SPA).
+ */
+function writeCloudflarePagesRootRedirects(): Plugin {
+  return {
+    name: 'write-cloudflare-pages-root-redirects',
+    closeBundle() {
+      const src = path.resolve(__dirname, '../script/cloudflare-pages-redirects')
+      const body = readFileSync(src, 'utf-8')
+      const outRoot = path.resolve(__dirname, '../dist/public')
+      mkdirSync(outRoot, { recursive: true })
+      writeFileSync(path.join(outRoot, '_redirects'), body, 'utf-8')
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [redirectBaseWithoutTrailingSlash(ADMIN_CONSOLE_BASE), react()],
+  plugins: [
+    redirectBaseWithoutTrailingSlash(ADMIN_CONSOLE_BASE),
+    react(),
+    writeCloudflarePagesRootRedirects(),
+  ],
   base: ADMIN_CONSOLE_BASE,
   build: {
     outDir: '../dist/public/admin-console',

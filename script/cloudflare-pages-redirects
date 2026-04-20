@@ -1,0 +1,7 @@
+# Cloudflare Pages: SPA fallbacks (see script/build.ts + admin-console vite.config.ts).
+# Default Pages SPA behavior serves /index.html for unknown paths; without these rules,
+# /admin-console/* gets the main site bundle (wouter) → blank page or "404 Page Not Found".
+/admin-console /admin-console/index.html 200
+/admin-console/ /admin-console/index.html 200
+/admin-console/* /admin-console/index.html 200
+/* /index.html 200

@@ -57,6 +57,12 @@ After DNS propagates, the site will be served at **https://ballistiq.xyz**.
 
 ---
 
+## Admin console deep links (reload / share URL)
+
+Cloudflare Pages’ default SPA behavior can serve the **root** `index.html` for paths under `/admin-console/...`, which loads the main site (not the admin bundle) and breaks reloads.
+
+The repo keeps canonical rules in **`script/cloudflare-pages-redirects`**. The full `npm run build` and the **admin-console** Vite build both write **`dist/public/_redirects`** so `/admin-console/*` is proxied to **`/admin-console/index.html`**.
+
 ## Summary
 
 | Setting              | Value                                      |

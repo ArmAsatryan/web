@@ -1,6 +1,6 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { execSync } from "child_process";
 import { existsSync } from "fs";
 import path from "path";
@@ -47,6 +47,15 @@ async function buildAll() {
     execSync("npm install", { cwd: adminDir, stdio: "inherit" });
     console.log("building admin-console...");
     execSync("npm run build", { cwd: adminDir, stdio: "inherit" });
+  }
+
+  const redirectsSrc = path.resolve(process.cwd(), "script/cloudflare-pages-redirects");
+  if (existsSync(redirectsSrc)) {
+    const body = await readFile(redirectsSrc, "utf-8");
+    const distPublic = path.resolve(process.cwd(), "dist/public");
+    await mkdir(distPublic, { recursive: true });
+    await writeFile(path.join(distPublic, "_redirects"), body, "utf-8");
+    console.log("wrote dist/public/_redirects (Cloudflare Pages SPA: admin-console + client)");
   }
 
   console.log("building server...");

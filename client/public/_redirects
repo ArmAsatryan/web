@@ -1,3 +1,5 @@
+# Keep in sync with script/cloudflare-pages-redirects (written again after admin-console build).
 /admin-console /admin-console/index.html 200
+/admin-console/ /admin-console/index.html 200
 /admin-console/* /admin-console/index.html 200
 /* /index.html 200
