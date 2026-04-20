@@ -151,6 +151,8 @@ export interface AdminNotificationBatchItemResponse {
   recipientsTotal?: number | null;
   recipientsSuccess?: number | null;
   recipientsFailed?: number | null;
+  /** When this history row was written (batch item created). */
+  createdAt?: string;
 }
 
 export interface AdminNotificationBatchResponse {
@@ -293,5 +295,72 @@ export interface DashboardPieResponse {
   bullets: { active: number; deleted: number };
   usersWithRifle: { totalUsers: number; usersWithRifle: number; usersWithoutRifle: number };
   bulletsAttached: { totalBullets: number; attachedToRifle: number; notAttached: number };
+}
+
+/** BallisticBE JSON envelope for many endpoints */
+export interface ApiBaseModel<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
+
+/** Raw row from GET /api/images/target */
+export interface TargetImageListRow {
+  id: number;
+  userId?: number | null;
+  imageUrl?: string;
+  metadataUrl?: string;
+  metadata?: string;
+  displayName?: string;
+  name?: string;
+  fullName?: string;
+  userFullName?: string;
+  userName?: string;
+  username?: string;
+  user_name?: string;
+  nickname?: string;
+  nickName?: string;
+  userNickname?: string;
+  email?: string;
+  userEmail?: string;
+}
+
+export interface DetectionUserSummaryRow {
+  userId: number;
+  detectionCount: number;
+  displayName?: string | null;
+  nickname?: string | null;
+  email?: string | null;
+  latestTimestamp?: string | null;
+}
+
+/** Transformed detection row used by the Assistant detections UI. */
+export interface TransformedDetection {
+  id: number;
+  timestamp: string;
+  detectionData: {
+    bulletHoles: Array<{
+      id: number;
+      boundingBox: { x: number; y: number; width: number; height: number };
+      confidence: number;
+      clockDirection?: string | number;
+      distanceInches?: number;
+      [key: string]: unknown;
+    }>;
+    target: {
+      id: number;
+      confidence: number;
+      boundingBox: { x: number; y: number; width: number; height: number };
+    } | null;
+    frameId: number;
+    isVibrating: boolean;
+    vibrationMagnitude: number;
+  };
+  imagePath: string;
+  metadataUrl?: string;
+  userId: number;
+  displayName: string | null;
+  nickname: string | null;
+  email: string | null;
 }
 

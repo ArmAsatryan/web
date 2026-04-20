@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import MapPage from './pages/Map';
 import Notifications from './pages/Notifications';
+import AssistantDetections from './pages/AssistantDetections';
 import Users from './pages/Users';
 import CreateBullet from './pages/CreateBullet';
 import CreateCaliber from './pages/CreateCaliber';
@@ -62,6 +63,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <Notifications />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/assistant-detections"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <AssistantDetections />
             </Layout>
           </ProtectedRoute>
         }

@@ -53,7 +53,6 @@ import {
   translateNotification,
 } from '../api/api';
 import type { AdminNotificationBatchLanguagePayload, AdminNotificationBatchResponse } from '../types';
-import PageHeader from '../components/PageHeader';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { languageCodeToLabel, localeTagToLabel } from '../utils/languageDisplay';
 
@@ -80,6 +79,20 @@ function formatBatchDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleString();
+}
+
+/** `scheduledAt` is an instant (UTC in ISO); show in the browser's local timezone. */
+function formatScheduledAtLocal(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
 }
 
 function DevicePreviewPanel(props: {
@@ -179,11 +192,15 @@ function buildLanguagePayloads(
       imageUrl: imageUrl.trim() || undefined,
     },
   ];
+  const seenCodes = new Set<string>([DEFAULT_LANG.trim().toLowerCase()]);
   for (const code of extraLangs) {
+    const norm = code.trim().toLowerCase();
+    if (!norm || seenCodes.has(norm)) continue;
     const t = translations[code];
     if (!t?.title?.trim()) continue;
+    seenCodes.add(norm);
     langs.push({
-      languageCode: code,
+      languageCode: code.trim(),
       title: t.title.trim(),
       body: t.body?.trim() || undefined,
       imageUrl: imageUrl.trim() || undefined,
@@ -293,6 +310,8 @@ export default function Notifications() {
 
   const translateAll = async () => {
     if (!enTitle.trim()) return;
+    const sourceBody = enBody.trim();
+    const translateBody = sourceBody.length > 0;
     const raw = locales ?? [];
     const targets = Array.from(
       new Set(raw.filter((l) => typeof l === 'string' && l.trim() !== '' && l !== DEFAULT_LANG))
@@ -317,11 +336,15 @@ export default function Notifications() {
         const { data } = await translateNotification({
           targetLanguage: lang,
           title: enTitle.trim(),
-          body: enBody.trim() || undefined,
+          body: translateBody ? sourceBody : undefined,
         });
         setTranslations((prev) => ({
           ...prev,
-          [lang]: { title: data.title, body: data.body ?? '' },
+          [lang]: {
+            title: data.title,
+            // Title-only compose: backend may still return a body; keep locales title-only.
+            body: translateBody ? (data.body ?? '') : '',
+          },
         }));
         done += 1;
         setTranslateProgress(Math.round((done / targets.length) * 100));
@@ -440,11 +463,6 @@ export default function Notifications() {
 
   return (
     <Box>
-      <PageHeader
-        title="Notifications"
-        subtitle="Send push notifications, schedule multi-language broadcasts, and view history"
-      />
-
       <Card>
         <Tabs
           value={activeTab}
@@ -806,31 +824,89 @@ export default function Notifications() {
                             <TableCell>Language</TableCell>
                             <TableCell>Locale</TableCell>
                             <TableCell>Title</TableCell>
+                            <TableCell>Body</TableCell>
                             <TableCell>Status</TableCell>
-                            <TableCell>Scheduled (UTC)</TableCell>
+                            <TableCell>
+                              <Tooltip title="Send instant in your browser timezone. Hover a cell for UTC (ISO).">
+                                <span>Send time</span>
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell>
+                              <Tooltip title="When this row was saved. If it is much earlier than the batch time above, the row may not belong with this campaign.">
+                                <span>Logged</span>
+                              </Tooltip>
+                            </TableCell>
                             <TableCell>Delivery</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {batch.items.map((row) => {
-                            const d = deliverySummary(row);
+                            const delivery = deliverySummary(row);
+                            const langTag = [row.languageCode, row.locale].filter(Boolean).join(' · ');
+                            const bodyText = row.body?.trim() ?? '';
+                            const langCaption = `${langTag} · #${row.id}`;
                             return (
                               <TableRow key={row.id}>
-                                <TableCell>{languageCodeToLabel(row.languageCode)}</TableCell>
+                                <TableCell sx={{ minWidth: 108, maxWidth: 160 }}>
+                                  <Typography variant="body2">{languageCodeToLabel(row.languageCode)}</Typography>
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    display="block"
+                                    noWrap
+                                    title={
+                                      row.createdAt ? `${langCaption} · logged ${row.createdAt}` : langCaption
+                                    }
+                                  >
+                                    {langCaption}
+                                  </Typography>
+                                </TableCell>
                                 <TableCell>{row.locale ? localeTagToLabel(row.locale) : '—'}</TableCell>
-                                <TableCell sx={{ maxWidth: 200 }}>{row.title}</TableCell>
+                                <TableCell sx={{ maxWidth: 220 }}>
+                                  <Tooltip title={row.title} placement="top-start">
+                                    <Typography variant="body2" noWrap>
+                                      {row.title}
+                                    </Typography>
+                                  </Tooltip>
+                                </TableCell>
+                                <TableCell sx={{ maxWidth: 220 }}>
+                                  {bodyText ? (
+                                    <Tooltip title={bodyText} placement="top-start">
+                                      <Typography variant="body2" noWrap>
+                                        {bodyText}
+                                      </Typography>
+                                    </Tooltip>
+                                  ) : (
+                                    <Typography variant="body2" color="text.secondary">
+                                      —
+                                    </Typography>
+                                  )}
+                                </TableCell>
                                 <TableCell>
                                   <Chip size="small" label={row.status} color={statusChip(row.status)} variant="outlined" />
                                 </TableCell>
                                 <TableCell>
-                                  {row.scheduledAt ? new Date(row.scheduledAt).toISOString() : '—'}
+                                  {row.scheduledAt ? (
+                                    <Tooltip title={`UTC: ${new Date(row.scheduledAt).toISOString()}`}>
+                                      <Typography variant="body2" component="span">
+                                        {formatScheduledAtLocal(row.scheduledAt)}
+                                      </Typography>
+                                    </Tooltip>
+                                  ) : (
+                                    '—'
+                                  )}
+                                </TableCell>
+                                <TableCell sx={{ maxWidth: 140 }}>
+                                  <Typography variant="caption" color="text.secondary" noWrap title={row.createdAt}>
+                                    {row.createdAt ? formatBatchDate(row.createdAt) : '—'}
+                                  </Typography>
                                 </TableCell>
                                 <TableCell>
                                   <Typography variant="caption" display="block">
-                                    {d.primary}
+                                    {delivery.primary}
                                   </Typography>
-                                  {d.progress != null && (
-                                    <LinearProgress variant="determinate" value={d.progress} sx={{ mt: 0.5, height: 6 }} />
+                                  {delivery.progress != null && (
+                                    <LinearProgress variant="determinate" value={delivery.progress} sx={{ mt: 0.5, height: 6 }} />
                                   )}
                                 </TableCell>
                               </TableRow>
@@ -871,6 +947,7 @@ export default function Notifications() {
               ))}
             </Box>
           )}
+
         </CardContent>
       </Card>
 

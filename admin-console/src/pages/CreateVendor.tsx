@@ -11,8 +11,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { createVendor } from '../api/api';
 import type { VendorCreateRequest } from '../types';
-import PageHeader from '../components/PageHeader';
-
 const initialForm: VendorCreateRequest = {
   name: '',
   imageUrl: '',
@@ -56,11 +54,6 @@ export default function CreateVendor() {
 
   return (
     <Box>
-      <PageHeader
-        title="Create vendor"
-        subtitle="Add a new vendor with name and optional image URL"
-      />
-
       <Card>
         <CardContent sx={{ py: 3, '&:last-child': { pb: 3 } }}>
           {submitSuccess && (

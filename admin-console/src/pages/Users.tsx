@@ -31,7 +31,6 @@ import { useEffect, useState } from 'react';
 import { getUsers } from '../api/api';
 import type { AdminUser } from '../types';
 import SendNotificationModal from '../components/SendNotificationModal';
-import PageHeader from '../components/PageHeader';
 import EmptyState from '../components/EmptyState';
 import { localeTagToLabel } from '../utils/languageDisplay';
 
@@ -94,11 +93,6 @@ export default function Users() {
 
   return (
     <Box>
-      <PageHeader
-        title="Users"
-        subtitle="Manage and view all registered users"
-      />
-
       <Card sx={{ mb: 3 }}>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>

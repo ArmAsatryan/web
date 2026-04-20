@@ -20,7 +20,6 @@ import type { UserLocationPoint } from '../types';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-import PageHeader from '../components/PageHeader';
 import { languageCodeToLabel } from '../utils/languageDisplay';
 
 const DefaultIcon = L.icon({
@@ -60,21 +59,17 @@ export default function MapPage() {
 
   return (
     <Box>
-      <PageHeader
-        title="User Locations Map"
-        subtitle="Visualize user locations on an interactive map"
-        action={
-          points && (
-            <Chip
-              icon={<PlaceIcon sx={{ fontSize: 16 }} />}
-              label={`${points.length.toLocaleString()} points`}
-              variant="outlined"
-              color="primary"
-              size="small"
-            />
-          )
-        }
-      />
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        {points && (
+          <Chip
+            icon={<PlaceIcon sx={{ fontSize: 16 }} />}
+            label={`${points.length.toLocaleString()} points`}
+            variant="outlined"
+            color="primary"
+            size="small"
+          />
+        )}
+      </Box>
 
       <Card sx={{ mb: 3 }}>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
