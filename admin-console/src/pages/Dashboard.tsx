@@ -36,7 +36,6 @@ import {
   getFcmTokensLight,
   getDashboardPie,
 } from '../api/api';
-import PageHeader from '../components/PageHeader';
 import type { AdminUserLight, AdminBulletLight, AdminLightItem } from '../types';
 
 export type TimeRangeFilter = '7d' | 'year' | 'month' | 'lifetime';
@@ -623,79 +622,73 @@ export default function Dashboard() {
 
   return (
     <Box>
-      <PageHeader
-        title="Dashboard"
-        subtitle="Overview: users, rifles, bullets, FCM tokens"
-        action={
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-            <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel id="dashboard-time-range">Time range</InputLabel>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 3 }}>
+        <FormControl size="small" sx={{ minWidth: 140 }}>
+          <InputLabel id="dashboard-time-range">Time range</InputLabel>
+          <Select
+            labelId="dashboard-time-range"
+            value={filter}
+            label="Time range"
+            onChange={handleFilterChange}
+          >
+            <MenuItem value="7d">Last 7 days</MenuItem>
+            <MenuItem value="year">Year</MenuItem>
+            <MenuItem value="month">Month</MenuItem>
+            <MenuItem value="lifetime">Lifetime</MenuItem>
+          </Select>
+        </FormControl>
+        {filter === 'year' && (
+          <FormControl size="small" sx={{ minWidth: 100 }}>
+            <InputLabel id="dashboard-year">Year</InputLabel>
+            <Select
+              labelId="dashboard-year"
+              value={String(selectedYear)}
+              label="Year"
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+            >
+              {YEARS.map((y) => (
+                <MenuItem key={y} value={String(y)}>
+                  {y}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+        {filter === 'month' && (
+          <>
+            <FormControl size="small" sx={{ minWidth: 100 }}>
+              <InputLabel id="dashboard-month-year">Year</InputLabel>
               <Select
-                labelId="dashboard-time-range"
-                value={filter}
-                label="Time range"
-                onChange={handleFilterChange}
+                labelId="dashboard-month-year"
+                value={String(selectedYear)}
+                label="Year"
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
               >
-                <MenuItem value="7d">Last 7 days</MenuItem>
-                <MenuItem value="year">Year</MenuItem>
-                <MenuItem value="month">Month</MenuItem>
-                <MenuItem value="lifetime">Lifetime</MenuItem>
+                {YEARS.map((y) => (
+                  <MenuItem key={y} value={String(y)}>
+                    {y}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
-            {filter === 'year' && (
-              <FormControl size="small" sx={{ minWidth: 100 }}>
-                <InputLabel id="dashboard-year">Year</InputLabel>
-                <Select
-                  labelId="dashboard-year"
-                  value={String(selectedYear)}
-                  label="Year"
-                  onChange={(e) => setSelectedYear(Number(e.target.value))}
-                >
-                  {YEARS.map((y) => (
-                    <MenuItem key={y} value={String(y)}>
-                      {y}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-            {filter === 'month' && (
-              <>
-                <FormControl size="small" sx={{ minWidth: 100 }}>
-                  <InputLabel id="dashboard-month-year">Year</InputLabel>
-                  <Select
-                    labelId="dashboard-month-year"
-                    value={String(selectedYear)}
-                    label="Year"
-                    onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  >
-                    {YEARS.map((y) => (
-                      <MenuItem key={y} value={String(y)}>
-                        {y}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel id="dashboard-month">Month</InputLabel>
-                  <Select
-                    labelId="dashboard-month"
-                    value={String(selectedMonth)}
-                    label="Month"
-                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                  >
-                    {MONTHS.map((m) => (
-                      <MenuItem key={m.value} value={String(m.value)}>
-                        {m.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </>
-            )}
-          </Box>
-        }
-      />
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel id="dashboard-month">Month</InputLabel>
+              <Select
+                labelId="dashboard-month"
+                value={String(selectedMonth)}
+                label="Month"
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              >
+                {MONTHS.map((m) => (
+                  <MenuItem key={m.value} value={String(m.value)}>
+                    {m.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
+        )}
+      </Box>
 
       <Box
         sx={{

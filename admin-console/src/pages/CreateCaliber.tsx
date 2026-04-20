@@ -11,8 +11,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { createCaliberDiameter } from '../api/api';
 import type { CreateCaliberDiameterRequest } from '../types';
-import PageHeader from '../components/PageHeader';
-
 const initialForm: CreateCaliberDiameterRequest = {
   caliber: '',
   diameter: 0,
@@ -57,11 +55,6 @@ export default function CreateCaliber() {
 
   return (
     <Box>
-      <PageHeader
-        title="Create caliber"
-        subtitle="Add a new caliber diameter (e.g. 17 WSM, 0.17)"
-      />
-
       <Card>
         <CardContent sx={{ py: 3, '&:last-child': { pb: 3 } }}>
           {submitSuccess && (

@@ -19,8 +19,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { createBullet, getAllCalibers, getAllVendors } from '../api/api';
 import type { BulletCreateRequest, CaliberItem, VendorItem } from '../types';
-import PageHeader from '../components/PageHeader';
-
 /** Form state includes caliberDiameterId for dropdown; payload uses caliber string */
 type BulletFormState = BulletCreateRequest & {
   caliberDiameterId: number;
@@ -122,11 +120,6 @@ export default function CreateBullet() {
 
   return (
     <Box>
-      <PageHeader
-        title="Create bullet"
-        subtitle="Add a new bullet with name, caliber, weight, length and ballistic coefficient"
-      />
-
       <Card>
         <CardContent sx={{ py: 3, '&:last-child': { pb: 3 } }}>
           {submitSuccess && (

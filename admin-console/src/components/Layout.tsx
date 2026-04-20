@@ -1,6 +1,7 @@
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import PeopleIcon from '@mui/icons-material/People';
 import MapIcon from '@mui/icons-material/Map';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -35,6 +36,7 @@ const nav = [
   { path: '/', label: 'Users', icon: <PeopleIcon /> },
   { path: '/map', label: 'User Locations', icon: <MapIcon /> },
   { path: '/notifications', label: 'Notifications', icon: <NotificationsIcon /> },
+  { path: '/assistant-detections', label: 'Assistant detections', icon: <ImageSearchIcon /> },
   { path: '/create-bullet', label: 'Create bullet', icon: <AddCircleOutlineIcon /> },
   { path: '/create-caliber', label: 'Create caliber', icon: <StraightenIcon /> },
   { path: '/create-vendor', label: 'Create vendor', icon: <StorefrontIcon /> },
@@ -45,9 +47,23 @@ const pageTitles: Record<string, string> = {
   '/': 'Users',
   '/map': 'User Locations Map',
   '/notifications': 'Notifications',
+  '/assistant-detections': 'Assistant detections',
   '/create-bullet': 'Create bullet',
   '/create-caliber': 'Create caliber',
   '/create-vendor': 'Create vendor',
+};
+
+/** Description under the AppBar title (per route). */
+const pageSubtitles: Record<string, string> = {
+  '/dashboard': 'Overview: users, rifles, bullets, FCM tokens',
+  '/': 'Manage and view all registered users',
+  '/map': 'Visualize user locations on an interactive map',
+  '/notifications': 'Send push notifications, schedule multi-language broadcasts, and view history',
+  '/assistant-detections':
+    'Target image detections from the assistant — browse users and inspect detection data',
+  '/create-bullet': 'Add a new bullet with name, caliber, weight, length and ballistic coefficient',
+  '/create-caliber': 'Add a new caliber diameter (e.g. 17 WSM, 0.17)',
+  '/create-vendor': 'Add a new vendor with name and optional image URL',
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -59,6 +75,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const currentWidth = collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH;
   const pageTitle = pageTitles[location.pathname] || 'Dashboard';
+  const pageSubtitle = pageSubtitles[location.pathname];
+  /** Pages that manage their own internal scrolling and must fill the viewport. */
+  const isFullHeightPage = location.pathname === '/assistant-detections';
 
   const userInitial = auth.user?.name?.charAt(0)?.toUpperCase()
     || auth.user?.emailAddress?.charAt(0)?.toUpperCase()
@@ -226,7 +245,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        width: '100%',
+        minWidth: 0,
+        bgcolor: 'background.default',
+        ...(isFullHeightPage && { height: '100vh', overflow: 'hidden' }),
+      }}
+    >
       <Box component="nav" sx={{ width: { sm: currentWidth }, flexShrink: { sm: 0 } }}>
         <Drawer
           variant="temporary"
@@ -264,11 +292,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <Box
         sx={{
-          flexGrow: 1,
+          flex: '1 1 0%',
+          minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
-          width: { sm: `calc(100% - ${currentWidth}px)` },
-          transition: 'width 0.2s ease-in-out',
         }}
       >
         <AppBar
@@ -281,7 +308,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             borderColor: 'divider',
           }}
         >
-          <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
+          <Toolbar
+            sx={{
+              px: { xs: 2, sm: 3 },
+              ...(pageSubtitle ? { py: 1.25, minHeight: { xs: 64, sm: 72 } } : {}),
+            }}
+          >
             <IconButton
               edge="start"
               onClick={() => setMobileOpen(true)}
@@ -290,13 +322,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             >
               <MenuIcon />
             </IconButton>
-            <Typography
-              variant="h6"
-              noWrap
-              sx={{ flexGrow: 1, color: 'text.primary', fontWeight: 600 }}
-            >
-              {pageTitle}
-            </Typography>
+            <Box sx={{ flexGrow: 1, minWidth: 0, mr: 2 }}>
+              <Typography variant="h6" noWrap sx={{ color: 'text.primary', fontWeight: 600, lineHeight: 1.25 }}>
+                {pageTitle}
+              </Typography>
+              {pageSubtitle && (
+                <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25, lineHeight: 1.35 }}>
+                  {pageSubtitle}
+                </Typography>
+              )}
+            </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box sx={{ textAlign: 'right', display: { xs: 'none', md: 'block' } }}>
                 <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 500, lineHeight: 1.2 }}>
@@ -324,10 +359,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Box
           component="main"
           sx={{
-            flexGrow: 1,
+            flex: '1 1 auto',
+            minWidth: 0,
             p: { xs: 2, sm: 3 },
-            maxWidth: 1400,
             width: '100%',
+            maxWidth: '100%',
+            alignSelf: 'stretch',
+            boxSizing: 'border-box',
+            ...(isFullHeightPage && {
+              minHeight: 0,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }),
           }}
         >
           {children}
