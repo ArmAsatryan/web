@@ -112,6 +112,72 @@ export interface ScheduledNotification {
   recipientsFailed?: number | null;
 }
 
+/** Multi-language batch send (POST /admin/api/notifications/batch) */
+export interface AdminNotificationBatchLanguagePayload {
+  languageCode: string;
+  title: string;
+  body?: string;
+  imageUrl?: string;
+}
+
+export interface AdminNotificationBatchRequest {
+  languages: AdminNotificationBatchLanguagePayload[];
+  /** When true, backend only targets the configured test user id. */
+  testMode: boolean;
+}
+
+export interface AdminNotificationScheduleBatchRequest {
+  languages: AdminNotificationBatchLanguagePayload[];
+  testMode: boolean;
+  /** yyyy-MM-dd */
+  scheduledDate: string;
+  /** HH:mm */
+  scheduledWallTime: string;
+  /** IANA zone, e.g. from Intl.DateTimeFormat().resolvedOptions().timeZone */
+  adminZoneId: string;
+}
+
+export interface AdminNotificationBatchItemResponse {
+  id: number;
+  languageCode: string;
+  locale?: string | null;
+  title: string;
+  body?: string;
+  imageUrl?: string;
+  scheduledAt?: string | null;
+  status: string;
+  errorMessage?: string;
+  sentAt?: string;
+  recipientsTotal?: number | null;
+  recipientsSuccess?: number | null;
+  recipientsFailed?: number | null;
+}
+
+export interface AdminNotificationBatchResponse {
+  id: number;
+  adminUserId: number;
+  batchType: string;
+  overallStatus: string;
+  scheduledDate?: string | null;
+  scheduledWallTime?: string | null;
+  adminZoneId?: string | null;
+  testMode: boolean;
+  createdAt: string;
+  completedAt?: string | null;
+  items: AdminNotificationBatchItemResponse[];
+}
+
+export interface TranslateNotificationRequest {
+  targetLanguage: string;
+  title: string;
+  body?: string;
+}
+
+export interface TranslateNotificationResponse {
+  title: string;
+  body: string;
+}
+
 // Admin bullet & caliber (BallisticBE AdminRestController)
 export interface CaliberDiameter {
   id: number;

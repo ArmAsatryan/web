@@ -33,6 +33,7 @@ import type { AdminUser } from '../types';
 import SendNotificationModal from '../components/SendNotificationModal';
 import PageHeader from '../components/PageHeader';
 import EmptyState from '../components/EmptyState';
+import { localeTagToLabel } from '../utils/languageDisplay';
 
 const SORT_OPTIONS = [
   { value: 'id', label: 'ID' },
@@ -241,7 +242,14 @@ export default function Users() {
                     </TableCell>
                     <TableCell>
                       {u.locale ? (
-                        <Chip label={u.locale} size="small" variant="outlined" sx={{ fontWeight: 500 }} />
+                        <Tooltip title={u.locale}>
+                          <Chip
+                            label={localeTagToLabel(u.locale)}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontWeight: 500 }}
+                          />
+                        </Tooltip>
                       ) : (
                         <Typography variant="body2" sx={{ color: 'text.disabled' }}>—</Typography>
                       )}

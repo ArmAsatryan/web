@@ -110,6 +110,31 @@ export function deleteScheduledNotification(id: number) {
   return api.delete(`/admin/api/notifications/scheduled/${id}`);
 }
 
+/** Multi-language notification campaigns */
+export function sendNotificationBatch(body: import('../types').AdminNotificationBatchRequest) {
+  return api.post<import('../types').AdminNotificationBatchResponse>('/admin/api/notifications/batch', body);
+}
+
+export function scheduleNotificationBatch(body: import('../types').AdminNotificationScheduleBatchRequest) {
+  return api.post<import('../types').AdminNotificationBatchResponse>('/admin/api/notifications/batch/schedule', body);
+}
+
+export function getNotificationHistory() {
+  return api.get<import('../types').AdminNotificationBatchResponse[]>('/admin/api/notifications/history');
+}
+
+export function translateNotification(body: import('../types').TranslateNotificationRequest) {
+  return api.post<import('../types').TranslateNotificationResponse>('/admin/api/notifications/translate', body);
+}
+
+export function cancelNotificationBatch(id: number) {
+  return api.post(`/admin/api/notifications/batch/${id}/cancel`);
+}
+
+export function deleteNotificationBatch(id: number) {
+  return api.delete(`/admin/api/notifications/batch/${id}`);
+}
+
 // Bullet create (AdminRestController)
 export function createBullet(body: import('../types').BulletCreateRequest) {
   return api.post<import('../types').Bullet>('/admin/api/bullets', body);
