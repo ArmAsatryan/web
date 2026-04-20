@@ -93,11 +93,12 @@ export function useAppStoreHealth(enabled = true) {
   });
 }
 
-export function useLocales() {
+export function useLocales(enabled = true) {
   return useQuery({
     queryKey: QK.locales,
     queryFn: async () => (await fetchLocales()).data,
     staleTime: 1000 * 60 * 60,
+    enabled,
   });
 }
 
