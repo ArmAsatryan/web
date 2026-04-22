@@ -7,7 +7,9 @@ import {
   MenuItem,
   Select,
   Skeleton,
+  Stack,
   Typography,
+  useTheme,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import RifleIcon from '@mui/icons-material/GpsFixed';
@@ -29,6 +31,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { SelectChangeEvent } from '@mui/material';
+import { alpha, type SxProps, type Theme } from '@mui/material/styles';
 import {
   getUsersLight,
   getRiflesLight,
@@ -36,9 +39,36 @@ import {
   getFcmTokensLight,
   getDashboardPie,
 } from '../api/api';
+import AnalyticOverview from '../components/AnalyticOverview';
+import ServerHealthSection from '../components/ServerHealthSection';
+import { dashboardPageCardContentSx, dashboardPageCardSx } from '../styles/dashboardPageCard';
 import type { AdminUserLight, AdminBulletLight, AdminLightItem } from '../types';
 
 export type TimeRangeFilter = '7d' | 'year' | 'month' | 'lifetime';
+
+/** Curated pie slices — softer than raw success/error, works in light & dark. */
+function getDashboardPieChartColors(theme: Theme) {
+  const dark = theme.palette.mode === 'dark';
+  const p = theme.palette;
+  if (dark) {
+    return {
+      active: '#3ED9BE',
+      deleted: '#FF9AAC',
+      withRifle: p.primary.light,
+      noRifle: alpha(p.text.secondary, 0.75),
+      attached: '#5DD3F0',
+      notAttached: '#C9A7FF',
+    };
+  }
+  return {
+    active: '#0B9D84',
+    deleted: '#D4637A',
+    withRifle: p.primary.main,
+    noRifle: alpha(p.text.secondary, 0.55),
+    attached: '#0A85A8',
+    notAttached: '#7C6CF0',
+  };
+}
 
 const CURRENT_YEAR = new Date().getFullYear();
 const START_YEAR = 2024; // first registration year
@@ -479,55 +509,148 @@ function BulletCreationProgress({
   );
 }
 
-/** Single pie chart card with title and data (name, value). Percent shown in label when total > 0. */
+/** Recharts `ResponsiveContainer` needs a parent with a definite height — percentage height alone collapses in flex. */
+const DASH_PIE_CHART_HEIGHT_PX = 232;
+
 function PieChartCard({
   title,
   icon,
   data,
   colors,
+  rightStat,
+  detail,
 }: {
   title: string;
   icon: React.ReactNode;
   data: Array<{ name: string; value: number }>;
   colors: string[];
+  /** Shown in the header row, e.g. "12,500 total" */
+  rightStat?: string;
+  /** Shown under the title, e.g. "68% with a rifle" */
+  detail?: string;
 }) {
+  const theme = useTheme();
   const total = data.reduce((s, d) => s + d.value, 0);
-  const dataWithPercent = data.map((d) => ({
-    ...d,
-    percent: total > 0 ? Math.round((d.value / total) * 100) : 0,
-  }));
+  const rechartsText = theme.palette.text.primary;
+  const tooltipStyle = {
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: 8,
+    color: rechartsText,
+    fontSize: 12,
+  };
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        {icon}
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>{title}</Typography>
-      </Box>
+      <Stack
+        direction="row"
+        flexWrap="wrap"
+        alignItems="flex-start"
+        justifyContent="space-between"
+        rowGap={0.5}
+        columnGap={1}
+        sx={{ mb: detail ? 0.5 : 1, minHeight: 40 }}
+      >
+        <Stack direction="row" alignItems="flex-start" gap={1} sx={{ minWidth: 0, flex: '1 1 140px' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              color: 'primary.main',
+              opacity: 0.95,
+              mt: 0.25,
+              flexShrink: 0,
+              '& .MuiSvgIcon-root': { fontSize: 20 },
+            }}
+          >
+            {icon}
+          </Box>
+          <Typography
+            variant="subtitle1"
+            fontWeight={700}
+            color="text.primary"
+            sx={{ lineHeight: 1.3, minWidth: 0, wordBreak: 'break-word' }}
+          >
+            {title}
+          </Typography>
+        </Stack>
+        {rightStat != null && rightStat !== '' && (
+          <Typography
+            variant="body2"
+            fontWeight={600}
+            color="text.primary"
+            sx={{ opacity: 0.85, flexShrink: 0, fontFeatureSettings: '"tnum"', whiteSpace: 'nowrap' }}
+          >
+            {rightStat}
+          </Typography>
+        )}
+      </Stack>
+      {detail != null && detail !== '' && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500, lineHeight: 1.4 }}>
+          {detail}
+        </Typography>
+      )}
       {total === 0 ? (
-        <Typography color="text.secondary">No data</Typography>
+        <Box
+          sx={{
+            minHeight: 200,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'text.secondary',
+            typography: 'body2',
+            fontWeight: 500,
+          }}
+        >
+          No data
+        </Box>
       ) : (
-        <ResponsiveContainer width="100%" height={240}>
-          <PieChart>
-            <Pie
-              data={dataWithPercent}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              label={({ name, percent }) => `${name}: ${percent}%`}
-            >
-              {dataWithPercent.map((_, index) => (
-                <Cell key={index} fill={colors[index % colors.length]} />
-              ))}
-            </Pie>
-            <Tooltip
-              formatter={(value, name, item) => {
-                const percent = (item as { payload?: { percent?: number } })?.payload?.percent ?? 0;
-                return [`${Number(value) ?? 0} (${percent}%)`, String(name ?? '')];
-              }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+        <Box
+          sx={{
+            width: 1,
+            height: DASH_PIE_CHART_HEIGHT_PX,
+            minHeight: DASH_PIE_CHART_HEIGHT_PX,
+            position: 'relative',
+          }}
+        >
+          <ResponsiveContainer width="100%" height={DASH_PIE_CHART_HEIGHT_PX} debounce={50}>
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="48%"
+                innerRadius="42%"
+                outerRadius="68%"
+                paddingAngle={2}
+                labelLine={false}
+              >
+                {data.map((entry, i) => (
+                  <Cell
+                    key={entry.name}
+                    fill={colors[i % colors.length]}
+                    stroke={theme.palette.background.paper}
+                    strokeWidth={1}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={tooltipStyle}
+                labelStyle={{ color: rechartsText, fontWeight: 600 }}
+                formatter={(value) => {
+                  const n = Number(value);
+                  const p = total > 0 ? ((n / total) * 100).toFixed(1) : '0';
+                  return [`${n} (${p}%)`, 'Count'];
+                }}
+              />
+              <Legend
+                verticalAlign="bottom"
+                align="center"
+                wrapperStyle={{ color: rechartsText, fontSize: 12, fontWeight: 500, paddingTop: 4 }}
+                formatter={(v) => <span style={{ color: rechartsText }}>{v}</span>}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </Box>
       )}
     </Box>
   );
@@ -622,44 +745,52 @@ export default function Dashboard() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mb: 3 }}>
-        <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel id="dashboard-time-range">Time range</InputLabel>
-          <Select
-            labelId="dashboard-time-range"
-            value={filter}
-            label="Time range"
-            onChange={handleFilterChange}
-          >
-            <MenuItem value="7d">Last 7 days</MenuItem>
-            <MenuItem value="year">Year</MenuItem>
-            <MenuItem value="month">Month</MenuItem>
-            <MenuItem value="lifetime">Lifetime</MenuItem>
-          </Select>
-        </FormControl>
-        {filter === 'year' && (
-          <FormControl size="small" sx={{ minWidth: 100 }}>
-            <InputLabel id="dashboard-year">Year</InputLabel>
+      <AnalyticOverview />
+      <ServerHealthSection />
+
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          flexWrap: 'wrap',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          justifyContent: 'space-between',
+          gap: 2,
+          mb: 2.5,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          User registration and creation progress
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 2,
+            alignItems: 'center',
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+          }}
+        >
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <InputLabel id="dashboard-time-range">Time range</InputLabel>
             <Select
-              labelId="dashboard-year"
-              value={String(selectedYear)}
-              label="Year"
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              labelId="dashboard-time-range"
+              value={filter}
+              label="Time range"
+              onChange={handleFilterChange}
             >
-              {YEARS.map((y) => (
-                <MenuItem key={y} value={String(y)}>
-                  {y}
-                </MenuItem>
-              ))}
+              <MenuItem value="7d">Last 7 days</MenuItem>
+              <MenuItem value="year">Year</MenuItem>
+              <MenuItem value="month">Month</MenuItem>
+              <MenuItem value="lifetime">Lifetime</MenuItem>
             </Select>
           </FormControl>
-        )}
-        {filter === 'month' && (
-          <>
+          {filter === 'year' && (
             <FormControl size="small" sx={{ minWidth: 100 }}>
-              <InputLabel id="dashboard-month-year">Year</InputLabel>
+              <InputLabel id="dashboard-year">Year</InputLabel>
               <Select
-                labelId="dashboard-month-year"
+                labelId="dashboard-year"
                 value={String(selectedYear)}
                 label="Year"
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -671,34 +802,53 @@ export default function Dashboard() {
                 ))}
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel id="dashboard-month">Month</InputLabel>
-              <Select
-                labelId="dashboard-month"
-                value={String(selectedMonth)}
-                label="Month"
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              >
-                {MONTHS.map((m) => (
-                  <MenuItem key={m.value} value={String(m.value)}>
-                    {m.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </>
-        )}
+          )}
+          {filter === 'month' && (
+            <>
+              <FormControl size="small" sx={{ minWidth: 100 }}>
+                <InputLabel id="dashboard-month-year">Year</InputLabel>
+                <Select
+                  labelId="dashboard-month-year"
+                  value={String(selectedYear)}
+                  label="Year"
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                >
+                  {YEARS.map((y) => (
+                    <MenuItem key={y} value={String(y)}>
+                      {y}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel id="dashboard-month">Month</InputLabel>
+                <Select
+                  labelId="dashboard-month"
+                  value={String(selectedMonth)}
+                  label="Month"
+                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                >
+                  {MONTHS.map((m) => (
+                    <MenuItem key={m.value} value={String(m.value)}>
+                      {m.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </>
+          )}
+        </Box>
       </Box>
 
       <Box
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' },
-          gap: 3,
+          gap: 2.5,
         }}
       >
-        <Card>
-          <CardContent>
+        <Card sx={dashboardPageCardSx} elevation={0}>
+          <CardContent sx={dashboardPageCardContentSx}>
             <UserRegistrationProgress
               filter={filter}
               selectedYear={selectedYear}
@@ -706,8 +856,8 @@ export default function Dashboard() {
             />
           </CardContent>
         </Card>
-        <Card>
-          <CardContent>
+        <Card sx={dashboardPageCardSx} elevation={0}>
+          <CardContent sx={dashboardPageCardContentSx}>
             <RifleCreationProgress
               filter={filter}
               selectedYear={selectedYear}
@@ -715,8 +865,8 @@ export default function Dashboard() {
             />
           </CardContent>
         </Card>
-        <Card>
-          <CardContent>
+        <Card sx={dashboardPageCardSx} elevation={0}>
+          <CardContent sx={dashboardPageCardContentSx}>
             <BulletCreationProgress
               filter={filter}
               selectedYear={selectedYear}
@@ -724,8 +874,8 @@ export default function Dashboard() {
             />
           </CardContent>
         </Card>
-        <Card>
-          <CardContent>
+        <Card sx={dashboardPageCardSx} elevation={0}>
+          <CardContent sx={dashboardPageCardContentSx}>
             <LightChartCard
               title="FCM tokens (devices)"
               icon={<SmartphoneIcon color="primary" />}
@@ -747,7 +897,7 @@ export default function Dashboard() {
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr 1fr' },
-          gap: 3,
+          gap: 2.5,
         }}
       >
         <DashboardPieCharts />
@@ -757,6 +907,7 @@ export default function Dashboard() {
 }
 
 function DashboardPieCharts() {
+  const theme = useTheme();
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard-pie'],
     queryFn: async () => {
@@ -764,12 +915,13 @@ function DashboardPieCharts() {
       return res.data;
     },
   });
+  const c = getDashboardPieChartColors(theme);
   if (isLoading) {
     return (
       <>
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i}>
-            <CardContent>
+          <Card key={i} sx={dashboardPageCardSx} elevation={0}>
+            <CardContent sx={dashboardPageCardContentSx}>
               <Skeleton variant="rectangular" height={280} />
             </CardContent>
           </Card>
@@ -779,13 +931,20 @@ function DashboardPieCharts() {
   }
   if (error || !data) {
     return (
-      <Card sx={{ gridColumn: '1 / -1' }}>
-        <CardContent>
+      <Card
+        elevation={0}
+        sx={
+          { ...(dashboardPageCardSx as object), gridColumn: '1 / -1' } as SxProps<Theme>
+        }
+      >
+        <CardContent sx={dashboardPageCardContentSx}>
           <Typography color="error">Failed to load pie chart data.</Typography>
         </CardContent>
       </Card>
     );
   }
+  const riflesTotal = data.rifles.active + data.rifles.deleted;
+  const bulletsTotal = data.bullets.active + data.bullets.deleted;
   const riflesData = [
     { name: 'Active', value: data.rifles.active },
     { name: 'Deleted', value: data.rifles.deleted },
@@ -804,43 +963,75 @@ function DashboardPieCharts() {
   ];
   return (
     <>
-      <Card>
-        <CardContent>
+      <Card sx={dashboardPageCardSx} elevation={0}>
+        <CardContent sx={dashboardPageCardContentSx}>
           <PieChartCard
             title="Rifles: active vs deleted"
             icon={<RifleIcon color="primary" />}
             data={riflesData}
-            colors={['#2e7d32', '#c62828']}
+            colors={[c.active, c.deleted]}
+            rightStat={riflesTotal > 0 ? `${riflesTotal.toLocaleString('en-US')} total` : undefined}
+            detail={
+              riflesTotal > 0
+                ? `${((data.rifles.active / riflesTotal) * 100).toFixed(1)}% active`
+                : undefined
+            }
           />
         </CardContent>
       </Card>
-      <Card>
-        <CardContent>
+      <Card sx={dashboardPageCardSx} elevation={0}>
+        <CardContent sx={dashboardPageCardContentSx}>
           <PieChartCard
             title="Bullets: active vs deleted"
             icon={<CategoryIcon color="primary" />}
             data={bulletsData}
-            colors={['#2e7d32', '#c62828']}
+            colors={[c.active, c.deleted]}
+            rightStat={bulletsTotal > 0 ? `${bulletsTotal.toLocaleString('en-US')} total` : undefined}
+            detail={
+              bulletsTotal > 0
+                ? `${((data.bullets.active / bulletsTotal) * 100).toFixed(1)}% active`
+                : undefined
+            }
           />
         </CardContent>
       </Card>
-      <Card>
-        <CardContent>
+      <Card sx={dashboardPageCardSx} elevation={0}>
+        <CardContent sx={dashboardPageCardContentSx}>
           <PieChartCard
             title="Users: with rifle %"
             icon={<PeopleIcon color="primary" />}
             data={usersRifleData}
-            colors={['#1565c0', '#78909c']}
+            colors={[c.withRifle, c.noRifle]}
+            rightStat={
+              data.usersWithRifle.totalUsers > 0
+                ? `${data.usersWithRifle.totalUsers.toLocaleString('en-US')} users`
+                : undefined
+            }
+            detail={
+              data.usersWithRifle.totalUsers > 0
+                ? `${((data.usersWithRifle.usersWithRifle / data.usersWithRifle.totalUsers) * 100).toFixed(1)}% with a registered rifle`
+                : undefined
+            }
           />
         </CardContent>
       </Card>
-      <Card>
-        <CardContent>
+      <Card sx={dashboardPageCardSx} elevation={0}>
+        <CardContent sx={dashboardPageCardContentSx}>
           <PieChartCard
             title="Bullets: attached to rifle %"
             icon={<CategoryIcon color="primary" />}
             data={bulletsAttachedData}
-            colors={['#00897b', '#ef6c00']}
+            colors={[c.attached, c.notAttached]}
+            rightStat={
+              data.bulletsAttached.totalBullets > 0
+                ? `${data.bulletsAttached.totalBullets.toLocaleString('en-US')} bullets`
+                : undefined
+            }
+            detail={
+              data.bulletsAttached.totalBullets > 0
+                ? `${((data.bulletsAttached.attachedToRifle / data.bulletsAttached.totalBullets) * 100).toFixed(1)}% attached to a rifle`
+                : undefined
+            }
           />
         </CardContent>
       </Card>

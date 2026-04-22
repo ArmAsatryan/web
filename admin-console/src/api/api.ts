@@ -3,6 +3,58 @@ import axios, { AxiosError } from 'axios';
 /** Backend API base URL. Override with VITE_API_BASE_URL in .env. */
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.ballistiq.xyz';
 
+/** `GET /api/loads/full` — see Vite proxy `__loads` in dev; override with `VITE_LOADS_API_BASE_URL`. */
+const defaultLoadsBaseURL = import.meta.env.DEV
+  ? '/__loads'
+  : 'https://205.196.83.22:8888';
+const loadsBaseURL = (
+  (import.meta.env.VITE_LOADS_API_BASE_URL as string | undefined) || defaultLoadsBaseURL
+).replace(/\/$/, '');
+
+const loadsApi = axios.create({
+  baseURL: loadsBaseURL,
+  headers: { 'Content-Type': 'application/json', language: 'en' },
+  /** Same-origin `/__loads` only; avoid CORS issues on absolute API URLs unless the server allows credentials. */
+  withCredentials: loadsBaseURL.startsWith('/'),
+});
+
+/**
+ * Optional bearer token for `GET /api/loads/full` (server health), saved from the admin UI.
+ * Precedence: manual paste → `VITE_LOADS_API_TOKEN` → admin session `admin_token`.
+ */
+export const LOADS_MANUAL_TOKEN_KEY = 'loads_api_token';
+
+function resolveLoadsBearerToken(): string | null {
+  if (typeof localStorage === 'undefined') return null;
+  const manual = localStorage.getItem(LOADS_MANUAL_TOKEN_KEY)?.trim();
+  if (manual) return manual;
+  const env = (import.meta.env.VITE_LOADS_API_TOKEN as string | undefined)?.trim();
+  if (env) return env;
+  return localStorage.getItem('admin_token')?.trim() || null;
+}
+
+/** Some backends only read the JWT from a cookie (error: "cookie token empty"). Same-origin + Vite dev proxy. */
+function syncLoadsSessionCookie(token: string) {
+  if (typeof document === 'undefined') return;
+  if (!loadsBaseURL.startsWith('/')) return;
+  const name = (import.meta.env.VITE_LOADS_COOKIE_NAME as string) || 'token';
+  document.cookie = `${name}=${encodeURIComponent(token)}; path=/; max-age=86400; SameSite=Lax`;
+}
+
+loadsApi.interceptors.request.use((config) => {
+  const token = resolveLoadsBearerToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+    syncLoadsSessionCookie(token);
+  }
+  return config;
+});
+
+loadsApi.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => Promise.reject(error)
+);
+
 export const api = axios.create({
   baseURL,
   headers: { 'Content-Type': 'application/json' },
@@ -51,6 +103,14 @@ export function getUsers(params: {
   q?: string;
 }) {
   return api.get<import('../types').PageResponse<import('../types').AdminUser>>('/admin/api/users', { params });
+}
+
+/**
+ * One-page fetch sorted by id desc — the first user’s id is the current max id (treated as total user count in the admin dashboard overview).
+ * Matches: GET /admin/api/users?page=1&size=20&sortBy=id&sortDir=desc
+ */
+export function getUsersForDashboardMaxId() {
+  return getUsers({ page: 1, size: 20, sortBy: 'id', sortDir: 'desc' });
 }
 
 // Admin users light (fast: id + createdAt only, totalUsers = last id)
@@ -196,4 +256,9 @@ export function getFcmTokensLight() {
 // Dashboard pie charts (rifles/bullets deleted %, users with rifle %, bullets attached %)
 export function getDashboardPie() {
   return api.get<import('../types').DashboardPieResponse>('/admin/api/dashboard/pie');
+}
+
+/** Server metrics (`GET /api/loads/full`). Use `VITE_LOADS_API_TOKEN` in `.env.local` for this host (never commit it). */
+export function getLoadsFull() {
+  return loadsApi.get<import('../types').LoadsFullResponse>('/api/loads/full');
 }

@@ -364,3 +364,24 @@ export interface TransformedDetection {
   email: string | null;
 }
 
+/** GET /api/loads/full — server health snapshot. */
+export interface LoadsFullData {
+  created_at: string;
+  valid_till: string;
+  memory: { total: number; used: number; free: number; cached: number };
+  disk: { total: number; free: number; used: number };
+  cpu: {
+    percentage: number;
+    kernel_count: number;
+    model: string;
+    top: { name: string; value: number }[];
+  };
+  /** Host OS and capacity; `uptime` is Unix seconds of last boot (per backend). */
+  platform: { num_proc: number; platforminfo: string; version: string; uptime: number };
+  la: { load1: number; load5: number; load15: number };
+}
+
+export interface LoadsFullResponse {
+  data: LoadsFullData;
+}
+

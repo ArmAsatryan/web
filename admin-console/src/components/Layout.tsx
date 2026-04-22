@@ -286,11 +286,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <Box
       sx={{
         display: 'flex',
-        minHeight: '100vh',
+        height: { xs: '100dvh', sm: '100vh' },
+        minHeight: { xs: '100dvh', sm: '100vh' },
+        maxHeight: { xs: '100dvh', sm: '100vh' },
         width: '100%',
         minWidth: 0,
         bgcolor: 'background.default',
-        ...(isFullHeightPage && { height: '100vh', overflow: 'hidden' }),
+        overflow: 'hidden',
       }}
     >
       <Box component="nav" sx={{ width: { sm: currentWidth }, flexShrink: { sm: 0 } }}>
@@ -332,8 +334,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         sx={{
           flex: '1 1 0%',
           minWidth: 0,
+          minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         <AppBar
@@ -397,19 +401,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Box
           component="main"
           sx={{
-            flex: '1 1 auto',
             minWidth: 0,
             p: { xs: 2, sm: 3 },
             width: '100%',
             maxWidth: '100%',
             alignSelf: 'stretch',
             boxSizing: 'border-box',
-            ...(isFullHeightPage && {
-              minHeight: 0,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-            }),
+            ...(isFullHeightPage
+              ? {
+                  flex: '1 1 auto',
+                  minHeight: 0,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }
+              : {
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                }),
           }}
         >
           {children}

@@ -34,7 +34,7 @@ Standalone React frontend for the BALLISTiQ admin panel. Only users with role `R
 
    | File | Mode | `VITE_API_BASE_URL` |
    |------|------|---------------------|
-   | `.env.development` | `npm run dev` | `http://192.168.1.25:8080` |
+   | `.env.development` | `npm run dev` | `https://api.ballistiq.xyz` |
    | `.env.production`  | `npm run build` | `https://api.ballistiq.xyz` |
 
    To override on your machine (e.g. point to a different local backend), copy `.env.example` to `.env` (gitignored):
@@ -65,7 +65,10 @@ Output is in `dist/`. Serve with any static file server and point it to your bac
 
 | Variable | Description |
 |----------|-------------|
-| `VITE_API_BASE_URL` | Base URL of the BALLISTiQ backend API. Dev default: `http://192.168.1.25:8080` (`.env.development`). Prod default: `https://api.ballistiq.xyz` (`.env.production`). |
+| `VITE_API_BASE_URL` | Base URL of the BALLISTiQ backend API. Default: `https://api.ballistiq.xyz` in both `.env.development` and `.env.production`. |
+| `VITE_LOADS_API_BASE_URL` | Optional. Override base URL for **Server health** (`GET /api/loads/full`). Dev default: `/__loads` (proxied to the loads host in `vite.config.ts`). Production default: `https://205.196.83.22:8888` unless you override at build time. |
+| `VITE_LOADS_API_TOKEN` | JWT `Authorization: Bearer …` for the loads host when the admin session token is not accepted. Put in **`.env.local`** (gitignored). |
+| `VITE_LOADS_COOKIE_NAME` | If the API returns **401 `cookie token empty`**, it expects the JWT in a **cookie** (default name `token`). The Vite dev proxy and the app set this automatically from `VITE_LOADS_API_TOKEN`. |
 
 ## Features
 
