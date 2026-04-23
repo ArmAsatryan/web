@@ -40,7 +40,6 @@ import {
   getDashboardPie,
 } from '../api/api';
 import AnalyticOverview from '../components/AnalyticOverview';
-import ServerHealthSection from '../components/ServerHealthSection';
 import { dashboardPageCardContentSx, dashboardPageCardSx } from '../styles/dashboardPageCard';
 import type { AdminUserLight, AdminBulletLight, AdminLightItem } from '../types';
 
@@ -746,7 +745,6 @@ export default function Dashboard() {
   return (
     <Box>
       <AnalyticOverview />
-      <ServerHealthSection />
 
       <Box
         sx={{

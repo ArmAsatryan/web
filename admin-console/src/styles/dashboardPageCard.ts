@@ -2,7 +2,7 @@ import { alpha } from '@mui/material/styles';
 import type { SxProps, Theme } from '@mui/material/styles';
 
 /**
- * Shared Card / CardContent look for the Dashboard (health, charts, pies).
+ * Shared Card / CardContent look for the Dashboard (charts, pies).
  * Use with `<Card sx={dashboardPageCardSx} elevation={0}>` and matching `CardContent`.
  */
 export const dashboardPageCardSx: SxProps<Theme> = {
