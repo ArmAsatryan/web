@@ -1,5 +1,7 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import FormControl from '@mui/material/FormControl';
@@ -230,6 +232,7 @@ export default function Notifications() {
   const [translations, setTranslations] = useState<Record<string, { title: string; body: string }>>({});
   const [langToAdd, setLangToAdd] = useState('');
   const [translatingAll, setTranslatingAll] = useState(false);
+  const [translatingLocaleCode, setTranslatingLocaleCode] = useState<string | null>(null);
   const [translateProgress, setTranslateProgress] = useState(0);
   const [scheduleMode, setScheduleMode] = useState<'now' | 'later'>('now');
   const [scheduledLocal, setScheduledLocal] = useState('');
@@ -308,10 +311,42 @@ export default function Notifications() {
     });
   };
 
-  const translateAll = async () => {
-    if (!enTitle.trim()) return;
+  /** Single locale: English title/body → Gemini → updates `translations[lang]`. */
+  const translateEnToOneLocale = async (lang: string) => {
+    const title = enTitle.trim();
+    if (!title) return;
     const sourceBody = enBody.trim();
     const translateBody = sourceBody.length > 0;
+    const { data } = await translateNotification({
+      targetLanguage: lang,
+      title,
+      body: translateBody ? sourceBody : undefined,
+    });
+    setTranslations((prev) => ({
+      ...prev,
+      [lang]: {
+        title: data.title,
+        // Title-only compose: backend may still return a body; keep locales title-only.
+        body: translateBody ? (data.body ?? '') : '',
+      },
+    }));
+  };
+
+  const handleTranslateOneLocale = async (code: string) => {
+    if (!enTitle.trim()) return;
+    setBatchMessage(null);
+    setTranslatingLocaleCode(code);
+    try {
+      await translateEnToOneLocale(code);
+    } catch (e: unknown) {
+      setBatchMessage({ type: 'error', text: extractApiError(e) });
+    } finally {
+      setTranslatingLocaleCode(null);
+    }
+  };
+
+  const translateAll = async () => {
+    if (!enTitle.trim()) return;
     const raw = locales ?? [];
     const targets = Array.from(
       new Set(raw.filter((l) => typeof l === 'string' && l.trim() !== '' && l !== DEFAULT_LANG))
@@ -333,19 +368,7 @@ export default function Notifications() {
     try {
       let done = 0;
       for (const lang of targets) {
-        const { data } = await translateNotification({
-          targetLanguage: lang,
-          title: enTitle.trim(),
-          body: translateBody ? sourceBody : undefined,
-        });
-        setTranslations((prev) => ({
-          ...prev,
-          [lang]: {
-            title: data.title,
-            // Title-only compose: backend may still return a body; keep locales title-only.
-            body: translateBody ? (data.body ?? '') : '',
-          },
-        }));
+        await translateEnToOneLocale(lang);
         done += 1;
         setTranslateProgress(Math.round((done / targets.length) * 100));
       }
@@ -658,7 +681,7 @@ export default function Notifications() {
                           color="secondary"
                           startIcon={<AutoAwesomeIcon />}
                           onClick={translateAll}
-                          disabled={translatingAll || !enTitle.trim()}
+                          disabled={translatingAll || translatingLocaleCode !== null || !enTitle.trim()}
                         >
                           {translatingAll ? 'Translating…' : 'Translate all with AI'}
                         </Button>
@@ -666,11 +689,43 @@ export default function Notifications() {
                       {translatingAll && <LinearProgress variant="determinate" value={translateProgress} />}
                       {extraLangs.map((code) => (
                         <Paper key={`lang-${code}`} variant="outlined" sx={{ p: 2 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                            <Typography fontWeight={600}>{languageCodeToLabel(code)}</Typography>
-                            <Button size="small" color="inherit" onClick={() => removeLanguage(code)}>
-                              Remove
-                            </Button>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 1,
+                              mb: 1,
+                            }}
+                          >
+                            <Typography fontWeight={600} sx={{ flex: 1, minWidth: 0 }}>
+                              {languageCodeToLabel(code)}
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, gap: 0.5 }}>
+                              <Tooltip title="Translate with AI">
+                                <span>
+                                  <IconButton
+                                    size="small"
+                                    aria-label="Translate with AI"
+                                    onClick={() => void handleTranslateOneLocale(code)}
+                                    disabled={
+                                      !enTitle.trim() ||
+                                      translatingAll ||
+                                      translatingLocaleCode !== null
+                                    }
+                                  >
+                                    {translatingLocaleCode === code ? (
+                                      <CircularProgress color="inherit" size={18} />
+                                    ) : (
+                                      <AutoAwesomeIcon fontSize="small" />
+                                    )}
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                              <Button size="small" color="inherit" onClick={() => removeLanguage(code)}>
+                                Remove
+                              </Button>
+                            </Box>
                           </Box>
                           <TextField
                             key={`tr-title-${code}`}
