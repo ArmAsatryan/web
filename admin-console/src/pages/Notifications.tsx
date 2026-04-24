@@ -54,7 +54,11 @@ import {
   sendNotificationToUser,
   translateNotification,
 } from '../api/api';
-import type { AdminNotificationBatchLanguagePayload, AdminNotificationBatchResponse } from '../types';
+import type {
+  AdminNotificationBatchItemResponse,
+  AdminNotificationBatchLanguagePayload,
+  AdminNotificationBatchResponse,
+} from '../types';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { languageCodeToLabel, localeTagToLabel } from '../utils/languageDisplay';
 
@@ -95,6 +99,42 @@ function formatScheduledAtLocal(iso: string): string {
     minute: '2-digit',
     timeZoneName: 'short',
   });
+}
+
+/** Group history rows by language code (case-insensitive); stable sort by normalized code. */
+function groupBatchHistoryItemsByLanguage(
+  items: AdminNotificationBatchItemResponse[]
+): { canonicalCode: string; rows: AdminNotificationBatchItemResponse[] }[] {
+  const map = new Map<string, AdminNotificationBatchItemResponse[]>();
+  for (const row of items) {
+    const raw = row.languageCode?.trim();
+    const key = raw ? raw.toLowerCase() : '_';
+    const bucket = map.get(key);
+    if (bucket) {
+      bucket.push(row);
+    } else {
+      map.set(key, [row]);
+    }
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, rows]) => ({
+      canonicalCode: rows[0]?.languageCode?.trim() || rows[0]?.languageCode || '—',
+      rows,
+    }));
+}
+
+/** Sum FCM device totals (`recipientsTotal`) for all rows in a language group; null if none reported. */
+function sumLanguageRecipientsTotal(rows: AdminNotificationBatchItemResponse[]): number | null {
+  let sum = 0;
+  let hasAny = false;
+  for (const r of rows) {
+    if (r.recipientsTotal != null) {
+      sum += r.recipientsTotal;
+      hasAny = true;
+    }
+  }
+  return hasAny ? sum : null;
 }
 
 function DevicePreviewPanel(props: {
@@ -867,109 +907,170 @@ export default function Notifications() {
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {batch.items.length} item(s)
+                        {batch.items.length > 0
+                          ? ` · ${groupBatchHistoryItemsByLanguage(batch.items).length} language(s)`
+                          : ''}
                         {batch.testMode ? ' · test mode' : ''}
                       </Typography>
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <TableContainer component={Paper} variant="outlined">
-                      <Table size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Language</TableCell>
-                            <TableCell>Locale</TableCell>
-                            <TableCell>Title</TableCell>
-                            <TableCell>Body</TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell>
-                              <Tooltip title="Send instant in your browser timezone. Hover a cell for UTC (ISO).">
-                                <span>Send time</span>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      {groupBatchHistoryItemsByLanguage(batch.items).map(({ canonicalCode, rows }) => {
+                        const devicesTotal = sumLanguageRecipientsTotal(rows);
+                        return (
+                        <Accordion
+                          key={`${batch.id}-lang-${canonicalCode}`}
+                          defaultExpanded={false}
+                          variant="outlined"
+                          disableGutters
+                          sx={{
+                            '&:before': { display: 'none' },
+                            boxShadow: 'none',
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1, width: '100%', pr: 1 }}>
+                              <Typography fontWeight={600}>{languageCodeToLabel(canonicalCode)}</Typography>
+                              <Typography variant="caption" color="text.secondary" component="span">
+                                ({canonicalCode})
+                              </Typography>
+                              <Chip size="small" label={`${rows.length} row(s)`} variant="outlined" />
+                              <Tooltip title="Sum of targeted devices (FCM tokens) across rows in this language. Pending sends may not include a total yet.">
+                                <Chip
+                                  size="small"
+                                  variant="outlined"
+                                  label={
+                                    devicesTotal != null
+                                      ? `${devicesTotal.toLocaleString()} devices`
+                                      : 'Devices: —'
+                                  }
+                                />
                               </Tooltip>
-                            </TableCell>
-                            <TableCell>
-                              <Tooltip title="When this row was saved. If it is much earlier than the batch time above, the row may not belong with this campaign.">
-                                <span>Logged</span>
-                              </Tooltip>
-                            </TableCell>
-                            <TableCell>Delivery</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {batch.items.map((row) => {
-                            const delivery = deliverySummary(row);
-                            const langTag = [row.languageCode, row.locale].filter(Boolean).join(' · ');
-                            const bodyText = row.body?.trim() ?? '';
-                            const langCaption = `${langTag} · #${row.id}`;
-                            return (
-                              <TableRow key={row.id}>
-                                <TableCell sx={{ minWidth: 108, maxWidth: 160 }}>
-                                  <Typography variant="body2">{languageCodeToLabel(row.languageCode)}</Typography>
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                    display="block"
-                                    noWrap
-                                    title={
-                                      row.createdAt ? `${langCaption} · logged ${row.createdAt}` : langCaption
-                                    }
-                                  >
-                                    {langCaption}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell>{row.locale ? localeTagToLabel(row.locale) : '—'}</TableCell>
-                                <TableCell sx={{ maxWidth: 220 }}>
-                                  <Tooltip title={row.title} placement="top-start">
-                                    <Typography variant="body2" noWrap>
-                                      {row.title}
-                                    </Typography>
-                                  </Tooltip>
-                                </TableCell>
-                                <TableCell sx={{ maxWidth: 220 }}>
-                                  {bodyText ? (
-                                    <Tooltip title={bodyText} placement="top-start">
-                                      <Typography variant="body2" noWrap>
-                                        {bodyText}
-                                      </Typography>
-                                    </Tooltip>
-                                  ) : (
-                                    <Typography variant="body2" color="text.secondary">
-                                      —
-                                    </Typography>
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  <Chip size="small" label={row.status} color={statusChip(row.status)} variant="outlined" />
-                                </TableCell>
-                                <TableCell>
-                                  {row.scheduledAt ? (
-                                    <Tooltip title={`UTC: ${new Date(row.scheduledAt).toISOString()}`}>
-                                      <Typography variant="body2" component="span">
-                                        {formatScheduledAtLocal(row.scheduledAt)}
-                                      </Typography>
-                                    </Tooltip>
-                                  ) : (
-                                    '—'
-                                  )}
-                                </TableCell>
-                                <TableCell sx={{ maxWidth: 140 }}>
-                                  <Typography variant="caption" color="text.secondary" noWrap title={row.createdAt}>
-                                    {row.createdAt ? formatBatchDate(row.createdAt) : '—'}
-                                  </Typography>
-                                </TableCell>
-                                <TableCell>
-                                  <Typography variant="caption" display="block">
-                                    {delivery.primary}
-                                  </Typography>
-                                  {delivery.progress != null && (
-                                    <LinearProgress variant="determinate" value={delivery.progress} sx={{ mt: 0.5, height: 6 }} />
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
+                            </Box>
+                          </AccordionSummary>
+                          <AccordionDetails sx={{ pt: 0, px: 1, pb: 1 }}>
+                            <TableContainer component={Paper} variant="outlined">
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Locale</TableCell>
+                                    <TableCell>Title</TableCell>
+                                    <TableCell>Body</TableCell>
+                                    <TableCell>Status</TableCell>
+                                    <TableCell>
+                                      <Tooltip title="Send instant in your browser timezone. Hover a cell for UTC (ISO).">
+                                        <span>Send time</span>
+                                      </Tooltip>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Tooltip title="When this row was saved. If it is much earlier than the batch time above, the row may not belong with this campaign.">
+                                        <span>Logged</span>
+                                      </Tooltip>
+                                    </TableCell>
+                                    <TableCell>Delivery</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {rows.map((row) => {
+                                    const delivery = deliverySummary(row);
+                                    const langTag = [row.languageCode, row.locale].filter(Boolean).join(' · ');
+                                    const bodyText = row.body?.trim() ?? '';
+                                    const langCaption = `${langTag} · #${row.id}`;
+                                    return (
+                                      <TableRow key={row.id}>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 140 }}>
+                                          <Typography variant="body2">
+                                            {row.locale ? localeTagToLabel(row.locale) : '—'}
+                                          </Typography>
+                                          <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                            display="block"
+                                            noWrap
+                                            title={
+                                              row.createdAt ? `${langCaption} · logged ${row.createdAt}` : langCaption
+                                            }
+                                          >
+                                            #{row.id}
+                                          </Typography>
+                                        </TableCell>
+                                        <TableCell sx={{ maxWidth: 220 }}>
+                                          <Tooltip title={row.title} placement="top-start">
+                                            <Typography variant="body2" noWrap>
+                                              {row.title}
+                                            </Typography>
+                                          </Tooltip>
+                                        </TableCell>
+                                        <TableCell sx={{ maxWidth: 220 }}>
+                                          {bodyText ? (
+                                            <Tooltip title={bodyText} placement="top-start">
+                                              <Typography variant="body2" noWrap>
+                                                {bodyText}
+                                              </Typography>
+                                            </Tooltip>
+                                          ) : (
+                                            <Typography variant="body2" color="text.secondary">
+                                              —
+                                            </Typography>
+                                          )}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Chip
+                                            size="small"
+                                            label={row.status}
+                                            color={statusChip(row.status)}
+                                            variant="outlined"
+                                          />
+                                        </TableCell>
+                                        <TableCell>
+                                          {row.scheduledAt ? (
+                                            <Tooltip title={`UTC: ${new Date(row.scheduledAt).toISOString()}`}>
+                                              <Typography variant="body2" component="span">
+                                                {formatScheduledAtLocal(row.scheduledAt)}
+                                              </Typography>
+                                            </Tooltip>
+                                          ) : (
+                                            '—'
+                                          )}
+                                        </TableCell>
+                                        <TableCell sx={{ maxWidth: 140 }}>
+                                          <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                            noWrap
+                                            title={row.createdAt}
+                                          >
+                                            {row.createdAt ? formatBatchDate(row.createdAt) : '—'}
+                                          </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Typography variant="caption" display="block">
+                                            {delivery.primary}
+                                          </Typography>
+                                          {delivery.progress != null && (
+                                            <LinearProgress
+                                              variant="determinate"
+                                              value={delivery.progress}
+                                              sx={{ mt: 0.5, height: 6 }}
+                                            />
+                                          )}
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  })}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </AccordionDetails>
+                        </Accordion>
+                        );
+                      })}
+                    </Box>
                     <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
                       <Tooltip title="Cancel pending scheduled batch">
                         <span>
