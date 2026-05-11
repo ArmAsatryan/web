@@ -7,6 +7,7 @@ import MapIcon from '@mui/icons-material/Map';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import PaidIcon from '@mui/icons-material/Paid';
 import AppleIcon from '@mui/icons-material/Apple';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -34,6 +35,7 @@ const COLLAPSED_WIDTH = 72;
 
 const nav = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+  { path: '/adapty', label: 'Subscriptions (Adapty)', icon: <PaidIcon /> },
   { path: '/', label: 'Users', icon: <PeopleIcon /> },
   { path: '/map', label: 'User Locations', icon: <MapIcon /> },
   { path: '/notifications', label: 'Notifications', icon: <NotificationsIcon /> },
@@ -43,9 +45,7 @@ const nav = [
   { path: '/create-vendor', label: 'Create vendor', icon: <StorefrontIcon /> },
 ];
 
-const secondaryNav = [
-  { path: '/app-store', label: 'App Store Connect', icon: <AppleIcon /> },
-];
+const secondaryNav = [{ path: '/app-store', label: 'App Store Connect', icon: <AppleIcon /> }];
 
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -58,6 +58,7 @@ const pageTitles: Record<string, string> = {
   '/create-vendor': 'Create vendor',
   '/app-store': 'App Store Connect',
   '/app-store/credentials': 'App Store Connect credentials',
+  '/adapty': 'Subscriptions (Adapty)',
 };
 
 /** Description under the AppBar title (per route). */
@@ -73,6 +74,7 @@ const pageSubtitles: Record<string, string> = {
   '/create-vendor': 'Add a new vendor with name and optional image URL',
   '/app-store': 'Manage your App Store Connect apps, versions and localized metadata',
   '/app-store/credentials': 'Store the issuer ID, key ID and .p8 signing key used to sign JWTs',
+  '/adapty': 'MRR, ARR, active subs & trials, revenue — from your Adapty Export Analytics API',
 };
 
 /** Prefix-based titles for dynamic nested routes. First match wins. */

@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Card,
   CardContent,
   FormControl,
@@ -30,6 +31,7 @@ import {
 } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import type { SelectChangeEvent } from '@mui/material';
 import { alpha, type SxProps, type Theme } from '@mui/material/styles';
 import {
@@ -745,6 +747,29 @@ export default function Dashboard() {
   return (
     <Box>
       <AnalyticOverview />
+
+      <Card sx={{ ...dashboardPageCardSx, mb: 2.5 }} elevation={0}>
+        <CardContent sx={{ ...dashboardPageCardContentSx, py: 2 }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            alignItems={{ sm: 'center' }}
+            justifyContent="space-between"
+            spacing={2}
+          >
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                Subscriptions (Adapty)
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                MRR, ARR, active subscriptions and trials, revenue trend — uses your server’s Adapty Export Analytics integration.
+              </Typography>
+            </Box>
+            <Button component={RouterLink} to="/adapty" variant="contained">
+              Open Adapty metrics
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
 
       <Box
         sx={{

@@ -1,3 +1,7 @@
+import { config as loadEnv } from "dotenv";
+
+loadEnv();
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -5,6 +9,49 @@ import { createServer } from "http";
 
 const app = express();
 const httpServer = createServer(app);
+
+/**
+ * Admin console dev server runs on another origin (e.g. :3001). Browsers block
+ * cross-origin calls to this API (:3000) without CORS. Production API already sends CORS.
+ */
+function allowAdminConsoleDevCors(req: Request, res: Response, next: NextFunction) {
+  if (process.env.NODE_ENV === "production") {
+    next();
+    return;
+  }
+  if (!req.path.startsWith("/admin/api")) {
+    next();
+    return;
+  }
+  const origin = req.headers.origin;
+  if (typeof origin === "string" && origin.length > 0) {
+    try {
+      const u = new URL(origin);
+      const ok =
+        u.hostname === "localhost" ||
+        u.hostname === "127.0.0.1" ||
+        u.hostname.endsWith(".replit.dev") ||
+        u.hostname.endsWith(".repl.co");
+      if (ok) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+        res.setHeader("Vary", "Origin");
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Authorization, Content-Type, X-Requested-With",
+  );
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(204);
+    return;
+  }
+  next();
+}
 
 declare module "http" {
   interface IncomingMessage {
@@ -21,6 +68,8 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false }));
+
+app.use(allowAdminConsoleDevCors);
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
