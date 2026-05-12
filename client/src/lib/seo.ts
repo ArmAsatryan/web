@@ -2,9 +2,12 @@
  * SEO config and utilities. Use SITE_URL for all absolute URLs (sitemap, canonical, OG, JSON-LD).
  * Set VITE_SITE_URL in env or leave unset to use default production domain.
  */
-export const SITE_URL =
-  (typeof import.meta !== "undefined" && (import.meta as unknown as { env?: { VITE_SITE_URL?: string } }).env?.VITE_SITE_URL) ||
-  "https://ballistiq.xyz";
+import {
+  OG_SITE_NAME,
+  resolvePublicSiteUrl,
+} from "@shared/marketing-seo";
+
+export const SITE_URL = resolvePublicSiteUrl();
 
 export interface PageMetaOptions {
   title: string;
@@ -73,8 +76,13 @@ export function setPageMeta({
 
   setMeta("og:title", title, "property");
   setMeta("og:description", description, "property");
+  setMeta("og:type", "website", "property");
   setMeta("og:url", canonical, "property");
   setMeta("og:image", imageUrl, "property");
+  setMeta("og:image:width", "1200", "property");
+  setMeta("og:image:height", "630", "property");
+  setMeta("og:site_name", OG_SITE_NAME, "property");
+  setMeta("og:locale", "en_US", "property");
   if (imageAlt) {
     setMeta("og:image:alt", imageAlt, "property");
     setMeta("twitter:image:alt", imageAlt);
@@ -82,6 +90,7 @@ export function setPageMeta({
     removeMeta("og:image:alt", "property");
     removeMeta("twitter:image:alt");
   }
+  setMeta("twitter:card", "summary_large_image");
   setMeta("twitter:title", title);
   setMeta("twitter:description", description);
   setMeta("twitter:image", imageUrl);

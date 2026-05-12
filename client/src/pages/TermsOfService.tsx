@@ -4,15 +4,11 @@ import { Footer } from "@/components/Footer";
 import { PageBackground } from "@/components/PageBackground";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { ArrowLeft } from "lucide-react";
+import { TERMS_OF_SERVICE_PAGE_META } from "@shared/marketing-seo";
 import { usePageMeta } from "@/hooks/use-page-meta";
 
 export function TermsOfServicePage() {
-  usePageMeta({
-    title: "Terms of Service | BALLISTiQ",
-    description:
-      "Terms and conditions for using BALLISTiQ ballistic calculator and sniper assistant app. Service description and user responsibilities.",
-    path: "/terms-of-service",
-  });
+  usePageMeta(TERMS_OF_SERVICE_PAGE_META);
   return (
     <div className="relative min-h-screen bg-background text-foreground">
       <PageBackground />
