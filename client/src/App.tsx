@@ -1,6 +1,7 @@
 import { Router, Route, Switch } from "wouter";
 import { ThemeContext, useThemeProvider } from "@/hooks/use-theme";
 import { I18nContext, useI18nProvider } from "@/hooks/use-i18n";
+import { MarketingSiteProvider } from "@/context/MarketingSiteContext";
 import { HomePage } from "@/pages/HomePage";
 import { PrivacyPolicyPage } from "@/pages/PrivacyPolicy";
 import { TermsOfServicePage } from "@/pages/TermsOfService";
@@ -13,7 +14,8 @@ function App() {
   return (
     <ThemeContext.Provider value={themeValue}>
       <I18nContext.Provider value={i18nValue}>
-        <Router>
+        <MarketingSiteProvider>
+          <Router>
           <Switch>
             <Route path="/privacy-policy" component={PrivacyPolicyPage} />
             <Route path="/terms-of-service" component={TermsOfServicePage} />
@@ -21,6 +23,7 @@ function App() {
             <Route path="/:rest+" component={NotFound} />
           </Switch>
         </Router>
+        </MarketingSiteProvider>
       </I18nContext.Provider>
     </ThemeContext.Provider>
   );

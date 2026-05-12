@@ -1,6 +1,8 @@
 import { reviews, ratingDistribution, ratingSummary } from "@/data/siteContent";
 import { Star, ThumbsUp } from "lucide-react";
 import { useI18n } from "@/hooks/use-i18n";
+import { useMarketingSitePayload } from "@/context/MarketingSiteContext";
+import { pickLocalized } from "@/lib/localized-text";
 import { AnimatedSection } from "./AnimatedSection";
 
 function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "lg" }) {
@@ -23,9 +25,15 @@ function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "lg
   );
 }
 
-function RatingSummaryBlock() {
+function RatingSummaryBlock({
+  distribution,
+  summary,
+}: {
+  distribution: { stars: number; count: number }[];
+  summary: { average: number; total: number };
+}) {
   const { t } = useI18n();
-  const maxCount = Math.max(...ratingDistribution.map((r) => r.count));
+  const maxCount = Math.max(...distribution.map((r) => r.count), 1);
 
   return (
     <div
@@ -34,19 +42,19 @@ function RatingSummaryBlock() {
     >
       <div className="flex-shrink-0 text-center">
         <div className="text-5xl font-bold leading-none text-foreground sm:text-6xl">
-          {ratingSummary.average}
+          {summary.average}
         </div>
         <div className="text-muted-foreground text-xs mt-1">
           {t("reviews.outOf")}
         </div>
-        <StarRating rating={Math.round(ratingSummary.average)} size="lg" />
+        <StarRating rating={Math.round(summary.average)} size="lg" />
         <div className="text-muted-foreground text-xs mt-2">
-          {ratingSummary.total} {t("reviews.ratings")}
+          {summary.total} {t("reviews.ratings")}
         </div>
       </div>
 
       <div className="w-full min-w-0 flex-1 space-y-1.5 pt-1 sm:pt-0">
-        {ratingDistribution.map((row) => (
+        {distribution.map((row) => (
           <div key={row.stars} className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground w-3 text-right">
               {row.stars}
@@ -67,7 +75,13 @@ function RatingSummaryBlock() {
   );
 }
 
-function ReviewCard({ review, index }: { review: typeof reviews[0]; index: number }) {
+function ReviewCard({
+  review,
+  index,
+}: {
+  review: { name: string; date: string; rating: number; title: string; text: string };
+  index: number;
+}) {
   return (
     <div
       className="bg-card/50 backdrop-blur-sm border border-border/40 rounded-2xl p-5 sm:p-6"
@@ -106,7 +120,30 @@ function ReviewCard({ review, index }: { review: typeof reviews[0]; index: numbe
 }
 
 export function ReviewsSection() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const cms = useMarketingSitePayload();
+  const cmsReviews = cms?.reviews?.items?.length ? cms.reviews : null;
+
+  const displayReviews = cmsReviews
+    ? cmsReviews.items.map((r) => ({
+        name: r.name,
+        date: r.date,
+        rating: r.rating,
+        title: pickLocalized(r.title, locale),
+        text: pickLocalized(r.text, locale),
+      }))
+    : reviews.map((r) => ({
+        name: r.name,
+        date: r.date,
+        rating: r.rating,
+        title: r.title,
+        text: r.text,
+      }));
+
+  const distribution = cmsReviews?.distribution ?? ratingDistribution;
+  const summary = cmsReviews
+    ? { average: cmsReviews.average, total: cmsReviews.total }
+    : ratingSummary;
 
   return (
     <section id="reviews" className="py-24 sm:py-32" data-testid="section-reviews">
@@ -123,12 +160,12 @@ export function ReviewsSection() {
 
         <AnimatedSection>
           <div className="mb-8 rounded-2xl border border-border/40 bg-card/50 p-4 backdrop-blur-sm sm:p-6 md:p-8">
-            <RatingSummaryBlock />
+            <RatingSummaryBlock distribution={distribution} summary={summary} />
           </div>
         </AnimatedSection>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {reviews.map((review, i) => (
+          {displayReviews.map((review, i) => (
             <ReviewCard key={i} review={review} index={i} />
           ))}
         </div>

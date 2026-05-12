@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, useCallback, createContext, useContext } from "react";
 
 export type Locale = "en" | "fr" | "it" | "es" | "hy";
 
@@ -602,12 +602,15 @@ interface I18nContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string) => string;
+  /** Merges CMS copy over built-in translations (per locale). Pass null to clear. */
+  applyMarketingStrings: (patch: Partial<Record<Locale, Record<string, string>>> | null) => void;
 }
 
 export const I18nContext = createContext<I18nContextType>({
   locale: "en",
   setLocale: () => {},
   t: (key: string) => key,
+  applyMarketingStrings: () => {},
 });
 
 export function useI18nProvider() {
@@ -628,11 +631,26 @@ export function useI18nProvider() {
 
   const setLocale = (l: Locale) => setLocaleState(l);
 
+  const [marketingStrings, setMarketingStrings] = useState<Partial<
+    Record<Locale, Record<string, string>>
+  > | null>(null);
+
+  const applyMarketingStrings = useCallback(
+    (patch: Partial<Record<Locale, Record<string, string>>> | null) => {
+      setMarketingStrings(patch);
+    },
+    [],
+  );
+
   const t = (key: string): string => {
+    const cms = marketingStrings?.[locale]?.[key];
+    if (typeof cms === "string" && cms.trim() !== "") {
+      return cms;
+    }
     return translations[locale]?.[key] || translations.en[key] || key;
   };
 
-  return { locale, setLocale, t };
+  return { locale, setLocale, t, applyMarketingStrings };
 }
 
 export function useI18n() {

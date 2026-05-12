@@ -17,6 +17,7 @@ import AppStoreCredentialsPage from './features/app-store/AppStoreCredentialsPag
 import AppDetailsPage from './features/app-store/AppDetailsPage';
 import ManageContentPage from './features/app-store/ManageContentPage';
 import SubmitForReviewPage from './features/app-store/SubmitForReviewPage';
+import MarketingSitePage from './features/marketing-site/MarketingSitePage';
 import Adapty from './pages/Adapty';
 
 const queryClient = new QueryClient();
@@ -159,6 +160,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <SubmitForReviewPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/marketing-site"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <MarketingSitePage />
             </Layout>
           </ProtectedRoute>
         }

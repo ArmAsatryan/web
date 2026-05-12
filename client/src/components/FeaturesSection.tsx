@@ -1,12 +1,29 @@
-import { Crosshair, Database, Focus, LayoutGrid, Wind, WifiOff } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import type { ComponentType } from "react";
 import { Card } from "@/components/ui/card";
 import { useI18n } from "@/hooks/use-i18n";
+import { useMarketingSitePayload } from "@/context/MarketingSiteContext";
+import { pickLocalized } from "@/lib/localized-text";
 import { AnimatedSection, StaggeredGrid } from "./AnimatedSection";
 
-const icons = [Crosshair, Database, Focus, LayoutGrid, Wind, WifiOff];
+const icons = [
+  LucideIcons.Crosshair,
+  LucideIcons.Database,
+  LucideIcons.Focus,
+  LucideIcons.LayoutGrid,
+  LucideIcons.Wind,
+  LucideIcons.WifiOff,
+];
 
 export function FeaturesSection() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const cms = useMarketingSitePayload();
+  const cmsCards = cms?.featureCards?.length ? cms.featureCards : null;
+
+  const resolveIcon = (name: string) => {
+    const Cmp = (LucideIcons as unknown as Record<string, ComponentType<{ className?: string }>>)[name];
+    return Cmp ?? LucideIcons.Crosshair;
+  };
 
   return (
     <section
@@ -26,7 +43,28 @@ export function FeaturesSection() {
         </AnimatedSection>
 
         <StaggeredGrid className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {icons.map((Icon, i) => (
+          {cmsCards
+            ? cmsCards.map((card, i) => {
+                const Icon = resolveIcon(card.icon);
+                return (
+                  <Card
+                    key={i}
+                    className="group glass-card p-6"
+                    data-testid={`card-feature-${i}`}
+                  >
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-md bg-primary/10">
+                      <Icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="mb-3 text-lg font-semibold text-foreground">
+                      {pickLocalized(card.title, locale)}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {pickLocalized(card.description, locale)}
+                    </p>
+                  </Card>
+                );
+              })
+            : icons.map((Icon, i) => (
             <Card
               key={i}
               className="group glass-card p-6"

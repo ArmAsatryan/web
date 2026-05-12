@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { useTheme } from "@/hooks/use-theme";
+import { useMarketingSitePayload } from "@/context/MarketingSiteContext";
+import { pickLocalized } from "@/lib/localized-text";
 import { AnimatedSection } from "./AnimatedSection";
 import { pricingTiers, pricingFeatures } from "@/data/siteContent";
 import logoImg from "@assets/Logo_1770890960676.png";
@@ -29,9 +31,12 @@ function useScrollRotation() {
 }
 
 export function PricingSection() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { theme } = useTheme();
   const rotation = useScrollRotation();
+  const cms = useMarketingSitePayload();
+  const cmsPricing =
+    cms?.pricing?.tiers?.length && cms?.pricing?.featureRows?.length ? cms.pricing : null;
 
   return (
     <section
@@ -75,7 +80,36 @@ export function PricingSection() {
           {/* Narrower column: smaller horizontal footprint, vertical spacing unchanged */}
           <div className="mx-auto flex w-full max-w-lg flex-col gap-6 sm:max-w-xl md:max-w-2xl">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4">
-            {pricingTiers.map((tier, i) => (
+            {cmsPricing
+              ? cmsPricing.tiers.map((tier, i) => (
+                  <Card
+                    key={i}
+                    data-testid={`card-pricing-tier-${i}`}
+                    className={`relative border bg-card shadow-md [backdrop-filter:none] [-webkit-backdrop-filter:none] dark:bg-card ${
+                      tier.highlighted
+                        ? "border-2 border-primary/40 shadow-lg ring-1 ring-primary/20"
+                        : "border border-primary/20"
+                    }`}
+                  >
+                    {tier.highlighted && (
+                      <Badge className="absolute -top-3 left-1/2 z-[1] -translate-x-1/2 bg-primary text-primary-foreground text-xs no-default-hover-elevate no-default-active-elevate">
+                        {t("pricing.popular")}
+                      </Badge>
+                    )}
+                    <div className="p-5 text-center sm:p-6">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {pickLocalized(tier.name, locale)}
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-foreground sm:text-3xl">
+                        {tier.price}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {pickLocalized(tier.perMonthLabel, locale)}
+                      </p>
+                    </div>
+                  </Card>
+                ))
+              : pricingTiers.map((tier, i) => (
               <Card
                 key={i}
                 data-testid={`card-pricing-tier-${i}`}
@@ -117,7 +151,35 @@ export function PricingSection() {
           </Card>
 
           <div className="flex flex-col gap-4">
-            {pricingFeatures.map((feature, i) => (
+            {cmsPricing
+              ? cmsPricing.featureRows.map((feature, i) => (
+                  <Card
+                    key={i}
+                    data-testid={`row-pricing-feature-${i}`}
+                    className="border border-primary/20 bg-card shadow-md [backdrop-filter:none] [-webkit-backdrop-filter:none] dark:bg-card"
+                  >
+                    <div className="grid grid-cols-[1fr_44px_44px] items-center gap-2 px-4 py-4 sm:grid-cols-[1fr_72px_72px] sm:px-6 sm:py-5">
+                      <span className="min-w-0 text-xs text-foreground sm:text-sm">
+                        {pickLocalized(feature.label, locale)}
+                      </span>
+                      <div className="flex justify-center">
+                        {feature.free ? (
+                          <Check className="h-5 w-5 shrink-0 text-primary" />
+                        ) : (
+                          <Minus className="h-5 w-5 shrink-0 text-muted-foreground/40" />
+                        )}
+                      </div>
+                      <div className="flex justify-center">
+                        {feature.premium ? (
+                          <Check className="h-5 w-5 shrink-0 text-primary" />
+                        ) : (
+                          <Minus className="h-5 w-5 shrink-0 text-muted-foreground/40" />
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              : pricingFeatures.map((feature, i) => (
               <Card
                 key={i}
                 data-testid={`row-pricing-feature-${i}`}

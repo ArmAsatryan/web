@@ -1,6 +1,8 @@
 import { teamMembers } from "@/data/siteContent";
 import { Card } from "@/components/ui/card";
 import { useI18n } from "@/hooks/use-i18n";
+import { useMarketingSitePayload } from "@/context/MarketingSiteContext";
+import { pickLocalized } from "@/lib/localized-text";
 import { AnimatedSection, StaggeredGrid } from "./AnimatedSection";
 import armenImg from "@assets/Armen_Asatryan_1770884174859.png";
 import gerasimImg from "@assets/Gerasim_Israyelyan_1770884180100.jpg";
@@ -19,7 +21,10 @@ const imageMap: Record<string, string> = {
 };
 
 export function TeamSection() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const cms = useMarketingSitePayload();
+  const cmsTeamFiltered = cms?.teamMembers?.filter((m) => m.imageUrl?.trim());
+  const cmsTeam = cmsTeamFiltered?.length ? cmsTeamFiltered : null;
 
   return (
     <section id="team" className="py-24 sm:py-32" data-testid="section-team">
@@ -35,7 +40,32 @@ export function TeamSection() {
         </AnimatedSection>
 
         <StaggeredGrid className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {teamMembers.map((member, i) => (
+          {cmsTeam
+            ? cmsTeam.map((member, i) => (
+                <Card
+                  key={i}
+                  className="group overflow-visible glass-card text-center flex flex-col h-full"
+                  data-testid={`card-team-${i}`}
+                >
+                  <div className="aspect-square relative overflow-hidden rounded-t-[inherit]">
+                    <img
+                      src={member.imageUrl}
+                      alt={member.name}
+                      className="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500"
+                      loading="lazy"
+                      width={300}
+                      height={300}
+                    />
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col justify-center">
+                    <h3 className="text-base font-semibold text-foreground mb-1">
+                      {member.name}
+                    </h3>
+                    <p className="text-primary text-sm">{pickLocalized(member.role, locale)}</p>
+                  </div>
+                </Card>
+              ))
+            : teamMembers.map((member, i) => (
             <Card
               key={i}
               className="group overflow-visible glass-card text-center flex flex-col h-full"

@@ -60,6 +60,11 @@ export default defineConfig({
     writeCloudflarePagesRootRedirects(),
   ],
   base: ADMIN_CONSOLE_BASE,
+  resolve: {
+    alias: {
+      '@shared': path.resolve(__dirname, '../shared'),
+    },
+  },
   build: {
     outDir: '../dist/public/admin-console',
     emptyOutDir: true,

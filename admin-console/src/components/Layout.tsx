@@ -8,6 +8,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import PaidIcon from '@mui/icons-material/Paid';
+import LanguageIcon from '@mui/icons-material/Language';
 import AppleIcon from '@mui/icons-material/Apple';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -35,6 +36,7 @@ const COLLAPSED_WIDTH = 72;
 
 const nav = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+  { path: '/marketing-site', label: 'Marketing site', icon: <LanguageIcon /> },
   { path: '/adapty', label: 'Subscriptions (Adapty)', icon: <PaidIcon /> },
   { path: '/', label: 'Users', icon: <PeopleIcon /> },
   { path: '/map', label: 'User Locations', icon: <MapIcon /> },
@@ -49,6 +51,7 @@ const secondaryNav = [{ path: '/app-store', label: 'App Store Connect', icon: <A
 
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
+  '/marketing-site': 'Marketing site',
   '/': 'Users',
   '/map': 'User Locations Map',
   '/notifications': 'Notifications',
@@ -64,6 +67,7 @@ const pageTitles: Record<string, string> = {
 /** Description under the AppBar title (per route). */
 const pageSubtitles: Record<string, string> = {
   '/dashboard': 'Overview: users, rifles, bullets, FCM tokens',
+  '/marketing-site': 'Hero, features, pricing, B2B, reviews, and team for ballistiq.xyz',
   '/': 'Manage and view all registered users',
   '/map': 'Visualize user locations on an interactive map',
   '/notifications': 'Send push notifications, schedule multi-language broadcasts, and view history',

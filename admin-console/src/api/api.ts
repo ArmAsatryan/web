@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import type { MarketingSitePayload } from '@shared/marketing-site-types';
 
 /** Backend API base URL. Override with VITE_API_BASE_URL in .env. */
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.ballistiq.xyz';
@@ -239,5 +240,31 @@ export function getAdaptySummary(params?: { from?: string; to?: string; timezone
     params,
     validateStatus: (status) =>
       (status >= 200 && status < 300) || status === 502 || status === 503,
+  });
+}
+
+export function getMarketingSite() {
+  return api.get<MarketingSitePayload>('/admin/api/marketing-site');
+}
+
+export function saveMarketingSite(payload: MarketingSitePayload) {
+  return api.put('/admin/api/marketing-site', payload);
+}
+
+export interface MarketingTranslateFieldsResponseBody {
+  locales: Record<string, Record<string, string>>;
+}
+
+export function translateMarketingFields(fields: Record<string, string>) {
+  return api.post<MarketingTranslateFieldsResponseBody>('/admin/api/marketing-site/translate-fields', {
+    fields,
+  });
+}
+
+export function uploadMarketingSiteImage(file: File) {
+  const fd = new FormData();
+  fd.append('file', file);
+  return api.post<import('../types').ApiBaseModel<string>>('/admin/api/marketing-site/upload-image', fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 }

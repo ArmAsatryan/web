@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
 import { useMagneticButton } from "@/hooks/use-magnetic-button";
 import { HeroBackground } from "./HeroBackground";
+import { useMarketingSitePayload } from "@/context/MarketingSiteContext";
 import bgImage from "@assets/Background1_1770884231570.jpg";
 import garminIqLogo from "@assets/Garmin_Connect_IQ_logo.png";
 
@@ -61,6 +62,8 @@ function HeroVideo({ title }: { title: string }) {
 
 export function HeroSection() {
   const { t } = useI18n();
+  const cms = useMarketingSitePayload();
+  const heroBg = cms?.heroBackgroundImageUrl?.trim();
 
   return (
     <section
@@ -71,7 +74,7 @@ export function HeroSection() {
       <div className="absolute inset-0 overflow-hidden">
         <div
           className="absolute left-1/2 top-1/2 h-[min(115vh,115%)] w-[min(115vw,115%)] max-w-none -translate-x-1/2 -translate-y-1/2 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${bgImage})` }}
+          style={{ backgroundImage: `url(${heroBg || bgImage})` }}
         />
       </div>
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/60" />

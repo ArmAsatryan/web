@@ -2,6 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield } from "lucide-react";
 import { useI18n } from "@/hooks/use-i18n";
+import { useMarketingSitePayload } from "@/context/MarketingSiteContext";
+import { pickLocalized } from "@/lib/localized-text";
 import { AnimatedSection, StaggeredGrid } from "./AnimatedSection";
 import thermalImg from "@assets/thermal_scope_cpp_engine.png";
 import ugvImg from "@assets/UGV_1770884064333.png";
@@ -11,13 +13,17 @@ import bg2 from "@assets/Background_2_1770884266453.png";
 const images = [thermalImg, ugvImg, turretImg];
 
 export function B2BSection() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const cms = useMarketingSitePayload();
+  const cmsCardsFiltered = cms?.b2bCards?.filter((c) => c.imageUrl?.trim());
+  const cmsCards = cmsCardsFiltered?.length ? cmsCardsFiltered : null;
+  const sectionBg = cms?.b2bSectionBackgroundImageUrl?.trim();
 
   return (
     <section id="b2b" className="relative py-24 sm:py-32 overflow-hidden" data-testid="section-b2b">
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15"
-        style={{ backgroundImage: `url(${bg2})` }}
+        style={{ backgroundImage: `url(${sectionBg || bg2})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
 
@@ -40,32 +46,59 @@ export function B2BSection() {
         </AnimatedSection>
 
         <StaggeredGrid className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {[0, 1, 2].map((i) => (
-            <Card
-              key={i}
-              className="group overflow-visible glass-card flex flex-col h-full"
-              data-testid={`card-b2b-${i}`}
-            >
-              <div className="aspect-[4/3] relative overflow-hidden rounded-t-[inherit]">
-                <img
-                  src={images[i]}
-                  alt={t(`b2b.${i}.title`)}
-                  className="w-full h-full object-contain bg-black/50 p-4"
-                  loading="lazy"
-                  width={400}
-                  height={300}
-                />
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="text-lg font-semibold text-foreground mb-3">
-                  {t(`b2b.${i}.title`)}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {t(`b2b.${i}.desc`)}
-                </p>
-              </div>
-            </Card>
-          ))}
+          {cmsCards
+            ? cmsCards.map((card, i) => (
+                <Card
+                  key={i}
+                  className="group overflow-visible glass-card flex flex-col h-full"
+                  data-testid={`card-b2b-${i}`}
+                >
+                  <div className="aspect-[4/3] relative overflow-hidden rounded-t-[inherit]">
+                    <img
+                      src={card.imageUrl}
+                      alt={pickLocalized(card.title, locale)}
+                      className="w-full h-full object-contain bg-black/50 p-4"
+                      loading="lazy"
+                      width={400}
+                      height={300}
+                    />
+                  </div>
+                  <div className="p-6 flex-1 flex flex-col">
+                    <h3 className="text-lg font-semibold text-foreground mb-3">
+                      {pickLocalized(card.title, locale)}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {pickLocalized(card.description, locale)}
+                    </p>
+                  </div>
+                </Card>
+              ))
+            : [0, 1, 2].map((i) => (
+          <Card
+            key={i}
+            className="group overflow-visible glass-card flex flex-col h-full"
+            data-testid={`card-b2b-${i}`}
+          >
+            <div className="aspect-[4/3] relative overflow-hidden rounded-t-[inherit]">
+              <img
+                src={images[i]}
+                alt={t(`b2b.${i}.title`)}
+                className="w-full h-full object-contain bg-black/50 p-4"
+                loading="lazy"
+                width={400}
+                height={300}
+              />
+            </div>
+            <div className="p-6 flex-1 flex flex-col">
+              <h3 className="text-lg font-semibold text-foreground mb-3">
+                {t(`b2b.${i}.title`)}
+              </h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {t(`b2b.${i}.desc`)}
+              </p>
+            </div>
+          </Card>
+        ))}
         </StaggeredGrid>
 
         <AnimatedSection className="text-center" delay={0.3}>
