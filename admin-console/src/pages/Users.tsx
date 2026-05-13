@@ -60,7 +60,7 @@ export default function Users() {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(20);
   const [sortBy, setSortBy] = useState('id');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [startsWith, setStartsWith] = useState<string>('');
   const [q, setQ] = useState('');
   const [debouncedQ, setDebouncedQ] = useState('');
