@@ -75,15 +75,5 @@ export default defineConfig({
     // Admin only on 3000: ADMIN_CONSOLE_DEV_PORT=3000 npm run dev
     port: parseInt(process.env.ADMIN_CONSOLE_DEV_PORT ?? '3001', 10),
     allowedHosts: ['.replit.dev', '.repl.co'],
-    /**
-     * Adapty admin metrics: browser calls same origin (this port), Vite forwards to Express.
-     * Avoids CORS when the admin UI and `GET /admin/api/adapty/summary` run on different ports.
-     */
-    proxy: {
-      '/admin/api/adapty': {
-        target: `http://127.0.0.1:${process.env.EXPRESS_DEV_PORT ?? '3000'}`,
-        changeOrigin: true,
-      },
-    },
   },
 })

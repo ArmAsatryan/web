@@ -363,31 +363,3 @@ export interface TransformedDetection {
   nickname: string | null;
   email: string | null;
 }
-
-/** GET /admin/api/adapty/summary — populated by API gateway with Adapty Export Analytics. */
-export interface AdaptyAdminSummaryOk {
-  ok: true;
-  dateFrom: string;
-  dateTo: string;
-  timezone: string;
-  metrics: {
-    mrr: number | null;
-    mrrUnit: string | null;
-    arr: number | null;
-    arrUnit: string | null;
-    subscriptionsActive: number | null;
-    trialsActive: number | null;
-    revenueInPeriod: number | null;
-    revenueUnit: string | null;
-    billingIssues: number | null;
-  };
-  revenueByDay: Array<{ date: string; value: number }>;
-}
-
-export interface AdaptyAdminSummaryErr {
-  ok: false;
-  error: string;
-  detail?: string;
-}
-
-export type AdaptyAdminSummaryResponse = AdaptyAdminSummaryOk | AdaptyAdminSummaryErr;

@@ -18,7 +18,6 @@ import AppDetailsPage from './features/app-store/AppDetailsPage';
 import ManageContentPage from './features/app-store/ManageContentPage';
 import SubmitForReviewPage from './features/app-store/SubmitForReviewPage';
 import MarketingSitePage from './features/marketing-site/MarketingSitePage';
-import Adapty from './pages/Adapty';
 
 const queryClient = new QueryClient();
 
@@ -170,16 +169,6 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <MarketingSitePage />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/adapty"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Adapty />
             </Layout>
           </ProtectedRoute>
         }

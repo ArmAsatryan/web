@@ -72,7 +72,10 @@ export function getAdminUserById(id: number) {
   return api.get<import('../types').AdminUser>(`/admin/api/users/${id}`);
 }
 
-// User locations for map
+/** Max rows; must stay within backend `@Max` on `/admin/api/user-locations`. */
+export const USER_LOCATIONS_MAX_LIMIT = 500_000;
+
+// User locations for map (optional date/locale filters; omit for “all rows up to limit”)
 export function getUserLocations(params: {
   from?: string;
   to?: string;
@@ -205,42 +208,6 @@ export function getFcmTokensLight() {
 // Dashboard pie charts (rifles/bullets deleted %, users with rifle %, bullets attached %)
 export function getDashboardPie() {
   return api.get<import('../types').DashboardPieResponse>('/admin/api/dashboard/pie');
-}
-
-/** True when `url` is empty or points at this machine (use Vite proxy in dev, avoids CORS). */
-function isLocalAdaptyBackend(url: string): boolean {
-  if (!url.trim()) return true;
-  try {
-    const u = new URL(url);
-    return u.hostname === 'localhost' || u.hostname === '127.0.0.1';
-  } catch {
-    return false;
-  }
-}
-
-function resolveAdaptyApiBase(): string {
-  const custom = (import.meta.env.VITE_ADAPTY_API_BASE_URL ?? '').trim();
-
-  if (import.meta.env.DEV && isLocalAdaptyBackend(custom)) {
-    // Same-origin + vite.config.ts `server.proxy` → Express (see `/admin/api/adapty`).
-    return typeof window !== 'undefined' ? window.location.origin : '';
-  }
-
-  if (custom !== '') {
-    return custom.replace(/\/$/, '');
-  }
-
-  return import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? 'https://api.ballistiq.xyz';
-}
-
-/** Adapty subscription metrics (GET /admin/api/adapty/summary). Uses VITE_ADAPTY_API_BASE_URL when set (e.g. local Express with ADAPTY_SECRET_API_KEY). */
-export function getAdaptySummary(params?: { from?: string; to?: string; timezone?: string }) {
-  return api.get<import('../types').AdaptyAdminSummaryResponse>('/admin/api/adapty/summary', {
-    baseURL: resolveAdaptyApiBase(),
-    params,
-    validateStatus: (status) =>
-      (status >= 200 && status < 300) || status === 502 || status === 503,
-  });
 }
 
 export function getMarketingSite() {

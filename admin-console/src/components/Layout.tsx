@@ -7,7 +7,6 @@ import MapIcon from '@mui/icons-material/Map';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import StorefrontIcon from '@mui/icons-material/Storefront';
-import PaidIcon from '@mui/icons-material/Paid';
 import LanguageIcon from '@mui/icons-material/Language';
 import AppleIcon from '@mui/icons-material/Apple';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -37,7 +36,6 @@ const COLLAPSED_WIDTH = 72;
 const nav = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/marketing-site', label: 'Marketing site', icon: <LanguageIcon /> },
-  { path: '/adapty', label: 'Subscriptions (Adapty)', icon: <PaidIcon /> },
   { path: '/', label: 'Users', icon: <PeopleIcon /> },
   { path: '/map', label: 'User Locations', icon: <MapIcon /> },
   { path: '/notifications', label: 'Notifications', icon: <NotificationsIcon /> },
@@ -61,7 +59,6 @@ const pageTitles: Record<string, string> = {
   '/create-vendor': 'Create vendor',
   '/app-store': 'App Store Connect',
   '/app-store/credentials': 'App Store Connect credentials',
-  '/adapty': 'Subscriptions (Adapty)',
 };
 
 /** Description under the AppBar title (per route). */
@@ -69,7 +66,7 @@ const pageSubtitles: Record<string, string> = {
   '/dashboard': 'Overview: users, rifles, bullets, FCM tokens',
   '/marketing-site': 'Hero, features, pricing, B2B, reviews, and team for ballistiq.xyz',
   '/': 'Manage and view all registered users',
-  '/map': 'Visualize user locations on an interactive map',
+  '/map': 'User locations on a map (OpenStreetMap); filter by user id',
   '/notifications': 'Send push notifications, schedule multi-language broadcasts, and view history',
   '/assistant-detections':
     'Target image detections from the assistant — browse users and inspect detection data',
@@ -78,7 +75,6 @@ const pageSubtitles: Record<string, string> = {
   '/create-vendor': 'Add a new vendor with name and optional image URL',
   '/app-store': 'Manage your App Store Connect apps, versions and localized metadata',
   '/app-store/credentials': 'Store the issuer ID, key ID and .p8 signing key used to sign JWTs',
-  '/adapty': 'MRR, ARR, active subs & trials, revenue — from your Adapty Export Analytics API',
 };
 
 /** Prefix-based titles for dynamic nested routes. First match wins. */
