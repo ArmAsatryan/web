@@ -49,13 +49,6 @@ export const features = [
 
 export const pricingTiers = [
   {
-    nameKey: "pricing.tier.weekly",
-    price: "$0.99",
-    periodKey: "pricing.period.week",
-    perMonthKey: "pricing.permonth.weekly",
-    highlighted: false,
-  },
-  {
     nameKey: "pricing.tier.monthly",
     price: "$3.99",
     periodKey: "pricing.period.month",

@@ -1,3 +1,4 @@
+import { Children, isValidElement, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useInViewAnimation, useStaggerChildren } from "@/hooks/use-in-view-animation";
 
@@ -18,22 +19,27 @@ export function AnimatedSection({ children, className = "", delay = 0 }: Animate
 }
 
 interface StaggeredGridProps {
-  children: React.ReactNode[];
+  children: ReactNode;
   className?: string;
   baseDelay?: number;
   staggerDelay?: number;
 }
 
 export function StaggeredGrid({ children, className = "", baseDelay = 0.1, staggerDelay = 0.08 }: StaggeredGridProps) {
-  const delays = useStaggerChildren(children.length, baseDelay, staggerDelay);
+  const childArray = Children.toArray(children);
+  const delays = useStaggerChildren(childArray.length, baseDelay, staggerDelay);
 
   return (
     <div className={className}>
-      {children.map((child, i) => (
-        <StaggerItem key={i} delay={delays[i].delay}>
-          {child}
-        </StaggerItem>
-      ))}
+      {childArray.map((child, i) => {
+        const staggerKey =
+          isValidElement(child) && child.key != null ? String(child.key) : `stagger-${i}`;
+        return (
+          <StaggerItem key={staggerKey} delay={delays[i].delay}>
+            {child}
+          </StaggerItem>
+        );
+      })}
     </div>
   );
 }

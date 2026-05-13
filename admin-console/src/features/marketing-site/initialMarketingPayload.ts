@@ -66,12 +66,6 @@ export function createInitialMarketingPayload(): MarketingSitePayload {
     pricing: {
       tiers: [
         {
-          highlighted: false,
-          price: '$0.99',
-          name: { en: 'Weekly' },
-          perMonthLabel: { en: '$4.30 / month' },
-        },
-        {
           highlighted: true,
           price: '$3.99',
           name: { en: 'Monthly' },

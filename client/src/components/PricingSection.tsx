@@ -37,6 +37,13 @@ export function PricingSection() {
   const cms = useMarketingSitePayload();
   const cmsPricing =
     cms?.pricing?.tiers?.length && cms?.pricing?.featureRows?.length ? cms.pricing : null;
+  const tierCount = cmsPricing ? cmsPricing.tiers.length : pricingTiers.length;
+  const tierGridClass =
+    tierCount >= 3
+      ? "grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4"
+      : tierCount === 2
+        ? "grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4"
+        : "grid grid-cols-1 gap-4 sm:gap-4";
 
   return (
     <section
@@ -79,7 +86,7 @@ export function PricingSection() {
 
           {/* Narrower column: smaller horizontal footprint, vertical spacing unchanged */}
           <div className="mx-auto flex w-full max-w-lg flex-col gap-6 sm:max-w-xl md:max-w-2xl">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4">
+          <div className={tierGridClass}>
             {cmsPricing
               ? cmsPricing.tiers.map((tier, i) => (
                   <Card

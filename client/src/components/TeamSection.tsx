@@ -51,13 +51,13 @@ export function TeamSection() {
           </p>
         </AnimatedSection>
 
-        <StaggeredGrid className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <StaggeredGrid className="grid w-full grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-6 sm:min-w-0">
           {teamFromCms !== undefined
             ? teamFromCms.map((member, i) => {
                 const photo = resolveTeamMemberPhotoUrl(member);
                 return (
                 <Card
-                  key={`${member.name}-${i}`}
+                  key={`${member.name}|${member.imageUrl ?? ""}|${i}`}
                   className="group overflow-visible glass-card text-center flex flex-col h-full"
                   data-testid={`card-team-${i}`}
                 >
