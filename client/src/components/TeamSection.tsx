@@ -20,6 +20,17 @@ const imageMap: Record<string, string> = {
   Arame_Avetisyan: arameImag,
 };
 
+/** Default marketing payload ships team rows with empty `imageUrl`; match by display name to bundled imports. */
+const bundledPhotoByMemberName: Record<string, string> = Object.fromEntries(
+  teamMembers.map((m) => [m.name, imageMap[m.image]])
+);
+
+function resolveTeamMemberPhotoUrl(member: { name: string; imageUrl?: string }): string | undefined {
+  const fromCms = member.imageUrl?.trim();
+  if (fromCms) return fromCms;
+  return bundledPhotoByMemberName[member.name];
+}
+
 export function TeamSection() {
   const { t, locale } = useI18n();
   const cms = useMarketingSitePayload();
@@ -42,21 +53,29 @@ export function TeamSection() {
 
         <StaggeredGrid className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {teamFromCms !== undefined
-            ? teamFromCms.filter((m) => m.imageUrl?.trim()).map((member, i) => (
+            ? teamFromCms.map((member, i) => {
+                const photo = resolveTeamMemberPhotoUrl(member);
+                return (
                 <Card
-                  key={`${member.imageUrl}-${i}`}
+                  key={`${member.name}-${i}`}
                   className="group overflow-visible glass-card text-center flex flex-col h-full"
                   data-testid={`card-team-${i}`}
                 >
-                  <div className="aspect-square relative overflow-hidden rounded-t-[inherit]">
-                    <img
-                      src={member.imageUrl}
-                      alt={member.name}
-                      className="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500"
-                      loading="lazy"
-                      width={300}
-                      height={300}
-                    />
+                  <div className="aspect-square relative overflow-hidden rounded-t-[inherit] bg-muted">
+                    {photo ? (
+                      <img
+                        src={photo}
+                        alt={member.name}
+                        className="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500"
+                        loading="lazy"
+                        width={300}
+                        height={300}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-muted-foreground">
+                        {(member.name?.trim().charAt(0) || "?").toUpperCase()}
+                      </div>
+                    )}
                   </div>
                   <div className="p-5 flex-1 flex flex-col justify-center">
                     <h3 className="text-base font-semibold text-foreground mb-1">
@@ -65,7 +84,8 @@ export function TeamSection() {
                     <p className="text-primary text-sm">{pickLocalized(member.role, locale)}</p>
                   </div>
                 </Card>
-              ))
+              );
+              })
             : teamMembers.map((member, i) => (
             <Card
               key={i}
