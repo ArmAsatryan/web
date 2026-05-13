@@ -51,14 +51,14 @@ export function TeamSection() {
           </p>
         </AnimatedSection>
 
-        <StaggeredGrid className="grid w-full grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-6 sm:min-w-0">
+        <StaggeredGrid className="flex w-full flex-wrap justify-center gap-x-6 gap-y-8">
           {teamFromCms !== undefined
             ? teamFromCms.map((member, i) => {
                 const photo = resolveTeamMemberPhotoUrl(member);
                 return (
                 <Card
                   key={`${member.name}|${member.imageUrl ?? ""}|${i}`}
-                  className="group overflow-visible glass-card text-center flex flex-col h-full"
+                  className="group h-full w-[10.5rem] max-w-full shrink-0 overflow-visible glass-card text-center flex flex-col sm:w-44"
                   data-testid={`card-team-${i}`}
                 >
                   <div className="aspect-square relative overflow-hidden rounded-t-[inherit] bg-muted">
@@ -89,7 +89,7 @@ export function TeamSection() {
             : teamMembers.map((member, i) => (
             <Card
               key={i}
-              className="group overflow-visible glass-card text-center flex flex-col h-full"
+              className="group h-full w-[10.5rem] max-w-full shrink-0 overflow-visible glass-card text-center flex flex-col sm:w-44"
               data-testid={`card-team-${i}`}
             >
               <div className="aspect-square relative overflow-hidden rounded-t-[inherit]">
