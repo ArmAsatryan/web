@@ -2,25 +2,22 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 import PlaceIcon from '@mui/icons-material/Place';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
-import { getUserLocations, getLocales } from '../api/api';
+import { getUserLocations, USER_LOCATIONS_MAX_LIMIT } from '../api/api';
 import type { UserLocationPoint } from '../types';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-import { languageCodeToLabel } from '../utils/languageDisplay';
 
 const DefaultIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -31,39 +28,51 @@ const DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-export default function MapPage() {
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [locale, setLocale] = useState('');
-  const [userId, setUserId] = useState('');
-  const [limit, setLimit] = useState(5000);
+function parseUserFilter(raw: string | null | undefined): { userId: number | undefined; invalid: boolean } {
+  const t = raw?.trim() ?? '';
+  if (t === '') return { userId: undefined, invalid: false };
+  const n = Number(t);
+  if (!Number.isInteger(n) || n < 1) return { userId: undefined, invalid: true };
+  return { userId: n, invalid: false };
+}
 
-  const { data: locales } = useQuery({ queryKey: ['locales'], queryFn: async () => (await getLocales()).data });
-  const { data: points, isLoading } = useQuery({
-    queryKey: ['user-locations', from || undefined, to || undefined, locale || undefined, userId || undefined, limit],
+export default function MapPage() {
+  const [userIdInput, setUserIdInput] = useState('');
+  const [appliedRaw, setAppliedRaw] = useState<string | null>(null);
+
+  const filter = useMemo(() => parseUserFilter(appliedRaw), [appliedRaw]);
+
+  const { data: points = [], isLoading, isError, error, refetch } = useQuery<UserLocationPoint[]>({
+    queryKey: ['user-locations', filter.userId ?? 'all', USER_LOCATIONS_MAX_LIMIT],
     queryFn: async () => {
       const res = await getUserLocations({
-        from: from || undefined,
-        to: to || undefined,
-        locale: locale || undefined,
-        userId: userId ? Number(userId) : undefined,
-        limit,
+        userId: filter.userId,
+        limit: USER_LOCATIONS_MAX_LIMIT,
       });
-      return res.data as UserLocationPoint[];
+      return res.data;
     },
+    enabled: !filter.invalid,
   });
 
-  const center: [number, number] = points?.length
-    ? [points[0].latitude, points[0].longitude]
-    : [40.0, 44.0];
+  const center: [number, number] =
+    points.length > 0 ? [points[0].latitude, points[0].longitude] : [40.0, 44.0];
+
+  const applyFilter = () => {
+    setAppliedRaw(userIdInput);
+  };
+
+  const clearFilter = () => {
+    setUserIdInput('');
+    setAppliedRaw('');
+  };
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        {points && (
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, gap: 1, flexWrap: 'wrap' }}>
+        {points.length > 0 && (
           <Chip
             icon={<PlaceIcon sx={{ fontSize: 16 }} />}
-            label={`${points.length.toLocaleString()} points`}
+            label={`${points.length.toLocaleString()} location${points.length === 1 ? '' : 's'}`}
             variant="outlined"
             color="primary"
             size="small"
@@ -73,62 +82,46 @@ export default function MapPage() {
 
       <Card sx={{ mb: 3 }}>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-            <TextField
-              size="small"
-              label="From"
-              type="datetime-local"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              sx={{ minWidth: 190 }}
-            />
-            <TextField
-              size="small"
-              label="To"
-              type="datetime-local"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              sx={{ minWidth: 190 }}
-            />
-            <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Language</InputLabel>
-              <Select
-                value={locale}
-                label="Language"
-                onChange={(e) => setLocale(e.target.value)}
-                displayEmpty
-                renderValue={(v) => (v ? languageCodeToLabel(v) : 'All')}
-              >
-                <MenuItem value="">All</MenuItem>
-                {(locales || []).map((l) => (
-                  <MenuItem key={l} value={l}>
-                    {languageCodeToLabel(l)}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Free map tiles (OpenStreetMap) via Leaflet. Loads up to {USER_LOCATIONS_MAX_LIMIT.toLocaleString()} points
+            from the database (newest first). Leave user id empty and click <strong>Show locations</strong> for
+            everyone, or enter a user id to filter.
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-start' }}>
             <TextField
               size="small"
               label="User ID"
-              type="number"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              placeholder="Optional"
-              sx={{ minWidth: 110 }}
+              type="text"
+              inputMode="numeric"
+              value={userIdInput}
+              onChange={(e) => setUserIdInput(e.target.value.replace(/\s+/g, ''))}
+              placeholder="Optional — all users"
+              sx={{ minWidth: 200 }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') applyFilter();
+              }}
             />
-            <FormControl size="small" sx={{ minWidth: 100 }}>
-              <InputLabel>Limit</InputLabel>
-              <Select value={limit} label="Limit" onChange={(e) => setLimit(Number(e.target.value))}>
-                {[1000, 5000, 10000, 20000].map((n) => (
-                  <MenuItem key={n} value={n}>
-                    {n.toLocaleString()}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Button variant="contained" onClick={applyFilter}>
+              Show locations
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={clearFilter}
+              disabled={!userIdInput && (appliedRaw == null || appliedRaw === '')}
+            >
+              Clear user filter
+            </Button>
           </Box>
+          {filter.invalid && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              Enter a positive integer user id, or clear the field to load all locations.
+            </Alert>
+          )}
+          {isError && (
+            <Alert severity="error" sx={{ mt: 2 }} onClose={() => void refetch()}>
+              {error instanceof Error ? error.message : 'Failed to load locations'}
+            </Alert>
+          )}
         </CardContent>
       </Card>
 
@@ -152,21 +145,26 @@ export default function MapPage() {
             <Box sx={{ textAlign: 'center' }}>
               <CircularProgress size={40} />
               <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary' }}>
-                Loading locations...
+                Loading locations…
               </Typography>
             </Box>
           </Box>
         )}
         <Box sx={{ height: 560, width: '100%' }}>
           <MapContainer center={center} zoom={6} style={{ height: '100%', width: '100%', borderRadius: 'inherit' }}>
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' />
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            />
             <MarkerClusterGroup chunkedLoading>
-              {(points || []).map((p, i) => (
+              {points.map((p, i) => (
                 <Marker key={`${p.userId}-${p.latitude}-${p.longitude}-${i}`} position={[p.latitude, p.longitude]}>
                   <Popup>
                     <Box sx={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', lineHeight: 1.6 }}>
-                      <strong>User ID:</strong> {p.userId}<br />
-                      <strong>Time:</strong> {p.timestamp ? new Date(p.timestamp).toLocaleString() : '—'}<br />
+                      <strong>User ID:</strong> {p.userId}
+                      <br />
+                      <strong>Time:</strong> {p.timestamp ? new Date(p.timestamp).toLocaleString() : '—'}
+                      <br />
                       <strong>Language:</strong> {p.locale ?? '—'}
                     </Box>
                   </Popup>

@@ -19,7 +19,7 @@ Standalone React frontend for the BALLISTiQ admin panel. Only users with role `R
 - **TanStack Query** for server state
 - **React Router** for routing
 - **Axios** for API client
-- **Leaflet** (react-leaflet) for the user locations map
+- **Leaflet** (react-leaflet) + **OpenStreetMap** tiles for the user locations map (no API key).
 
 ## Setup
 
@@ -71,7 +71,7 @@ Output is in `dist/`. Serve with any static file server and point it to your bac
 
 - **Login**: Email + password. Only accounts with admin role can proceed; others see "Access denied".
 - **Users**: Paginated, sortable, filterable table (search, A–Z filter). Per-row "Send notification".
-- **User Locations Map**: Leaflet map with pins; filters for date range, locale, user ID, limit.
+- **User Locations Map**: Leaflet + OSM tiles, clustered pins; loads up to 500k points from the DB (backend cap). Filter by user id via **Show locations** (optional); leave empty for all users.
 - **Notifications**: Send by locale (dropdown from backend); single-user send from the Users page; multi-language batch and history.
 - **Assistant detections**: Standalone sidebar page listed directly below **Notifications**. Browse users who have target-image rows (paginated), open per-user detection viewer with image overlays and metadata. Uses the same admin JWT as other API calls (`src/api/detectionsApi.ts` → `/api/images/target`, `/api/images/target/users`, deletes). If these endpoints return **403**, ensure BallisticBE allows admin roles for those paths.
 
@@ -82,7 +82,7 @@ The backend must expose:
 - `POST /api/authenticate/sign-in` — login (body: `emailAddress`, `password`); response includes `data.token` and `data.userInfo.roles`.
 - `GET /api/authenticate/user-info` — current user (with `roles`); used after login.
 - `GET /admin/api/users` — paginated users (query: `page`, `size`, `sortBy`, `sortDir`, `startsWith`, `q`).
-- `GET /admin/api/user-locations` — location points for the map.
+- `GET /admin/api/user-locations` — location points for the map (query: `userId` optional, `limit` up to 500,000; optional `from`, `to`, `locale`).
 - `GET /admin/api/locales` — list of locale codes.
 - `POST /admin/api/notifications/user` — send notification to one user.
 - `POST /admin/api/notifications/language` — send notification by language (FCM token language).
