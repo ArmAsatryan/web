@@ -352,12 +352,34 @@ export default function MarketingSitePage() {
             Pricing (Get Premium)
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Edit tier prices and labels (EN). Toggle free/premium columns per feature row.
+            Edit tier prices and labels (EN). Toggle free/premium columns per feature row. Remove tiers you do not sell
+            (for example weekly); the public site falls back to built-in pricing if none are saved.
           </Typography>
-          <Typography variant="subtitle2">Tiers</Typography>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+            <Typography variant="subtitle2">Tiers</Typography>
+            <Button
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                const current = payload.pricing ?? SEED.pricing!;
+                setPayload({
+                  ...payload,
+                  pricing: {
+                    ...current,
+                    tiers: [
+                      ...(current.tiers ?? []),
+                      { name: { en: '' }, price: '', perMonthLabel: { en: '' }, highlighted: false },
+                    ],
+                  },
+                });
+              }}
+            >
+              Add tier
+            </Button>
+          </Stack>
           <Stack spacing={1.5} sx={{ mb: 2 }}>
             {(payload.pricing?.tiers ?? []).map((tier, i) => (
-              <Stack key={i} direction={{ xs: 'column', md: 'row' }} spacing={1}>
+              <Stack key={i} direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems={{ md: 'center' }}>
                 <TextField
                   label="Name (EN)"
                   value={tier.name.en ?? ''}
@@ -399,6 +421,22 @@ export default function MarketingSitePage() {
                   <MenuItem value="no">No</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
                 </TextField>
+                <IconButton
+                  type="button"
+                  aria-label="Delete pricing tier"
+                  onClick={() => {
+                    const current = payload.pricing ?? SEED.pricing!;
+                    setPayload({
+                      ...payload,
+                      pricing: {
+                        ...current,
+                        tiers: (current.tiers ?? []).filter((_, j) => j !== i),
+                      },
+                    });
+                  }}
+                >
+                  <DeleteOutlineIcon />
+                </IconButton>
               </Stack>
             ))}
           </Stack>
