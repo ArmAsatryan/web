@@ -43,7 +43,7 @@ import AnalyticOverview from '../components/AnalyticOverview';
 import { dashboardPageCardContentSx, dashboardPageCardSx } from '../styles/dashboardPageCard';
 import type { AdminUserLight, AdminBulletLight, AdminLightItem } from '../types';
 
-export type TimeRangeFilter = '7d' | 'year' | 'month' | 'lifetime';
+export type TimeRangeFilter = '7d' | '30d' | '1y' | 'all';
 
 /** Curated pie slices — softer than raw success/error, works in light & dark. */
 function getDashboardPieChartColors(theme: Theme) {
@@ -68,19 +68,6 @@ function getDashboardPieChartColors(theme: Theme) {
     notAttached: '#7C6CF0',
   };
 }
-
-const CURRENT_YEAR = new Date().getFullYear();
-const START_YEAR = 2024; // first registration year
-const YEARS = Array.from(
-  { length: CURRENT_YEAR - START_YEAR + 3 },
-  (_, i) => START_YEAR + i
-); // 2024..current+2
-const MONTHS = [
-  { value: 1, label: 'January' }, { value: 2, label: 'February' }, { value: 3, label: 'March' },
-  { value: 4, label: 'April' }, { value: 5, label: 'May' }, { value: 6, label: 'June' },
-  { value: 7, label: 'July' }, { value: 8, label: 'August' }, { value: 9, label: 'September' },
-  { value: 10, label: 'October' }, { value: 11, label: 'November' }, { value: 12, label: 'December' },
-];
 
 /** Parse createdAt from backend (string, ISO, epoch ms, or [y,m,d,...] array) to a valid Date */
 function parseCreatedAt(value: string | number | number[] | undefined): Date | null {
@@ -148,15 +135,13 @@ interface ChartPoint {
 
 function aggregateForChart<T extends { createdAt?: string | number | number[]; created?: string | number | number[] }>(
   items: T[],
-  filter: TimeRangeFilter,
-  selectedYear: number,
-  selectedMonth: number
+  filter: TimeRangeFilter
 ): ChartPoint[] {
   const now = new Date();
-  const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
   if (filter === '7d') {
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const byDay = new Map<string, number>();
     for (let i = 0; i < 7; i++) {
       const d = new Date(sevenDaysAgo);
@@ -174,42 +159,18 @@ function aggregateForChart<T extends { createdAt?: string | number | number[]; c
       .map(([key, count]) => ({ key, label: dayLabel(key), count }));
   }
 
-  if (filter === 'year') {
-    const byMonth = new Map<string, number>();
-    for (let m = 1; m <= 12; m++) {
-      const key = `${selectedYear}-${String(m).padStart(2, '0')}`;
-      byMonth.set(key, 0);
-    }
-    for (const item of items) {
-      const d = getItemCreatedDate(item);
-      if (!d || d.getFullYear() !== selectedYear) continue;
-      const key = monthKey(d);
-      byMonth.set(key, (byMonth.get(key) ?? 0) + 1);
-    }
-    let cumulative = 0;
-    return Array.from(byMonth.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([month, count]) => {
-        cumulative += count;
-        return {
-          key: month,
-          label: monthLabel(month),
-          count,
-          cumulative,
-        };
-      });
-  }
-
-  if (filter === 'month') {
-    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+  if (filter === '30d') {
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const byDay = new Map<string, number>();
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(selectedYear, selectedMonth - 1, d);
-      byDay.set(dayKey(date), 0);
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(thirtyDaysAgo);
+      d.setDate(d.getDate() + i);
+      byDay.set(dayKey(d), 0);
     }
     for (const item of items) {
       const d = getItemCreatedDate(item);
-      if (!d || d.getFullYear() !== selectedYear || d.getMonth() !== selectedMonth - 1) continue;
+      if (!d || d < thirtyDaysAgo) continue;
       const key = dayKey(d);
       if (byDay.has(key)) byDay.set(key, (byDay.get(key) ?? 0) + 1);
     }
@@ -218,7 +179,29 @@ function aggregateForChart<T extends { createdAt?: string | number | number[]; c
       .map(([key, count]) => ({ key, label: dayLabel(key), count }));
   }
 
-  if (filter === 'lifetime') {
+  if (filter === '1y') {
+    const rangeStart = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+    const byMonth = new Map<string, number>();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(rangeStart.getFullYear(), rangeStart.getMonth() + i, 1);
+      byMonth.set(monthKey(d), 0);
+    }
+    for (const item of items) {
+      const d = getItemCreatedDate(item);
+      if (!d || d < rangeStart || d > now) continue;
+      const key = monthKey(d);
+      if (byMonth.has(key)) byMonth.set(key, (byMonth.get(key) ?? 0) + 1);
+    }
+    return Array.from(byMonth.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, count]) => ({
+        key: month,
+        label: monthLabel(month),
+        count,
+      }));
+  }
+
+  if (filter === 'all') {
     const byMonth = new Map<string, number>();
     for (const item of items) {
       const d = getItemCreatedDate(item);
@@ -246,21 +229,17 @@ function aggregateForChart<T extends { createdAt?: string | number | number[]; c
 function ProgressLineChart<T extends { createdAt?: string | number | number[]; created?: string | number | number[] }>({
   items,
   filter,
-  selectedYear,
-  selectedMonth,
   totalLabel,
   countLineName,
   emptyMessage,
 }: {
   items: T[];
   filter: TimeRangeFilter;
-  selectedYear: number;
-  selectedMonth: number;
   totalLabel: string;
   countLineName: string;
   emptyMessage: string;
 }) {
-  const chartData = aggregateForChart(items, filter, selectedYear, selectedMonth);
+  const chartData = aggregateForChart(items, filter);
 
   if (chartData.length === 0) {
     return (
@@ -307,15 +286,7 @@ function ProgressLineChart<T extends { createdAt?: string | number | number[]; c
   );
 }
 
-function UserRegistrationProgress({
-  filter,
-  selectedYear,
-  selectedMonth,
-}: {
-  filter: TimeRangeFilter;
-  selectedYear: number;
-  selectedMonth: number;
-}) {
+function UserRegistrationProgress({ filter }: { filter: TimeRangeFilter }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard-users-light'],
     queryFn: async () => {
@@ -358,8 +329,6 @@ function UserRegistrationProgress({
       <ProgressLineChart
         items={items}
         filter={filter}
-        selectedYear={selectedYear}
-        selectedMonth={selectedMonth}
         totalLabel={`Total users: ${totalUsers}`}
         countLineName="Registrations"
         emptyMessage="No registration data for the selected period."
@@ -368,15 +337,7 @@ function UserRegistrationProgress({
   );
 }
 
-function RifleCreationProgress({
-  filter,
-  selectedYear,
-  selectedMonth,
-}: {
-  filter: TimeRangeFilter;
-  selectedYear: number;
-  selectedMonth: number;
-}) {
+function RifleCreationProgress({ filter }: { filter: TimeRangeFilter }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard-rifles-light'],
     queryFn: async () => {
@@ -428,8 +389,6 @@ function RifleCreationProgress({
       <ProgressLineChart
         items={items}
         filter={filter}
-        selectedYear={selectedYear}
-        selectedMonth={selectedMonth}
         totalLabel={`Total rifles: ${totalRifles}`}
         countLineName="Created"
         emptyMessage="No rifle creation data for the selected period."
@@ -438,15 +397,7 @@ function RifleCreationProgress({
   );
 }
 
-function BulletCreationProgress({
-  filter,
-  selectedYear,
-  selectedMonth,
-}: {
-  filter: TimeRangeFilter;
-  selectedYear: number;
-  selectedMonth: number;
-}) {
+function BulletCreationProgress({ filter }: { filter: TimeRangeFilter }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard-bullets-light'],
     queryFn: async () => {
@@ -498,8 +449,6 @@ function BulletCreationProgress({
       <ProgressLineChart
         items={items}
         filter={filter}
-        selectedYear={selectedYear}
-        selectedMonth={selectedMonth}
         totalLabel={`Total bullets: ${totalBullets}`}
         countLineName="Created"
         emptyMessage="No bullet creation data for the selected period."
@@ -663,8 +612,6 @@ function LightChartCard({
   fetchFn,
   totalLabelKey,
   filter,
-  selectedYear,
-  selectedMonth,
   countLineName,
   emptyMessage,
 }: {
@@ -674,8 +621,6 @@ function LightChartCard({
   fetchFn: () => Promise<{ data?: unknown }>;
   totalLabelKey: string;
   filter: TimeRangeFilter;
-  selectedYear: number;
-  selectedMonth: number;
   countLineName: string;
   emptyMessage: string;
 }) {
@@ -723,8 +668,6 @@ function LightChartCard({
       <ProgressLineChart
         items={items}
         filter={filter}
-        selectedYear={selectedYear}
-        selectedMonth={selectedMonth}
         totalLabel={`Total: ${total}`}
         countLineName={countLineName}
         emptyMessage={emptyMessage}
@@ -735,8 +678,6 @@ function LightChartCard({
 
 export default function Dashboard() {
   const [filter, setFilter] = useState<TimeRangeFilter>('7d');
-  const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
 
   const handleFilterChange = (event: SelectChangeEvent<TimeRangeFilter>) => {
     setFilter(event.target.value as TimeRangeFilter);
@@ -770,7 +711,7 @@ export default function Dashboard() {
             justifyContent: { xs: 'flex-start', sm: 'flex-end' },
           }}
         >
-          <FormControl size="small" sx={{ minWidth: 140 }}>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
             <InputLabel id="dashboard-time-range">Time range</InputLabel>
             <Select
               labelId="dashboard-time-range"
@@ -779,62 +720,11 @@ export default function Dashboard() {
               onChange={handleFilterChange}
             >
               <MenuItem value="7d">Last 7 days</MenuItem>
-              <MenuItem value="year">Year</MenuItem>
-              <MenuItem value="month">Month</MenuItem>
-              <MenuItem value="lifetime">Lifetime</MenuItem>
+              <MenuItem value="30d">Last 30 days</MenuItem>
+              <MenuItem value="1y">Last 1 year</MenuItem>
+              <MenuItem value="all">All time</MenuItem>
             </Select>
           </FormControl>
-          {filter === 'year' && (
-            <FormControl size="small" sx={{ minWidth: 100 }}>
-              <InputLabel id="dashboard-year">Year</InputLabel>
-              <Select
-                labelId="dashboard-year"
-                value={String(selectedYear)}
-                label="Year"
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-              >
-                {YEARS.map((y) => (
-                  <MenuItem key={y} value={String(y)}>
-                    {y}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-          {filter === 'month' && (
-            <>
-              <FormControl size="small" sx={{ minWidth: 100 }}>
-                <InputLabel id="dashboard-month-year">Year</InputLabel>
-                <Select
-                  labelId="dashboard-month-year"
-                  value={String(selectedYear)}
-                  label="Year"
-                  onChange={(e) => setSelectedYear(Number(e.target.value))}
-                >
-                  {YEARS.map((y) => (
-                    <MenuItem key={y} value={String(y)}>
-                      {y}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel id="dashboard-month">Month</InputLabel>
-                <Select
-                  labelId="dashboard-month"
-                  value={String(selectedMonth)}
-                  label="Month"
-                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                >
-                  {MONTHS.map((m) => (
-                    <MenuItem key={m.value} value={String(m.value)}>
-                      {m.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </>
-          )}
         </Box>
       </Box>
 
@@ -847,29 +737,17 @@ export default function Dashboard() {
       >
         <Card sx={dashboardPageCardSx} elevation={0}>
           <CardContent sx={dashboardPageCardContentSx}>
-            <UserRegistrationProgress
-              filter={filter}
-              selectedYear={selectedYear}
-              selectedMonth={selectedMonth}
-            />
+            <UserRegistrationProgress filter={filter} />
           </CardContent>
         </Card>
         <Card sx={dashboardPageCardSx} elevation={0}>
           <CardContent sx={dashboardPageCardContentSx}>
-            <RifleCreationProgress
-              filter={filter}
-              selectedYear={selectedYear}
-              selectedMonth={selectedMonth}
-            />
+            <RifleCreationProgress filter={filter} />
           </CardContent>
         </Card>
         <Card sx={dashboardPageCardSx} elevation={0}>
           <CardContent sx={dashboardPageCardContentSx}>
-            <BulletCreationProgress
-              filter={filter}
-              selectedYear={selectedYear}
-              selectedMonth={selectedMonth}
-            />
+            <BulletCreationProgress filter={filter} />
           </CardContent>
         </Card>
         <Card sx={dashboardPageCardSx} elevation={0}>
@@ -881,8 +759,6 @@ export default function Dashboard() {
               fetchFn={getFcmTokensLight}
               totalLabelKey="totalFcmTokens"
               filter={filter}
-              selectedYear={selectedYear}
-              selectedMonth={selectedMonth}
               countLineName="Registered"
               emptyMessage="No FCM tokens for the selected period."
             />
