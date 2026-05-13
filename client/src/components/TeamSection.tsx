@@ -23,8 +23,9 @@ const imageMap: Record<string, string> = {
 export function TeamSection() {
   const { t, locale } = useI18n();
   const cms = useMarketingSitePayload();
-  const cmsTeamFiltered = cms?.teamMembers?.filter((m) => m.imageUrl?.trim());
-  const cmsTeam = cmsTeamFiltered?.length ? cmsTeamFiltered : null;
+  /** When CMS defines `teamMembers`, honor it (even empty). Only fall back to bundled static team when the key is absent. */
+  const teamFromCms =
+    cms != null && Array.isArray(cms.teamMembers) ? cms.teamMembers : undefined;
 
   return (
     <section id="team" className="py-24 sm:py-32" data-testid="section-team">
@@ -40,10 +41,10 @@ export function TeamSection() {
         </AnimatedSection>
 
         <StaggeredGrid className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {cmsTeam
-            ? cmsTeam.map((member, i) => (
+          {teamFromCms !== undefined
+            ? teamFromCms.filter((m) => m.imageUrl?.trim()).map((member, i) => (
                 <Card
-                  key={i}
+                  key={`${member.imageUrl}-${i}`}
                   className="group overflow-visible glass-card text-center flex flex-col h-full"
                   data-testid={`card-team-${i}`}
                 >
