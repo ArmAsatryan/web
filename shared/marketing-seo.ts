@@ -66,6 +66,28 @@ export const TERMS_OF_SERVICE_PAGE_META: CrawlerPageMeta = {
   path: "/terms-of-service",
 };
 
+export const NEWS_PAGE_META: CrawlerPageMeta = {
+  title: "News & Updates | BALLISTiQ",
+  description:
+    "Latest BALLISTiQ news, product updates, and announcements for precision shooters and ballistic calculator users.",
+  path: "/news",
+};
+
+export function newsDetailPageMeta(item: {
+  title: string;
+  content: string;
+  slug: string;
+  imageUrl?: string | null;
+}): CrawlerPageMeta {
+  const excerpt = item.content.trim().slice(0, 160).replace(/\s+/g, " ");
+  return {
+    title: `${item.title} | BALLISTiQ News`,
+    description: excerpt.length < item.content.trim().length ? `${excerpt}…` : excerpt,
+    path: `/news/${item.slug}`,
+    image: item.imageUrl ?? undefined,
+  };
+}
+
 export function resolvePublicSiteUrl(): string {
   if (typeof process !== "undefined" && process.env?.VITE_SITE_URL) {
     return String(process.env.VITE_SITE_URL).replace(/\/+$/, "");
@@ -96,6 +118,14 @@ export function getCrawlerPageMeta(pathname: string): CrawlerPageMeta | null {
   }
   if (p === "/privacy-policy") return PRIVACY_POLICY_PAGE_META;
   if (p === "/terms-of-service") return TERMS_OF_SERVICE_PAGE_META;
+  if (p === "/news") return NEWS_PAGE_META;
+  if (p.startsWith("/news/")) {
+    return {
+      title: "BALLISTiQ News",
+      description: NEWS_PAGE_META.description,
+      path: p,
+    };
+  }
   return null;
 }
 

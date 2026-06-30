@@ -235,3 +235,40 @@ export function uploadMarketingSiteImage(file: File) {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
+
+// News (BallisticBE NewsController)
+export function getNewsList(params?: { page?: number; size?: number }) {
+  return api.get<import('@shared/news-types').NewsPageResponse>('/admin/api/news', { params });
+}
+
+export function getNewsById(id: number) {
+  return api.get<import('@shared/news-types').NewsItem>(`/admin/api/news/${id}`);
+}
+
+export function createNews(body: import('@shared/news-types').NewsCreateRequest) {
+  return api.post<import('@shared/news-types').NewsItem>('/admin/api/news', body);
+}
+
+export function updateNews(id: number, body: import('@shared/news-types').NewsUpdateRequest) {
+  return api.put<import('@shared/news-types').NewsItem>(`/admin/api/news/${id}`, body);
+}
+
+export function deleteNews(id: number) {
+  return api.delete(`/admin/api/news/${id}`);
+}
+
+export function publishNews(id: number) {
+  return api.post<import('@shared/news-types').NewsItem>(`/admin/api/news/${id}/publish`);
+}
+
+export function unpublishNews(id: number) {
+  return api.post<import('@shared/news-types').NewsItem>(`/admin/api/news/${id}/unpublish`);
+}
+
+export function uploadNewsImage(file: File) {
+  const fd = new FormData();
+  fd.append('file', file);
+  return api.post<import('../types').ApiBaseModel<string>>('/admin/api/news/upload-image', fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}

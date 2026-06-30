@@ -18,6 +18,7 @@ import AppDetailsPage from './features/app-store/AppDetailsPage';
 import ManageContentPage from './features/app-store/ManageContentPage';
 import SubmitForReviewPage from './features/app-store/SubmitForReviewPage';
 import MarketingSitePage from './features/marketing-site/MarketingSitePage';
+import NewsPage from './features/news/NewsPage';
 
 const queryClient = new QueryClient();
 
@@ -169,6 +170,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <MarketingSitePage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/news"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <NewsPage />
             </Layout>
           </ProtectedRoute>
         }

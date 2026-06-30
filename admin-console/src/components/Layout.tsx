@@ -8,6 +8,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import LanguageIcon from '@mui/icons-material/Language';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
 import AppleIcon from '@mui/icons-material/Apple';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -36,6 +37,7 @@ const COLLAPSED_WIDTH = 72;
 const nav = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/marketing-site', label: 'Marketing site', icon: <LanguageIcon /> },
+  { path: '/news', label: 'News', icon: <NewspaperIcon /> },
   { path: '/', label: 'Users', icon: <PeopleIcon /> },
   { path: '/map', label: 'User Locations', icon: <MapIcon /> },
   { path: '/notifications', label: 'Notifications', icon: <NotificationsIcon /> },
@@ -50,6 +52,7 @@ const secondaryNav = [{ path: '/app-store', label: 'App Store Connect', icon: <A
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/marketing-site': 'Marketing site',
+  '/news': 'News',
   '/': 'Users',
   '/map': 'User Locations Map',
   '/notifications': 'Notifications',
@@ -65,6 +68,7 @@ const pageTitles: Record<string, string> = {
 const pageSubtitles: Record<string, string> = {
   '/dashboard': 'Overview: users, rifles, bullets, FCM tokens',
   '/marketing-site': 'Hero, features, pricing, B2B, reviews, and team for ballistiq.xyz',
+  '/news': 'Create and publish news articles for ballistiq.xyz/news',
   '/': 'Manage and view all registered users',
   '/map': 'User locations on a map (OpenStreetMap); filter by user id',
   '/notifications': 'Send push notifications, schedule multi-language broadcasts, and view history',

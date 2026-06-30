@@ -1,17 +1,23 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { Logo } from "./Logo";
 import { Menu, X, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useI18n, type Locale, localeFlags } from "@/hooks/use-i18n";
 
-const navKeys = [
-  { key: "nav.features", href: "#features" },
-  { key: "nav.pricing", href: "#pricing" },
-  { key: "nav.business", href: "#b2b" },
-  { key: "nav.reviews", href: "#reviews" },
-  { key: "nav.team", href: "#team" },
-  { key: "nav.contact", href: "#contact" },
+type NavItem =
+  | { key: string; href: string; type: "anchor" }
+  | { key: string; href: string; type: "route" };
+
+const navKeys: NavItem[] = [
+  { key: "nav.features", href: "#features", type: "anchor" },
+  { key: "nav.pricing", href: "#pricing", type: "anchor" },
+  { key: "nav.business", href: "#b2b", type: "anchor" },
+  { key: "nav.reviews", href: "#reviews", type: "anchor" },
+  { key: "nav.team", href: "#team", type: "anchor" },
+  { key: "nav.news", href: "#news", type: "anchor" },
+  { key: "nav.contact", href: "#contact", type: "anchor" },
 ];
 
 export function Navbar() {
@@ -19,6 +25,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { t, locale, setLocale } = useI18n();
 
@@ -26,7 +33,9 @@ export function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
 
-      const sections = navKeys.map((l) => l.href.replace("#", ""));
+      const sections = navKeys
+        .filter((l) => l.type === "anchor")
+        .map((l) => l.href.replace("#", ""));
       let current = "";
       for (const id of sections) {
         const el = document.getElementById(id);
@@ -46,10 +55,66 @@ export function Navbar() {
 
   const handleNavClick = (href: string) => {
     setMobileOpen(false);
-    const el = document.getElementById(href.replace("#", ""));
+    const id = href.replace("#", "");
+    const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
+      return;
     }
+    if (href.startsWith("#")) {
+      window.location.href = `/${href}`;
+    }
+  };
+
+  const isNavActive = (link: NavItem) => {
+    if (link.type === "route") {
+      return location === link.href || location.startsWith(`${link.href}/`);
+    }
+    return activeSection === link.href.replace("#", "");
+  };
+
+  const navTestId = (link: NavItem) =>
+    link.type === "route"
+      ? link.href.replace(/^\//, "")
+      : link.href.replace("#", "");
+
+  const renderNavButton = (link: NavItem, mobile = false) => {
+    const active = isNavActive(link);
+    const className = mobile
+      ? `w-full justify-start ${active ? "text-primary" : "text-muted-foreground"}`
+      : active
+        ? "text-primary"
+        : "text-muted-foreground";
+
+    if (link.type === "route") {
+      return (
+        <Button
+          key={link.href}
+          variant="ghost"
+          size={mobile ? "default" : "sm"}
+          className={className}
+          asChild
+          data-testid={mobile ? `link-mobile-${navTestId(link)}` : `link-${navTestId(link)}`}
+        >
+          <Link href={link.href} onClick={() => setMobileOpen(false)}>
+            {t(link.key)}
+          </Link>
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        key={link.href}
+        variant="ghost"
+        size={mobile ? "default" : "sm"}
+        onClick={() => handleNavClick(link.href)}
+        className={className}
+        data-testid={mobile ? `link-mobile-${navTestId(link)}` : `link-${navTestId(link)}`}
+      >
+        {t(link.key)}
+      </Button>
+    );
   };
 
   const locales: Locale[] = ["en", "fr", "it", "es", "hy"];
@@ -70,21 +135,7 @@ export function Navbar() {
           </a>
 
           <div className="hidden lg:flex items-center gap-1">
-            {navKeys.map((link) => (
-              <Button
-                key={link.href}
-                variant="ghost"
-                size="sm"
-                onClick={() => handleNavClick(link.href)}
-                className={activeSection === link.href.replace("#", "")
-                  ? "text-primary"
-                  : "text-muted-foreground"
-                }
-                data-testid={`link-${link.href.replace("#", "")}`}
-              >
-                {t(link.key)}
-              </Button>
-            ))}
+            {navKeys.map((link) => renderNavButton(link))}
 
             <div className="relative ml-2">
               <Button
@@ -192,21 +243,7 @@ export function Navbar() {
       {mobileOpen && (
         <div className="lg:hidden bg-background/95 backdrop-blur-xl border-b border-border/50">
           <div className="px-4 py-4 space-y-1">
-            {navKeys.map((link) => (
-              <Button
-                key={link.href}
-                variant="ghost"
-                onClick={() => handleNavClick(link.href)}
-                className={`w-full justify-start ${
-                  activeSection === link.href.replace("#", "")
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                }`}
-                data-testid={`link-mobile-${link.href.replace("#", "")}`}
-              >
-                {t(link.key)}
-              </Button>
-            ))}
+            {navKeys.map((link) => renderNavButton(link, true))}
             <Button
               onClick={() => { handleNavClick("#hero"); setMobileOpen(false); }}
               className="w-full mt-3"

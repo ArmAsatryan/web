@@ -6,6 +6,7 @@ import { FeaturesPricingDivider } from "@/components/FeaturesPricingDivider";
 import { PricingSection } from "@/components/PricingSection";
 import { B2BSection } from "@/components/B2BSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
+import { NewsSection } from "@/components/NewsSection";
 import { TeamSection } from "@/components/TeamSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
@@ -41,6 +42,7 @@ export function HomePage() {
         <PricingSection />
         <B2BSection />
         <ReviewsSection />
+        <NewsSection />
         <TeamSection />
         <ContactSection />
         <Footer />

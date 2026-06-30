@@ -5,6 +5,8 @@ import { MarketingSiteProvider } from "@/context/MarketingSiteContext";
 import { HomePage } from "@/pages/HomePage";
 import { PrivacyPolicyPage } from "@/pages/PrivacyPolicy";
 import { TermsOfServicePage } from "@/pages/TermsOfService";
+import { NewsPage } from "@/pages/NewsPage";
+import { NewsDetailPage } from "@/pages/NewsDetailPage";
 import NotFound from "@/pages/not-found";
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
           <Switch>
             <Route path="/privacy-policy" component={PrivacyPolicyPage} />
             <Route path="/terms-of-service" component={TermsOfServicePage} />
+            <Route path="/news/:slug" component={NewsDetailPage} />
+            <Route path="/news" component={NewsPage} />
             <Route path="/" component={HomePage} />
             <Route path="/:rest+" component={NotFound} />
           </Switch>
