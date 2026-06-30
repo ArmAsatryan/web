@@ -73,7 +73,7 @@ export default function NewsPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<NewsItem | null>(null);
-  const [banner, setBanner] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
+  const [banner, setBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ['admin-news'],
@@ -139,7 +139,7 @@ export default function NewsPage() {
     onSuccess: () => {
       closeDialog();
       invalidate();
-      setBanner({ type: 'ok', text: editing ? 'News updated.' : 'News created as draft.' });
+      setBanner({ type: 'success', text: editing ? 'News updated.' : 'News created as draft.' });
     },
     onError: (e) => setFormError(errMsg(e)),
   });
@@ -148,7 +148,7 @@ export default function NewsPage() {
     mutationFn: (id: number) => publishNews(id),
     onSuccess: () => {
       invalidate();
-      setBanner({ type: 'ok', text: 'News published.' });
+      setBanner({ type: 'success', text: 'News published.' });
     },
     onError: (e) => setBanner({ type: 'error', text: errMsg(e) }),
   });
@@ -157,7 +157,7 @@ export default function NewsPage() {
     mutationFn: (id: number) => unpublishNews(id),
     onSuccess: () => {
       invalidate();
-      setBanner({ type: 'ok', text: 'News unpublished.' });
+      setBanner({ type: 'success', text: 'News unpublished.' });
     },
     onError: (e) => setBanner({ type: 'error', text: errMsg(e) }),
   });
@@ -167,7 +167,7 @@ export default function NewsPage() {
     onSuccess: () => {
       setDeleteTarget(null);
       invalidate();
-      setBanner({ type: 'ok', text: 'News deleted.' });
+      setBanner({ type: 'success', text: 'News deleted.' });
     },
     onError: (e) => setBanner({ type: 'error', text: errMsg(e) }),
   });
