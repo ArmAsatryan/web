@@ -155,7 +155,10 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="overflow-hidden touch-pan-y [touch-action:pan-y_pinch-zoom]">
+    <div
+      ref={carouselRef}
+      className="overflow-hidden touch-pan-y [touch-action:pan-y_pinch-zoom] [transform:translateZ(0)]"
+    >
       <div
         ref={ref}
         className={cn(

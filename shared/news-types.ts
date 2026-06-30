@@ -51,6 +51,12 @@ export interface NewsLinkedInImportResponse {
 /** Characters shown on list cards before "Read more". */
 export const NEWS_EXCERPT_LENGTH = 220;
 
+/** Shorter excerpt for home carousel cards (especially on mobile). */
+export const NEWS_CAROUSEL_EXCERPT_LENGTH = 100;
+
+/** Home page carousel fetch size — keep small for fast mobile load. */
+export const HOME_NEWS_CAROUSEL_SIZE = 12;
+
 export function newsExcerpt(content: string, maxLength = NEWS_EXCERPT_LENGTH): string {
   const trimmed = content.trim();
   if (trimmed.length <= maxLength) return trimmed;
