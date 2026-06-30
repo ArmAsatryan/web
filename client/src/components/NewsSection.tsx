@@ -19,6 +19,7 @@ import { sortNewsByDateDesc, type NewsItem } from "@shared/news-types";
 const HOME_NEWS_FETCH_SIZE = 50;
 
 function NewsCarouselControls({ api, itemCount }: { api: CarouselApi | undefined; itemCount: number }) {
+  const { t } = useI18n();
   const [current, setCurrent] = useState(0);
   const [snapCount, setSnapCount] = useState(0);
   const [canPrev, setCanPrev] = useState(false);
@@ -59,7 +60,7 @@ function NewsCarouselControls({ api, itemCount }: { api: CarouselApi | undefined
           type="button"
           variant="ghost"
           size="icon"
-          className={navButtonClass}
+          className={cn(navButtonClass, "hidden sm:inline-flex")}
           disabled={!canPrev}
           onClick={() => api?.scrollPrev()}
           aria-label="Previous news"
@@ -95,7 +96,7 @@ function NewsCarouselControls({ api, itemCount }: { api: CarouselApi | undefined
           type="button"
           variant="ghost"
           size="icon"
-          className={navButtonClass}
+          className={cn(navButtonClass, "hidden sm:inline-flex")}
           disabled={!canNext}
           onClick={() => api?.scrollNext()}
           aria-label="Next news"
@@ -103,6 +104,7 @@ function NewsCarouselControls({ api, itemCount }: { api: CarouselApi | undefined
           <ArrowRight className="h-5 w-5" />
         </Button>
       </div>
+      <p className="text-center text-xs text-muted-foreground sm:hidden">{t("news.swipeHint")}</p>
     </div>
   );
 }
@@ -169,14 +171,18 @@ export function NewsSection() {
                 opts={{
                   align: "start",
                   loop: items.length > 1,
+                  dragFree: false,
+                  breakpoints: {
+                    "(max-width: 767px)": { align: "center" },
+                  },
                 }}
-                className="w-full"
+                className="w-full touch-manipulation"
               >
                 <CarouselContent className="-ml-4 md:-ml-5">
                   {items.map((item) => (
                     <CarouselItem
                       key={item.id}
-                      className="pl-4 md:pl-5 basis-full md:basis-1/2 lg:basis-1/3"
+                      className="select-none pl-4 md:pl-5 basis-[88%] sm:basis-full md:basis-1/2 lg:basis-1/3"
                     >
                       <NewsCard item={item} />
                     </CarouselItem>

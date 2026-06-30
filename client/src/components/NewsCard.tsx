@@ -59,6 +59,7 @@ export function NewsCard({ item, full = false }: NewsCardProps) {
           <img
             src={item.imageUrl}
             alt=""
+            draggable={false}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             loading="lazy"
           />
