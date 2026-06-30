@@ -11,7 +11,7 @@ import { newsDetailPageMeta, NEWS_PAGE_META } from "@shared/marketing-seo";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useI18n } from "@/hooks/use-i18n";
 import { fetchPublishedNewsBySlug } from "@/lib/news-api";
-import { formatNewsDate, type NewsItem } from "@shared/news-types";
+import { formatNewsDate, newsDisplayDateValue, parseNewsDate, type NewsItem } from "@shared/news-types";
 
 export function NewsDetailPage() {
   const [, params] = useRoute("/news/:slug");
@@ -55,8 +55,11 @@ export function NewsDetailPage() {
   }, [slug, t]);
 
   const dateLabel = item
-    ? formatNewsDate(item.publishedAt ?? item.created, locale)
+    ? formatNewsDate(newsDisplayDateValue(item), locale)
     : "";
+  const dateTimeAttr = item
+    ? parseNewsDate(newsDisplayDateValue(item))?.toISOString()
+    : undefined;
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
@@ -112,7 +115,11 @@ export function NewsDetailPage() {
 
                   <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                     <CalendarDays className="h-4 w-4 shrink-0 text-primary/80" aria-hidden />
-                    <time dateTime={item.publishedAt ?? item.created}>{dateLabel}</time>
+                    {dateTimeAttr ? (
+                      <time dateTime={dateTimeAttr}>{dateLabel}</time>
+                    ) : (
+                      <span>{dateLabel}</span>
+                    )}
                   </div>
 
                   <h1 className="mb-6 text-3xl font-bold text-foreground sm:text-4xl">

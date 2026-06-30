@@ -12,7 +12,7 @@ import { NEWS_PAGE_META } from "@shared/marketing-seo";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useI18n } from "@/hooks/use-i18n";
 import { fetchPublishedNews } from "@/lib/news-api";
-import type { NewsItem } from "@shared/news-types";
+import { sortNewsByDateDesc, type NewsItem } from "@shared/news-types";
 
 export function NewsPage() {
   usePageMeta(NEWS_PAGE_META);
@@ -27,7 +27,7 @@ export function NewsPage() {
     setError(null);
     fetchPublishedNews(1, 50)
       .then((data) => {
-        if (!cancelled) setItems(data.items);
+        if (!cancelled) setItems(sortNewsByDateDesc(data.items));
       })
       .catch(() => {
         if (!cancelled) setError(t("news.loadError"));

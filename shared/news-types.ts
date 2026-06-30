@@ -2,6 +2,9 @@
 
 export type NewsStatus = "DRAFT" | "PUBLISHED";
 
+/** Backend may send ISO strings or Jackson LocalDateTime arrays. */
+export type NewsDateValue = string | number | number[];
+
 export interface NewsItem {
   id: number;
   title: string;
@@ -9,9 +12,9 @@ export interface NewsItem {
   content: string;
   imageUrl?: string | null;
   status?: NewsStatus;
-  publishedAt?: string | null;
-  created: string;
-  updated?: string | null;
+  publishedAt?: NewsDateValue | null;
+  created: NewsDateValue;
+  updated?: NewsDateValue | null;
 }
 
 export interface NewsPageResponse {
@@ -61,13 +64,49 @@ export function newsNeedsReadMore(content: string, maxLength = NEWS_EXCERPT_LENG
   return content.trim().length > maxLength;
 }
 
-export function formatNewsDate(iso: string | null | undefined, locale?: string): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
+/** Published date when set, otherwise created date. */
+export function newsDisplayDateValue(item: Pick<NewsItem, "publishedAt" | "created">): NewsDateValue | null | undefined {
+  return item.publishedAt ?? item.created;
+}
+
+export function parseNewsDate(value: NewsDateValue | null | undefined): Date | null {
+  if (value == null || value === "") return null;
+  if (typeof value === "number") {
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  if (Array.isArray(value) && value.length >= 3) {
+    const [y, m, d, h = 0, min = 0, s = 0] = value;
+    const date = new Date(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(s));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  const s = String(value).trim();
+  if (!s || s === "[object Object]") return null;
+  const space = s.indexOf(" ");
+  let iso = s;
+  if (space > 0) {
+    iso = `${s.slice(0, space)}T${s.slice(space + 1)}`;
+  }
+  const fracMatch = iso.match(/(\.\d{3})\d*/);
+  if (fracMatch) iso = iso.replace(/(\.\d{3})\d*/, fracMatch[1]!);
+  const parsed = new Date(iso);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function formatNewsDate(value: NewsDateValue | null | undefined, locale?: string): string {
+  const d = parseNewsDate(value);
+  if (!d) return "";
   return d.toLocaleDateString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
+  });
+}
+
+export function sortNewsByDateDesc(items: NewsItem[]): NewsItem[] {
+  return [...items].sort((a, b) => {
+    const ta = parseNewsDate(newsDisplayDateValue(a))?.getTime() ?? 0;
+    const tb = parseNewsDate(newsDisplayDateValue(b))?.getTime() ?? 0;
+    return tb - ta;
   });
 }

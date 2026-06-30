@@ -32,6 +32,11 @@ import { isAxiosError } from 'axios';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { NewsCreateRequest, NewsItem, NewsUpdateRequest } from '@shared/news-types';
 import {
+  formatNewsDate,
+  newsDisplayDateValue,
+  sortNewsByDateDesc,
+} from '@shared/news-types';
+import {
   createNews,
   deleteNews,
   getNewsList,
@@ -59,11 +64,9 @@ function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : 'Request failed';
 }
 
-function formatDate(iso?: string | null): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString();
+function formatAdminDate(item: NewsItem): string {
+  const label = formatNewsDate(newsDisplayDateValue(item));
+  return label || '—';
 }
 
 export default function NewsPage() {
@@ -83,7 +86,7 @@ export default function NewsPage() {
     queryKey: ['admin-news'],
     queryFn: async () => {
       const { data: res } = await getNewsList({ page: 1, size: 100 });
-      return res;
+      return { ...res, items: sortNewsByDateDesc(res.items ?? []) };
     },
   });
 
@@ -277,8 +280,7 @@ export default function NewsPage() {
                   <TableRow>
                     <TableCell>Title</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell>Created</TableCell>
-                    <TableCell>Published</TableCell>
+                    <TableCell>Date</TableCell>
                     <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -300,8 +302,7 @@ export default function NewsPage() {
                           color={item.status === 'PUBLISHED' ? 'success' : 'default'}
                         />
                       </TableCell>
-                      <TableCell>{formatDate(item.created)}</TableCell>
-                      <TableCell>{formatDate(item.publishedAt)}</TableCell>
+                      <TableCell>{formatAdminDate(item)}</TableCell>
                       <TableCell align="right">
                         <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                           <IconButton size="small" aria-label="Edit" onClick={() => openEdit(item)}>

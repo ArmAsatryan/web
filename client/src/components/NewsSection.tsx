@@ -3,12 +3,20 @@ import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NewsCard } from "@/components/NewsCard";
-import { AnimatedSection, StaggeredGrid } from "@/components/AnimatedSection";
+import { AnimatedSection } from "@/components/AnimatedSection";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { useI18n } from "@/hooks/use-i18n";
 import { fetchPublishedNews } from "@/lib/news-api";
-import type { NewsItem } from "@shared/news-types";
+import { sortNewsByDateDesc, type NewsItem } from "@shared/news-types";
 
-const HOME_NEWS_LIMIT = 3;
+/** Max items loaded for the home page carousel (newest first). */
+const HOME_NEWS_FETCH_SIZE = 50;
 
 export function NewsSection() {
   const { t } = useI18n();
@@ -20,9 +28,9 @@ export function NewsSection() {
     let cancelled = false;
     setLoading(true);
     setError(false);
-    fetchPublishedNews(1, HOME_NEWS_LIMIT)
+    fetchPublishedNews(1, HOME_NEWS_FETCH_SIZE)
       .then((data) => {
-        if (!cancelled) setItems(data.items ?? []);
+        if (!cancelled) setItems(sortNewsByDateDesc(data.items ?? []));
       })
       .catch(() => {
         if (!cancelled) {
@@ -41,7 +49,7 @@ export function NewsSection() {
   return (
     <section id="news" className="py-24 sm:py-32" data-testid="section-news">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <AnimatedSection className="mb-16 text-center">
+        <AnimatedSection className="mb-12 text-center sm:mb-16">
           <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl">
             {t("news.title1")}{" "}
             <span className="text-primary">{t("news.title2")}</span>
@@ -64,11 +72,38 @@ export function NewsSection() {
         )}
 
         {!loading && !error && items.length > 0 && (
-          <StaggeredGrid className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
-              <NewsCard key={item.id} item={item} />
-            ))}
-          </StaggeredGrid>
+          <AnimatedSection className="px-8 sm:px-12">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: items.length > 1,
+              }}
+              className="mx-auto w-full max-w-6xl"
+            >
+              <CarouselContent className="-ml-4">
+                {items.map((item) => (
+                  <CarouselItem
+                    key={item.id}
+                    className="pl-4 basis-full md:basis-1/2 lg:basis-1/3"
+                  >
+                    <NewsCard item={item} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {items.length > 1 && (
+                <>
+                  <CarouselPrevious
+                    variant="outline"
+                    className="left-0 top-[calc(50%-1rem)] h-10 w-10 border-border/60 bg-background/90 backdrop-blur-sm sm:-left-4"
+                  />
+                  <CarouselNext
+                    variant="outline"
+                    className="right-0 top-[calc(50%-1rem)] h-10 w-10 border-border/60 bg-background/90 backdrop-blur-sm sm:-right-4"
+                  />
+                </>
+              )}
+            </Carousel>
+          </AnimatedSection>
         )}
 
         <AnimatedSection className="mt-12 text-center" delay={0.15}>

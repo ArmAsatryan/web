@@ -4,8 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   formatNewsDate,
+  newsDisplayDateValue,
   newsExcerpt,
   newsNeedsReadMore,
+  parseNewsDate,
   type NewsItem,
 } from "@shared/news-types";
 import { useI18n } from "@/hooks/use-i18n";
@@ -16,15 +18,40 @@ interface NewsCardProps {
   full?: boolean;
 }
 
+function NewsDateLine({
+  item,
+  locale,
+  className = "mb-3 flex items-center gap-2 text-sm text-muted-foreground",
+}: {
+  item: NewsItem;
+  locale?: string;
+  className?: string;
+}) {
+  const displayDate = newsDisplayDateValue(item);
+  const dateLabel = formatNewsDate(displayDate, locale);
+  const dateTimeAttr = parseNewsDate(displayDate)?.toISOString();
+  if (!dateLabel) return null;
+
+  return (
+    <div className={className}>
+      <CalendarDays className="h-4 w-4 shrink-0 text-primary/80" aria-hidden />
+      {dateTimeAttr ? (
+        <time dateTime={dateTimeAttr}>{dateLabel}</time>
+      ) : (
+        <span>{dateLabel}</span>
+      )}
+    </div>
+  );
+}
+
 export function NewsCard({ item, full = false }: NewsCardProps) {
   const { t, locale } = useI18n();
-  const dateLabel = formatNewsDate(item.publishedAt ?? item.created, locale);
   const showReadMore = !full && newsNeedsReadMore(item.content);
   const body = full ? item.content : newsExcerpt(item.content);
 
   return (
     <Card
-      className="glass-card overflow-hidden flex flex-col h-full"
+      className="glass-card group overflow-hidden flex flex-col h-full"
       data-testid={`news-card-${item.slug}`}
     >
       {item.imageUrl && (
@@ -39,10 +66,7 @@ export function NewsCard({ item, full = false }: NewsCardProps) {
       )}
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
-          <CalendarDays className="h-4 w-4 shrink-0 text-primary/80" aria-hidden />
-          <time dateTime={item.publishedAt ?? item.created}>{dateLabel}</time>
-        </div>
+        <NewsDateLine item={item} locale={locale} />
 
         <h2 className="mb-3 text-xl font-semibold text-foreground sm:text-2xl">
           {full ? (
