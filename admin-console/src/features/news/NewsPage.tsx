@@ -22,6 +22,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import PublishIcon from '@mui/icons-material/Publish';
@@ -38,6 +39,7 @@ import {
   unpublishNews,
   updateNews,
   uploadNewsImage,
+  importNewsFromLinkedIn,
 } from '../../api/api';
 import ConfirmDialog from '../../components/ConfirmDialog';
 
@@ -74,6 +76,8 @@ export default function NewsPage() {
   const [uploading, setUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<NewsItem | null>(null);
   const [banner, setBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [linkedInUrl, setLinkedInUrl] = useState('');
+  const [importingLinkedIn, setImportingLinkedIn] = useState(false);
 
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ['admin-news'],
@@ -91,6 +95,7 @@ export default function NewsPage() {
     setEditing(null);
     setForm(emptyForm);
     setFormError(null);
+    setLinkedInUrl('');
     setDialogOpen(true);
   };
 
@@ -102,6 +107,7 @@ export default function NewsPage() {
       imageUrl: item.imageUrl ?? '',
     });
     setFormError(null);
+    setLinkedInUrl('');
     setDialogOpen(true);
   };
 
@@ -110,6 +116,7 @@ export default function NewsPage() {
     setEditing(null);
     setForm(emptyForm);
     setFormError(null);
+    setLinkedInUrl('');
   };
 
   const validateForm = (): boolean => {
@@ -185,6 +192,29 @@ export default function NewsPage() {
       setFormError(errMsg(e));
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleLinkedInImport = async () => {
+    const url = linkedInUrl.trim();
+    if (!url) {
+      setFormError('Paste a LinkedIn post URL first.');
+      return;
+    }
+    setImportingLinkedIn(true);
+    setFormError(null);
+    try {
+      const { data } = await importNewsFromLinkedIn({ url });
+      setForm({
+        title: data.title?.trim() ?? '',
+        content: data.content?.trim() ?? '',
+        imageUrl: data.imageUrl?.trim() ?? '',
+      });
+      setBanner({ type: 'success', text: 'Imported title, text, and image from LinkedIn.' });
+    } catch (e) {
+      setFormError(errMsg(e));
+    } finally {
+      setImportingLinkedIn(false);
     }
   };
 
@@ -326,6 +356,44 @@ export default function NewsPage() {
             )}
 
             <Stack spacing={2.5} sx={{ pt: 0.5 }}>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'action.hover',
+                }}
+              >
+                <Typography variant="subtitle2" gutterBottom>
+                  Import from LinkedIn
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Paste a public LinkedIn post URL to fill title, text, and image automatically.
+                </Typography>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                  <TextField
+                    label="LinkedIn post URL"
+                    value={linkedInUrl}
+                    onChange={(e) => setLinkedInUrl(e.target.value)}
+                    placeholder="https://www.linkedin.com/posts/…"
+                    fullWidth
+                    size="small"
+                  />
+                  <Button
+                    variant="contained"
+                    startIcon={
+                      importingLinkedIn ? <CircularProgress size={16} color="inherit" /> : <LinkedInIcon />
+                    }
+                    onClick={() => void handleLinkedInImport()}
+                    disabled={importingLinkedIn}
+                    sx={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+                  >
+                    {importingLinkedIn ? 'Importing…' : 'Import'}
+                  </Button>
+                </Stack>
+              </Box>
+
               <TextField
                 label="Title"
                 value={form.title}

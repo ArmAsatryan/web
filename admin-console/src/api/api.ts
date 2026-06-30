@@ -272,3 +272,10 @@ export function uploadNewsImage(file: File) {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
+
+export function importNewsFromLinkedIn(body: import('@shared/news-types').NewsLinkedInImportRequest) {
+  return api.post<import('@shared/news-types').NewsLinkedInImportResponse>(
+    '/admin/api/news/import-linkedin',
+    body,
+  );
+}

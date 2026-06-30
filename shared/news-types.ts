@@ -34,6 +34,17 @@ export interface NewsUpdateRequest {
   imageUrl?: string;
 }
 
+export interface NewsLinkedInImportRequest {
+  url: string;
+}
+
+export interface NewsLinkedInImportResponse {
+  title: string;
+  content: string;
+  imageUrl?: string | null;
+  sourceUrl: string;
+}
+
 /** Characters shown on list cards before "Read more". */
 export const NEWS_EXCERPT_LENGTH = 220;
 
