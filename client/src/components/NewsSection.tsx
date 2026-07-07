@@ -223,7 +223,7 @@ function MobileNewsScrollCarousel({ items }: { items: NewsItem[] }) {
             }}
             className="w-[88%] max-w-md shrink-0 snap-center"
           >
-            <NewsCard item={item} compact loadImage={Math.abs(index - current) <= 1} />
+            <NewsCard item={item} loadImage={Math.abs(index - current) <= 1} />
           </div>
         ))}
       </div>
@@ -278,7 +278,6 @@ function DesktopNewsCarousel({ items }: { items: NewsItem[] }) {
             >
               <NewsCard
                 item={item}
-                compact
                 loadImage={Math.abs(index - selectedIndex) <= 2}
               />
             </CarouselItem>
