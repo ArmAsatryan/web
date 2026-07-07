@@ -2,7 +2,12 @@
  * Minimal Worker + static assets so `wrangler deploy` works (Cloudflare Workers build).
  * Serves files from [assets]; on 404, returns the correct SPA shell for /admin-console/* vs /.
  */
-import { injectCrawlerSocialMetaIntoHtml } from "../shared/marketing-seo";
+import {
+  fetchPublishedNewsListForSeo,
+  injectCrawlerSocialMetaForPath,
+  renderMarketingSitemapXml,
+} from "../shared/news-seo";
+import { resolvePublicSiteUrl } from "../shared/marketing-seo";
 
 interface Env {
   ASSETS: Fetcher;
@@ -19,7 +24,7 @@ async function htmlResponseWithOg(
   if (!html) {
     return source;
   }
-  const injected = injectCrawlerSocialMetaIntoHtml(html, pathname);
+  const injected = await injectCrawlerSocialMetaForPath(html, pathname);
   const headers = new Headers(source.headers);
   headers.set("Content-Type", "text/html; charset=utf-8");
   headers.delete("Content-Length");
@@ -31,6 +36,26 @@ export default {
     const method = request.method;
     if (method !== "GET" && method !== "HEAD") {
       return env.ASSETS.fetch(request);
+    }
+
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    if (path === "/sitemap.xml") {
+      try {
+        const siteUrl = resolvePublicSiteUrl();
+        const newsItems = await fetchPublishedNewsListForSeo();
+        const xml = renderMarketingSitemapXml(siteUrl, newsItems);
+        return new Response(xml, {
+          status: 200,
+          headers: { "Content-Type": "application/xml; charset=utf-8" },
+        });
+      } catch {
+        return new Response(renderMarketingSitemapXml(), {
+          status: 200,
+          headers: { "Content-Type": "application/xml; charset=utf-8" },
+        });
+      }
     }
 
     const res = await env.ASSETS.fetch(request);

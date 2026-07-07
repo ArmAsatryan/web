@@ -8,7 +8,14 @@ import { ScrollProgress } from "@/components/ScrollProgress";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { Button } from "@/components/ui/button";
 import { newsDetailPageMeta, NEWS_PAGE_META } from "@shared/marketing-seo";
+import {
+  buildNewsArticleJsonLd,
+  buildNewsBreadcrumbJsonLd,
+  newsDetailImageAlt,
+  newsNotFoundPageMeta,
+} from "@shared/news-seo";
 import { usePageMeta } from "@/hooks/use-page-meta";
+import { SITE_URL } from "@/lib/seo";
 import { useI18n } from "@/hooks/use-i18n";
 import { fetchPublishedNewsBySlug } from "@/lib/news-api";
 import { formatNewsDate, newsDisplayDateValue, parseNewsDate, type NewsItem } from "@shared/news-types";
@@ -22,11 +29,21 @@ export function NewsDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const pageMeta = useMemo(
-    () => (item ? newsDetailPageMeta(item) : NEWS_PAGE_META),
-    [item],
-  );
-  usePageMeta(pageMeta);
+  const pageMeta = useMemo(() => {
+    if (notFound) return newsNotFoundPageMeta(slug);
+    if (item) return newsDetailPageMeta(item);
+    return NEWS_PAGE_META;
+  }, [item, notFound, slug]);
+
+  const jsonLd = useMemo(() => {
+    if (!item) return undefined;
+    return [
+      buildNewsArticleJsonLd(item, SITE_URL),
+      buildNewsBreadcrumbJsonLd(item.slug, item.title, SITE_URL),
+    ];
+  }, [item]);
+
+  usePageMeta({ ...pageMeta, jsonLd });
 
   useEffect(() => {
     if (!slug) return;
@@ -102,12 +119,13 @@ export function NewsDetailPage() {
 
             {!loading && !notFound && !error && item && (
               <AnimatedSection>
-                <article className="mx-auto max-w-3xl">
+                <article className="mx-auto max-w-3xl" itemScope itemType="https://schema.org/NewsArticle">
                   {item.imageUrl && (
                     <div className="mb-8 overflow-hidden rounded-lg border border-border/50 bg-muted/20">
                       <img
                         src={item.imageUrl}
-                        alt=""
+                        alt={newsDetailImageAlt(item.title)}
+                        itemProp="image"
                         className="h-auto w-full object-contain"
                       />
                     </div>
@@ -116,17 +134,22 @@ export function NewsDetailPage() {
                   <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                     <CalendarDays className="h-4 w-4 shrink-0 text-primary/80" aria-hidden />
                     {dateTimeAttr ? (
-                      <time dateTime={dateTimeAttr}>{dateLabel}</time>
+                      <time dateTime={dateTimeAttr} itemProp="datePublished">
+                        {dateLabel}
+                      </time>
                     ) : (
                       <span>{dateLabel}</span>
                     )}
                   </div>
 
-                  <h1 className="mb-6 text-3xl font-bold text-foreground sm:text-4xl">
+                  <h1 className="mb-6 text-3xl font-bold text-foreground sm:text-4xl" itemProp="headline">
                     {item.title}
                   </h1>
 
-                  <div className="whitespace-pre-wrap text-base leading-relaxed text-muted-foreground sm:text-lg">
+                  <div
+                    className="whitespace-pre-wrap text-base leading-relaxed text-muted-foreground sm:text-lg"
+                    itemProp="articleBody"
+                  >
                     {item.content}
                   </div>
                 </article>

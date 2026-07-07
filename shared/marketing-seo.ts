@@ -50,6 +50,10 @@ export interface CrawlerPageMeta {
   keywords?: string;
   image?: string;
   imageAlt?: string;
+  ogType?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  section?: string;
 }
 
 export const PRIVACY_POLICY_PAGE_META: CrawlerPageMeta = {
@@ -66,27 +70,8 @@ export const TERMS_OF_SERVICE_PAGE_META: CrawlerPageMeta = {
   path: "/terms-of-service",
 };
 
-export const NEWS_PAGE_META: CrawlerPageMeta = {
-  title: "News & Updates | BALLISTiQ",
-  description:
-    "Latest BALLISTiQ news, product updates, and announcements for precision shooters and ballistic calculator users.",
-  path: "/news",
-};
-
-export function newsDetailPageMeta(item: {
-  title: string;
-  content: string;
-  slug: string;
-  imageUrl?: string | null;
-}): CrawlerPageMeta {
-  const excerpt = item.content.trim().slice(0, 160).replace(/\s+/g, " ");
-  return {
-    title: `${item.title} | BALLISTiQ News`,
-    description: excerpt.length < item.content.trim().length ? `${excerpt}…` : excerpt,
-    path: `/news/${item.slug}`,
-    image: item.imageUrl ?? undefined,
-  };
-}
+export { NEWS_PAGE_META, newsDetailPageMeta } from "./news-seo";
+import { NEWS_PAGE_META } from "./news-seo";
 
 export function resolvePublicSiteUrl(): string {
   if (typeof process !== "undefined" && process.env?.VITE_SITE_URL) {
@@ -167,6 +152,17 @@ export function renderCrawlerSocialHeadHtml(siteUrl: string, meta: CrawlerPageMe
       ? `    <meta name="keywords" content="${et(meta.keywords)}" />\n`
       : "";
 
+  const ogType = meta.ogType ?? "website";
+  const articleLines = [
+    meta.publishedTime
+      ? `    <meta property="article:published_time" content="${et(meta.publishedTime)}" />\n`
+      : "",
+    meta.modifiedTime
+      ? `    <meta property="article:modified_time" content="${et(meta.modifiedTime)}" />\n`
+      : "",
+    meta.section ? `    <meta property="article:section" content="${et(meta.section)}" />\n` : "",
+  ].join("");
+
   return `    <title>${et(meta.title)}</title>
     <meta name="description" content="${et(meta.description)}" />
 ${keywordsLine}    <meta name="robots" content="${robots}" />
@@ -175,7 +171,7 @@ ${keywordsLine}    <meta name="robots" content="${robots}" />
     <!-- Open Graph -->
     <meta property="og:title" content="${et(meta.title)}" />
     <meta property="og:description" content="${et(meta.description)}" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="${ogType}" />
     <meta property="og:url" content="${et(canonical)}" />
     <meta property="og:image" content="${et(imageUrl)}" />
     <meta property="og:image:width" content="${OG_IMAGE_WIDTH}" />
@@ -183,7 +179,7 @@ ${keywordsLine}    <meta name="robots" content="${robots}" />
     <meta property="og:image:alt" content="${et(imageAlt)}" />
     <meta property="og:site_name" content="${et(OG_SITE_NAME)}" />
     <meta property="og:locale" content="en_US" />
-
+${articleLines}
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${et(meta.title)}" />
@@ -200,9 +196,10 @@ export function injectCrawlerSocialMetaIntoHtml(
   html: string,
   pathname: string,
   siteUrl?: string,
+  metaOverride?: CrawlerPageMeta | null,
 ): string {
   const base = siteUrl ?? resolvePublicSiteUrl();
-  const meta = getCrawlerPageMeta(pathname);
+  const meta = metaOverride !== undefined ? metaOverride : getCrawlerPageMeta(pathname);
   if (!meta) return html;
   const block = `<!-- app:crawler-social-meta -->\n${renderCrawlerSocialHeadHtml(base, meta)}    <!-- /app:crawler-social-meta -->`;
   if (!CRAWLER_HEAD_MARKER.test(html)) return html;

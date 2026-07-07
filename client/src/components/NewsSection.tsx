@@ -245,7 +245,8 @@ function DesktopNewsCarousel({ items }: { items: NewsItem[] }) {
   const [snapCount, setSnapCount] = useState(0);
   const selectedIndex = useCarouselIndex(carouselApi);
 
-  const handleSetApi = useCallback((api: CarouselApi) => {
+  const handleSetApi = useCallback((api: CarouselApi | undefined) => {
+    if (!api) return;
     setCarouselApi(api);
     setSnapCount(api.scrollSnapList().length);
   }, []);
@@ -255,7 +256,9 @@ function DesktopNewsCarousel({ items }: { items: NewsItem[] }) {
 
     const onReInit = () => setSnapCount(carouselApi.scrollSnapList().length);
     carouselApi.on("reInit", onReInit);
-    return () => carouselApi.off("reInit", onReInit);
+    return () => {
+      carouselApi.off("reInit", onReInit);
+    };
   }, [carouselApi]);
 
   return (

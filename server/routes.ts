@@ -2,6 +2,11 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { fetchAdaptySummary } from "./adapty";
 import { getRifles } from "./rifles";
+import { resolvePublicSiteUrl } from "../shared/marketing-seo";
+import {
+  fetchPublishedNewsListForSeo,
+  renderMarketingSitemapXml,
+} from "../shared/news-seo";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -23,11 +28,6 @@ export async function registerRoutes(
     res.json(data);
   });
 
-  /**
-   * Adapty subscription metrics (Export Analytics API). Requires ADAPTY_SECRET_API_KEY.
-   * Production Ballistiq API should expose the same path with admin auth; until then,
-   * point the admin console at this server via VITE_ADAPTY_API_BASE_URL or implement on the Java API.
-   */
   app.get("/admin/api/adapty/summary", async (req, res) => {
     const apiKey = process.env.ADAPTY_SECRET_API_KEY?.trim();
     if (!apiKey) {
@@ -51,6 +51,16 @@ export async function registerRoutes(
       return res.status(502).json(result);
     }
     res.json(result);
+  });
+
+  app.get("/sitemap.xml", async (_req, res) => {
+    try {
+      const siteUrl = resolvePublicSiteUrl();
+      const newsItems = await fetchPublishedNewsListForSeo();
+      res.type("application/xml").send(renderMarketingSitemapXml(siteUrl, newsItems));
+    } catch {
+      res.type("application/xml").send(renderMarketingSitemapXml());
+    }
   });
 
   return httpServer;

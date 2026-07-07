@@ -16,5 +16,10 @@ export function usePageMeta(options: PageMetaOptions) {
     options.image,
     options.keywords,
     options.imageAlt,
+    options.ogType,
+    options.publishedTime,
+    options.modifiedTime,
+    options.section,
+    options.jsonLd,
   ]);
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { ArrowLeft, Newspaper } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
@@ -9,17 +9,26 @@ import { AnimatedSection, StaggeredGrid } from "@/components/AnimatedSection";
 import { NewsCard } from "@/components/NewsCard";
 import { Button } from "@/components/ui/button";
 import { NEWS_PAGE_META } from "@shared/marketing-seo";
+import { buildNewsBreadcrumbJsonLd, buildNewsListJsonLd } from "@shared/news-seo";
 import { usePageMeta } from "@/hooks/use-page-meta";
+import { SITE_URL } from "@/lib/seo";
 import { useI18n } from "@/hooks/use-i18n";
 import { fetchPublishedNews } from "@/lib/news-api";
 import { sortNewsByDateDesc, type NewsItem } from "@shared/news-types";
 
 export function NewsPage() {
-  usePageMeta(NEWS_PAGE_META);
   const { t } = useI18n();
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const jsonLd = useMemo(() => {
+    const breadcrumb = buildNewsBreadcrumbJsonLd(null, null, SITE_URL);
+    if (!items.length) return [breadcrumb];
+    return [buildNewsListJsonLd(items, SITE_URL), breadcrumb];
+  }, [items]);
+
+  usePageMeta({ ...NEWS_PAGE_META, jsonLd });
 
   useEffect(() => {
     let cancelled = false;

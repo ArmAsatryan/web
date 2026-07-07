@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
 import { readFile } from "fs/promises";
-import { injectCrawlerSocialMetaIntoHtml } from "../shared/marketing-seo";
+import { injectCrawlerSocialMetaForPath } from "../shared/news-seo";
 
 export function serveStatic(app: Express) {
   const distPath = path.resolve(__dirname, "public");
@@ -64,7 +64,7 @@ export function serveStatic(app: Express) {
     const indexPath = path.resolve(distPath, "index.html");
     try {
       let html = await readFile(indexPath, "utf-8");
-      html = injectCrawlerSocialMetaIntoHtml(html, req.path);
+      html = await injectCrawlerSocialMetaForPath(html, req.path);
       res.type("html").send(html);
     } catch {
       res.sendFile(indexPath);
