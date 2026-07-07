@@ -72,7 +72,12 @@ export const NewsCard = memo(function NewsCard({
       data-testid={`news-card-${item.slug}`}
     >
       {item.imageUrl && (
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted/30">
+        <div
+          className={cn(
+            "relative flex w-full items-center justify-center overflow-hidden bg-muted/30",
+            compact ? "min-h-[9rem]" : "",
+          )}
+        >
           {loadImage ? (
             <img
               src={item.imageUrl}
@@ -80,13 +85,17 @@ export const NewsCard = memo(function NewsCard({
               draggable={false}
               decoding="async"
               className={cn(
-                "h-full w-full object-cover",
+                "h-auto w-full object-contain",
+                compact ? "max-h-52" : "max-h-[min(70vh,28rem)]",
                 !compact && "transition-transform duration-500 group-hover:scale-[1.02]",
               )}
               loading="lazy"
             />
           ) : (
-            <div className="h-full w-full bg-muted/40" aria-hidden />
+            <div
+              className={cn("w-full bg-muted/40", compact ? "h-52" : "h-48")}
+              aria-hidden
+            />
           )}
         </div>
       )}

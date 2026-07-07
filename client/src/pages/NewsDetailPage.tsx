@@ -108,7 +108,7 @@ export function NewsDetailPage() {
                       <img
                         src={item.imageUrl}
                         alt=""
-                        className="aspect-[16/9] w-full object-cover"
+                        className="h-auto w-full object-contain"
                       />
                     </div>
                   )}

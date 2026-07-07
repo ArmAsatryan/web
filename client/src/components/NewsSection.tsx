@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,44 +37,22 @@ function useCarouselIndex(api: CarouselApi | undefined) {
   return index;
 }
 
-function useCarouselVisibleSlides(api: CarouselApi | undefined) {
-  const [visible, setVisible] = useState<number[]>([0]);
-
-  useEffect(() => {
-    if (!api) return;
-
-    const update = () => setVisible(api.slidesInView());
-
-    update();
-    api.on("reInit", update);
-    api.on("select", update);
-    api.on("slidesInView", update);
-
-    return () => {
-      api.off("reInit", update);
-      api.off("select", update);
-      api.off("slidesInView", update);
-    };
-  }, [api]);
-
-  return visible;
-}
-
-function shouldLoadCarouselImage(index: number, visible: number[]): boolean {
-  if (visible.includes(index)) return true;
-  return visible.some((slideIndex) => Math.abs(slideIndex - index) <= 1);
-}
-
 function NewsCarouselControls({
   api,
   itemCount,
   current,
   snapCount,
+  onPrev,
+  onNext,
+  onGoTo,
 }: {
-  api: CarouselApi | undefined;
+  api?: CarouselApi;
   itemCount: number;
   current: number;
   snapCount: number;
+  onPrev?: () => void;
+  onNext?: () => void;
+  onGoTo?: (index: number) => void;
 }) {
   const { t } = useI18n();
   const isMobile = useIsMobile();
@@ -82,7 +60,11 @@ function NewsCarouselControls({
   const [canNext, setCanNext] = useState(false);
 
   useEffect(() => {
-    if (!api) return;
+    if (!api) {
+      setCanPrev(current > 0);
+      setCanNext(current < itemCount - 1);
+      return;
+    }
 
     const onSelect = () => {
       setCanPrev(api.canScrollPrev());
@@ -97,7 +79,7 @@ function NewsCarouselControls({
       api.off("select", onSelect);
       api.off("reInit", onSelect);
     };
-  }, [api]);
+  }, [api, current, itemCount]);
 
   if (itemCount <= 1) return null;
 
@@ -105,6 +87,9 @@ function NewsCarouselControls({
     "h-11 w-11 shrink-0 rounded-full border border-primary/25 bg-background/80 text-foreground shadow-md shadow-primary/10 backdrop-blur-md transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary disabled:pointer-events-none disabled:opacity-35";
 
   const showDots = !isMobile && snapCount > 0 && snapCount <= 12;
+  const scrollPrev = () => (api ? api.scrollPrev() : onPrev?.());
+  const scrollNext = () => (api ? api.scrollNext() : onNext?.());
+  const scrollTo = (index: number) => (api ? api.scrollTo(index) : onGoTo?.(index));
 
   return (
     <div
@@ -116,9 +101,9 @@ function NewsCarouselControls({
           type="button"
           variant="ghost"
           size="icon"
-          className={cn(navButtonClass, "hidden sm:inline-flex")}
+          className={navButtonClass}
           disabled={!canPrev}
-          onClick={() => api?.scrollPrev()}
+          onClick={scrollPrev}
           aria-label="Previous news"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -132,7 +117,7 @@ function NewsCarouselControls({
                 type="button"
                 aria-label={`Go to slide ${index + 1}`}
                 aria-current={index === current ? "true" : undefined}
-                onClick={() => api?.scrollTo(index)}
+                onClick={() => scrollTo(index)}
                 className={cn(
                   "rounded-full",
                   index === current
@@ -152,9 +137,9 @@ function NewsCarouselControls({
           type="button"
           variant="ghost"
           size="icon"
-          className={cn(navButtonClass, "hidden sm:inline-flex")}
+          className={navButtonClass}
           disabled={!canNext}
-          onClick={() => api?.scrollNext()}
+          onClick={scrollNext}
           aria-label="Next news"
         >
           <ArrowRight className="h-5 w-5" />
@@ -165,16 +150,100 @@ function NewsCarouselControls({
   );
 }
 
-export function NewsSection() {
-  const { t } = useI18n();
-  const isMobile = useIsMobile();
-  const [items, setItems] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+function MobileNewsScrollCarousel({ items }: { items: NewsItem[] }) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [current, setCurrent] = useState(0);
+
+  const updateIndexFromScroll = useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    const center = scroller.scrollLeft + scroller.clientWidth / 2;
+    let nearest = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    slideRefs.current.forEach((slide, index) => {
+      if (!slide) return;
+      const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+      const distance = Math.abs(center - slideCenter);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearest = index;
+      }
+    });
+
+    setCurrent(nearest);
+  }, []);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateIndexFromScroll);
+    };
+
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    updateIndexFromScroll();
+
+    return () => {
+      scroller.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [items.length, updateIndexFromScroll]);
+
+  const scrollToIndex = useCallback((index: number) => {
+    slideRefs.current[index]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, []);
+
+  const scrollByStep = useCallback((direction: -1 | 1) => {
+    scrollToIndex(Math.min(items.length - 1, Math.max(0, current + direction)));
+  }, [current, items.length, scrollToIndex]);
+
+  return (
+    <>
+      <div
+        ref={scrollerRef}
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{ WebkitOverflowScrolling: "touch" }}
+        data-testid="news-mobile-scroll-carousel"
+      >
+        {items.map((item, index) => (
+          <div
+            key={item.id}
+            ref={(node) => {
+              slideRefs.current[index] = node;
+            }}
+            className="w-[88%] max-w-md shrink-0 snap-center"
+          >
+            <NewsCard item={item} compact loadImage={Math.abs(index - current) <= 1} />
+          </div>
+        ))}
+      </div>
+
+      <NewsCarouselControls
+        itemCount={items.length}
+        current={current}
+        snapCount={items.length}
+        onPrev={() => scrollByStep(-1)}
+        onNext={() => scrollByStep(1)}
+        onGoTo={scrollToIndex}
+      />
+    </>
+  );
+}
+
+function DesktopNewsCarousel({ items }: { items: NewsItem[] }) {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [snapCount, setSnapCount] = useState(0);
   const selectedIndex = useCarouselIndex(carouselApi);
-  const visibleSlides = useCarouselVisibleSlides(carouselApi);
 
   const handleSetApi = useCallback((api: CarouselApi) => {
     setCarouselApi(api);
@@ -188,6 +257,51 @@ export function NewsSection() {
     carouselApi.on("reInit", onReInit);
     return () => carouselApi.off("reInit", onReInit);
   }, [carouselApi]);
+
+  return (
+    <>
+      <Carousel
+        setApi={handleSetApi}
+        opts={{
+          align: "start",
+          loop: items.length > 1 && items.length <= 6,
+          dragFree: false,
+          containScroll: "trimSnaps",
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-4 md:-ml-5">
+          {items.map((item, index) => (
+            <CarouselItem
+              key={item.id}
+              className="pl-4 md:pl-5 basis-full md:basis-1/2 lg:basis-1/3"
+            >
+              <NewsCard
+                item={item}
+                compact
+                loadImage={Math.abs(index - selectedIndex) <= 2}
+              />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+
+      <NewsCarouselControls
+        api={carouselApi}
+        itemCount={items.length}
+        current={selectedIndex}
+        snapCount={snapCount}
+      />
+    </>
+  );
+}
+
+export function NewsSection() {
+  const { t } = useI18n();
+  const isMobile = useIsMobile();
+  const [items, setItems] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -210,13 +324,6 @@ export function NewsSection() {
       cancelled = true;
     };
   }, []);
-
-  const imageLoadRadius = isMobile ? 1 : 2;
-
-  const shouldLoadImage = (index: number) => {
-    if (shouldLoadCarouselImage(index, visibleSlides)) return true;
-    return Math.abs(index - selectedIndex) <= imageLoadRadius;
-  };
 
   return (
     <section id="news" className="py-24 sm:py-32" data-testid="section-news">
@@ -245,56 +352,11 @@ export function NewsSection() {
 
         {!loading && !error && items.length > 0 && (
           <div className="relative mx-auto w-full max-w-6xl">
-            <Carousel
-              setApi={handleSetApi}
-              opts={{
-                align: "start",
-                loop: items.length > 1 && items.length <= 6,
-                dragFree: false,
-                containScroll: "trimSnaps",
-                breakpoints: {
-                  "(max-width: 767px)": {
-                    align: "center",
-                    loop: false,
-                  },
-                },
-              }}
-              className="w-full touch-manipulation"
-            >
-              <CarouselContent className="-ml-4 md:-ml-5">
-                {items.map((item, index) => {
-                  const distance = Math.abs(index - selectedIndex);
-
-                  return (
-                    <CarouselItem
-                      key={item.id}
-                      className="select-none pl-4 md:pl-5 basis-[88%] sm:basis-full md:basis-1/2 lg:basis-1/3"
-                      style={
-                        distance > (isMobile ? 3 : 5)
-                          ? {
-                              contentVisibility: "auto",
-                              containIntrinsicSize: "0 420px",
-                            }
-                          : undefined
-                      }
-                    >
-                      <NewsCard
-                        item={item}
-                        compact
-                        loadImage={shouldLoadImage(index)}
-                      />
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-            </Carousel>
-
-            <NewsCarouselControls
-              api={carouselApi}
-              itemCount={items.length}
-              current={selectedIndex}
-              snapCount={snapCount}
-            />
+            {isMobile ? (
+              <MobileNewsScrollCarousel items={items} />
+            ) : (
+              <DesktopNewsCarousel items={items} />
+            )}
           </div>
         )}
 
