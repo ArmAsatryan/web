@@ -11,12 +11,12 @@ type NavItem =
   | { key: string; href: string; type: "route" };
 
 const navKeys: NavItem[] = [
-  { key: "nav.features", href: "#features", type: "anchor" },
+  { key: "nav.news", href: "#news", type: "anchor" },
   { key: "nav.pricing", href: "#pricing", type: "anchor" },
   { key: "nav.business", href: "#b2b", type: "anchor" },
   { key: "nav.reviews", href: "#reviews", type: "anchor" },
   { key: "nav.team", href: "#team", type: "anchor" },
-  { key: "nav.news", href: "#news", type: "anchor" },
+  { key: "nav.features", href: "#features", type: "anchor" },
   { key: "nav.contact", href: "#contact", type: "anchor" },
 ];
 

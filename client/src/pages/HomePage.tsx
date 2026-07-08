@@ -37,12 +37,12 @@ export function HomePage() {
         <Navbar />
         <HeroSection />
         <MetricsStrip />
-        <FeaturesSection />
+        <NewsSection />
         <FeaturesPricingDivider />
         <PricingSection />
         <B2BSection />
         <ReviewsSection />
-        <NewsSection />
+        <FeaturesSection />
         <TeamSection />
         <ContactSection />
         <Footer />
