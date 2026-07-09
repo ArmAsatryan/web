@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "./use-reduced-motion";
 
 interface InViewAnimationOptions {
@@ -7,31 +7,66 @@ interface InViewAnimationOptions {
   y?: number;
 }
 
+const REVEAL_FALLBACK_MS = 2500;
+
 export function useInViewAnimation(options: InViewAnimationOptions = {}) {
   const { threshold = 0.15, delay = 0, y = 12 } = options;
-  const ref = useRef<HTMLDivElement>(null);
+  const nodeRef = useRef<HTMLDivElement | null>(null);
   const [hasEntered, setHasEntered] = useState(false);
   const reduced = useReducedMotion();
 
+  const reveal = useCallback(() => {
+    setHasEntered(true);
+  }, []);
+
+  const setRef = useCallback((node: HTMLDivElement | null) => {
+    nodeRef.current = node;
+  }, []);
+
   useEffect(() => {
-    if (reduced || !ref.current) {
-      setHasEntered(true);
+    if (reduced) {
+      reveal();
       return;
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setHasEntered(true);
-          observer.disconnect();
-        }
-      },
-      { threshold }
-    );
+    const node = nodeRef.current;
+    if (!node) return;
 
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [threshold, reduced]);
+    let revealed = false;
+    const safeReveal = () => {
+      if (revealed) return;
+      revealed = true;
+      reveal();
+    };
+
+    const fallbackTimer = window.setTimeout(safeReveal, REVEAL_FALLBACK_MS);
+
+    if (typeof IntersectionObserver === "undefined") {
+      safeReveal();
+      return () => window.clearTimeout(fallbackTimer);
+    }
+
+    let observer: IntersectionObserver | null = null;
+    try {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) {
+            safeReveal();
+            observer?.disconnect();
+          }
+        },
+        { threshold, rootMargin: "40px 0px" },
+      );
+      observer.observe(node);
+    } catch {
+      safeReveal();
+    }
+
+    return () => {
+      window.clearTimeout(fallbackTimer);
+      observer?.disconnect();
+    };
+  }, [threshold, reduced, reveal]);
 
   const motionProps = reduced
     ? {}
@@ -45,7 +80,7 @@ export function useInViewAnimation(options: InViewAnimationOptions = {}) {
         },
       };
 
-  return { ref, motionProps, hasEntered };
+  return { ref: setRef, motionProps, hasEntered };
 }
 
 export function useStaggerChildren(count: number, baseDelay = 0, staggerDelay = 0.08) {

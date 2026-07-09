@@ -8,8 +8,11 @@ import { ScrollProgress } from "@/components/ScrollProgress";
 import { AnimatedSection, StaggeredGrid } from "@/components/AnimatedSection";
 import { NewsCard } from "@/components/NewsCard";
 import { Button } from "@/components/ui/button";
-import { NEWS_PAGE_META } from "@shared/marketing-seo";
-import { buildNewsBreadcrumbJsonLd, buildNewsListJsonLd } from "@shared/news-seo";
+import {
+  buildNewsBreadcrumbJsonLd,
+  buildNewsListJsonLd,
+  NEWS_PAGE_META,
+} from "@shared/news-seo";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { SITE_URL } from "@/lib/seo";
 import { useI18n } from "@/hooks/use-i18n";

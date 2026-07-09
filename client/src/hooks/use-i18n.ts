@@ -707,13 +707,13 @@ export function useI18nProvider() {
     [],
   );
 
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
     const cms = marketingStrings?.[locale]?.[key];
     if (typeof cms === "string" && cms.trim() !== "") {
       return cms;
     }
     return translations[locale]?.[key] || translations.en[key] || key;
-  };
+  }, [locale, marketingStrings]);
 
   return { locale, setLocale, t, applyMarketingStrings };
 }

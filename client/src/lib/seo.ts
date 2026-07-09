@@ -91,7 +91,11 @@ export function setJsonLd(data: object | object[] | null | undefined) {
     script.type = "application/ld+json";
     document.head.appendChild(script);
   }
-  script.textContent = JSON.stringify(payload);
+  try {
+    script.textContent = JSON.stringify(payload);
+  } catch {
+    script.remove();
+  }
 }
 
 export function setPageMeta({

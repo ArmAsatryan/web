@@ -70,8 +70,13 @@ export const TERMS_OF_SERVICE_PAGE_META: CrawlerPageMeta = {
   path: "/terms-of-service",
 };
 
-export { NEWS_PAGE_META, newsDetailPageMeta } from "./news-seo";
-import { NEWS_PAGE_META } from "./news-seo";
+/** Sync crawler fallback for /news — keep aligned with NEWS_PAGE_META in news-seo.ts */
+const NEWS_LIST_CRAWLER_META: CrawlerPageMeta = {
+  title: "News & Updates | BALLISTiQ Ballistic Calculator",
+  description:
+    "Latest BALLISTiQ news and product updates for precision shooters: ballistic calculator features, app releases, long-range shooting tools, and company announcements.",
+  path: "/news",
+};
 
 export function resolvePublicSiteUrl(): string {
   if (typeof process !== "undefined" && process.env?.VITE_SITE_URL) {
@@ -103,11 +108,11 @@ export function getCrawlerPageMeta(pathname: string): CrawlerPageMeta | null {
   }
   if (p === "/privacy-policy") return PRIVACY_POLICY_PAGE_META;
   if (p === "/terms-of-service") return TERMS_OF_SERVICE_PAGE_META;
-  if (p === "/news") return NEWS_PAGE_META;
+  if (p === "/news") return NEWS_LIST_CRAWLER_META;
   if (p.startsWith("/news/")) {
     return {
       title: "BALLISTiQ News",
-      description: NEWS_PAGE_META.description,
+      description: NEWS_LIST_CRAWLER_META.description,
       path: p,
     };
   }

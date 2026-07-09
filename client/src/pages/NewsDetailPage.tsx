@@ -7,12 +7,13 @@ import { PageBackground } from "@/components/PageBackground";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { Button } from "@/components/ui/button";
-import { newsDetailPageMeta, NEWS_PAGE_META } from "@shared/marketing-seo";
 import {
   buildNewsArticleJsonLd,
   buildNewsBreadcrumbJsonLd,
   newsDetailImageAlt,
+  newsDetailPageMeta,
   newsNotFoundPageMeta,
+  NEWS_PAGE_META,
 } from "@shared/news-seo";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { SITE_URL } from "@/lib/seo";

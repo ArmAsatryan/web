@@ -86,7 +86,7 @@ function NewsCarouselControls({
   const navButtonClass =
     "h-11 w-11 shrink-0 rounded-full border border-primary/25 bg-background/80 text-foreground shadow-md shadow-primary/10 backdrop-blur-md transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary disabled:pointer-events-none disabled:opacity-35";
 
-  const showDots = !isMobile && snapCount > 0 && snapCount <= 12;
+  const showDots = isMobile === false && snapCount > 0 && snapCount <= 12;
   const scrollPrev = () => (api ? api.scrollPrev() : onPrev?.());
   const scrollNext = () => (api ? api.scrollNext() : onNext?.());
   const scrollTo = (index: number) => (api ? api.scrollTo(index) : onGoTo?.(index));
@@ -354,7 +354,7 @@ export function NewsSection() {
 
         {!loading && !error && items.length > 0 && (
           <div className="relative mx-auto w-full max-w-6xl">
-            {isMobile ? (
+            {isMobile !== false ? (
               <MobileNewsScrollCarousel items={items} />
             ) : (
               <DesktopNewsCarousel items={items} />
