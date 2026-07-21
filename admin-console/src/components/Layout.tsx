@@ -9,6 +9,7 @@ import StraightenIcon from '@mui/icons-material/Straighten';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import LanguageIcon from '@mui/icons-material/Language';
 import NewspaperIcon from '@mui/icons-material/Newspaper';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 import AppleIcon from '@mui/icons-material/Apple';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -42,6 +43,7 @@ const nav = [
   { path: '/map', label: 'User Locations', icon: <MapIcon /> },
   { path: '/notifications', label: 'Notifications', icon: <NotificationsIcon /> },
   { path: '/assistant-detections', label: 'Assistant detections', icon: <ImageSearchIcon /> },
+  { path: '/challenge-review', label: 'Challenge review', icon: <FactCheckIcon /> },
   { path: '/create-bullet', label: 'Create bullet', icon: <AddCircleOutlineIcon /> },
   { path: '/create-caliber', label: 'Create caliber', icon: <StraightenIcon /> },
   { path: '/create-vendor', label: 'Create vendor', icon: <StorefrontIcon /> },
@@ -57,6 +59,7 @@ const pageTitles: Record<string, string> = {
   '/map': 'User Locations Map',
   '/notifications': 'Notifications',
   '/assistant-detections': 'Assistant detections',
+  '/challenge-review': 'Challenge review',
   '/create-bullet': 'Create bullet',
   '/create-caliber': 'Create caliber',
   '/create-vendor': 'Create vendor',
@@ -74,6 +77,7 @@ const pageSubtitles: Record<string, string> = {
   '/notifications': 'Send push notifications, schedule multi-language broadcasts, and view history',
   '/assistant-detections':
     'Target image detections from the assistant — browse users and inspect detection data',
+  '/challenge-review': 'Review completed challenge sessions — approve, correct scores, or decline',
   '/create-bullet': 'Add a new bullet with name, caliber, weight, length and ballistic coefficient',
   '/create-caliber': 'Add a new caliber diameter (e.g. 17 WSM, 0.17)',
   '/create-vendor': 'Add a new vendor with name and optional image URL',
@@ -87,6 +91,11 @@ const pageTitlePrefixes: Array<{ prefix: string; title: string; subtitle?: strin
     prefix: '/app-store/apps/',
     title: 'App Store Connect',
     subtitle: 'Manage versions, metadata and App Store submissions',
+  },
+  {
+    prefix: '/challenge-review/',
+    title: 'Challenge review',
+    subtitle: 'Watch video evidence, correct shot scores, approve or decline',
   },
 ];
 

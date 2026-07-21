@@ -19,6 +19,8 @@ import ManageContentPage from './features/app-store/ManageContentPage';
 import SubmitForReviewPage from './features/app-store/SubmitForReviewPage';
 import MarketingSitePage from './features/marketing-site/MarketingSitePage';
 import NewsPage from './features/news/NewsPage';
+import ChallengeReviewQueuePage from './features/challenge-review/ChallengeReviewQueuePage';
+import ChallengeReviewDetailPage from './features/challenge-review/ChallengeReviewDetailPage';
 
 const queryClient = new QueryClient();
 
@@ -180,6 +182,26 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <NewsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/challenge-review"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ChallengeReviewQueuePage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/challenge-review/:sessionId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ChallengeReviewDetailPage />
             </Layout>
           </ProtectedRoute>
         }
