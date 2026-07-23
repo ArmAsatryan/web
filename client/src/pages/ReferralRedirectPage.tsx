@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRoute } from "wouter";
 import {
   buildReferralStoreUrls,
-  detectMobilePlatform,
+  detectMobilePlatformFromNavigator,
   normalizeReferralCode,
   trackReferralClick,
 } from "@/lib/storeLinks";
@@ -57,7 +57,7 @@ export function ReferralRedirectPage() {
         index: false,
       });
 
-      const platform = detectMobilePlatform(navigator.userAgent);
+      const platform = detectMobilePlatformFromNavigator(navigator);
       const urls = buildReferralStoreUrls(code);
 
       if (platform === "ios") {

@@ -21,10 +21,56 @@ export function extractReferralCodeFromPath(pathname: string): string | null {
 
 export type MobilePlatform = "ios" | "android" | "other";
 
-export function detectMobilePlatform(userAgent: string): MobilePlatform {
-  if (/iPhone|iPad|iPod/i.test(userAgent)) return "ios";
-  if (/Android/i.test(userAgent)) return "android";
+type PlatformHints = {
+  secChUaMobile?: string | null;
+  secChUaPlatform?: string | null;
+};
+
+/** Server-side detection from User-Agent and optional Client Hints. */
+export function detectMobilePlatform(
+  userAgent: string,
+  hints: PlatformHints = {},
+): MobilePlatform {
+  const ua = userAgent;
+  const platform = hints.secChUaPlatform?.replace(/"/g, "").toLowerCase() ?? "";
+
+  if (/iPhone|iPod|iPad|CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua)) return "ios";
+  if (platform === "ios") return "ios";
+  if (/Android/i.test(ua)) return "android";
+  if (platform === "android") return "android";
+
+  // iPhone/iPad with "Request Desktop Website" can send a Mac-like UA.
+  if (hints.secChUaMobile === "?1" && /Safari/i.test(ua) && !/Chrome|Chromium/i.test(ua)) {
+    return "ios";
+  }
+
   return "other";
+}
+
+/** Browser-side detection; handles iPad and iOS desktop-mode UA. */
+export function detectMobilePlatformFromNavigator(nav: {
+  userAgent: string;
+  platform: string;
+  maxTouchPoints: number;
+}): MobilePlatform {
+  const ua = nav.userAgent;
+  if (/iPhone|iPod|iPad|CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua)) return "ios";
+  if (nav.platform === "MacIntel" && nav.maxTouchPoints > 1) return "ios";
+  if (/Android/i.test(ua)) return "android";
+  return "other";
+}
+
+function buildMobileAutoRedirectScript(iosUrl: string, androidUrl: string): string {
+  return `<script>
+(function () {
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPhone|iPod|iPad|CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/i.test(ua);
+  if (isIOS) { window.location.replace(${JSON.stringify(iosUrl)}); return; }
+  if (isAndroid) { window.location.replace(${JSON.stringify(androidUrl)}); return; }
+})();
+</script>`;
 }
 
 export function buildReferralStoreUrls(code: string) {
@@ -84,12 +130,14 @@ function referralHtmlResponse(code: string, invalid: boolean): Response {
   const message = invalid
     ? `<p class="error">This referral code isn&apos;t valid. You can still download BALLISTiQ below.</p>`
     : `<p>Referral code: <strong>${safeCode}</strong></p>`;
+  const autoRedirect = invalid ? "" : buildMobileAutoRedirectScript(ios, android);
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Get BALLISTiQ</title>
+  ${autoRedirect}
   <style>
     body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; display: flex; min-height: 100vh; align-items: center; justify-content: center; margin: 0; padding: 1.5rem; }
     .card { max-width: 28rem; text-align: center; }
@@ -131,7 +179,10 @@ export async function buildReferralRedirectResponse(
   }
 
   const userAgent = request.headers.get("User-Agent") ?? "";
-  const platform = detectMobilePlatform(userAgent);
+  const platform = detectMobilePlatform(userAgent, {
+    secChUaMobile: request.headers.get("Sec-CH-UA-Mobile"),
+    secChUaPlatform: request.headers.get("Sec-CH-UA-Platform"),
+  });
   const urls = buildReferralStoreUrls(code);
 
   if (platform === "ios") {

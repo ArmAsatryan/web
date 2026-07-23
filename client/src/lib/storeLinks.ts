@@ -2,6 +2,7 @@
 export {
   buildReferralStoreUrls,
   detectMobilePlatform,
+  detectMobilePlatformFromNavigator,
   normalizeReferralCode,
   trackReferralClick,
   type MobilePlatform,
