@@ -47,7 +47,7 @@ export default {
 
     const referralCode = extractReferralCodeFromPath(path);
     if (referralCode) {
-      return await buildReferralRedirectResponse(request, referralCode);
+      return buildReferralRedirectResponse(request, referralCode);
     }
 
     if (path === "/sitemap.xml") {

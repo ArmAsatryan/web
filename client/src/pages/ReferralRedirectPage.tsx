@@ -4,13 +4,12 @@ import {
   buildReferralStoreUrls,
   detectMobilePlatformFromNavigator,
   normalizeReferralCode,
-  trackReferralClick,
 } from "@/lib/storeLinks";
 import { setPageMeta } from "@/lib/seo";
 
 const REFERRAL_STORAGE_KEY = "ballistiq_referral_code";
 
-type ReferralStatus = "loading" | "invalid" | "ready";
+type ReferralStatus = "invalid" | "ready";
 
 function persistReferralCode(code: string) {
   try {
@@ -24,7 +23,7 @@ function persistReferralCode(code: string) {
 export function ReferralRedirectPage() {
   const [, params] = useRoute("/r/:code");
   const code = normalizeReferralCode(params?.code);
-  const [status, setStatus] = useState<ReferralStatus>("loading");
+  const [status, setStatus] = useState<ReferralStatus | null>(null);
 
   useEffect(() => {
     if (!code) {
@@ -32,49 +31,27 @@ export function ReferralRedirectPage() {
       return;
     }
 
-    let cancelled = false;
+    persistReferralCode(code);
+    setPageMeta({
+      title: "Get BALLISTiQ | Referral",
+      description: "Download BALLISTiQ on the App Store or Google Play.",
+      path: `/r/${code}`,
+      index: false,
+    });
 
-    void (async () => {
-      const attributed = await trackReferralClick(code);
-      if (cancelled) return;
+    const platform = detectMobilePlatformFromNavigator(navigator);
+    const urls = buildReferralStoreUrls(code);
 
-      if (!attributed) {
-        setStatus("invalid");
-        setPageMeta({
-          title: "Get BALLISTiQ | Referral",
-          description: "Download BALLISTiQ on the App Store or Google Play.",
-          path: `/r/${code}`,
-          index: false,
-        });
-        return;
-      }
+    if (platform === "ios") {
+      window.location.replace(urls.ios);
+      return;
+    }
+    if (platform === "android") {
+      window.location.replace(urls.android);
+      return;
+    }
 
-      persistReferralCode(code);
-      setPageMeta({
-        title: "Get BALLISTiQ | Referral",
-        description: "Download BALLISTiQ on the App Store or Google Play.",
-        path: `/r/${code}`,
-        index: false,
-      });
-
-      const platform = detectMobilePlatformFromNavigator(navigator);
-      const urls = buildReferralStoreUrls(code);
-
-      if (platform === "ios") {
-        window.location.replace(urls.ios);
-        return;
-      }
-      if (platform === "android") {
-        window.location.replace(urls.android);
-        return;
-      }
-
-      setStatus("ready");
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+    setStatus("ready");
   }, [code]);
 
   if (!code) {
@@ -86,20 +63,12 @@ export function ReferralRedirectPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-6 gap-4 text-center">
       <h1 className="text-xl font-semibold">Download BALLISTiQ</h1>
-      {status === "loading" && (
-        <p className="text-sm text-muted-foreground">Checking referral code…</p>
-      )}
-      {status === "invalid" && (
-        <p className="text-sm text-destructive">
-          This referral code isn&apos;t valid. You can still download BALLISTiQ below.
-        </p>
-      )}
       {status === "ready" && (
         <p className="text-sm text-muted-foreground">
           Referral code: <strong>{code}</strong>
         </p>
       )}
-      {(status === "invalid" || status === "ready") && (
+      {status === "ready" && (
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <a className="underline" href={urls.ios}>
             App Store (iOS)
@@ -111,6 +80,9 @@ export function ReferralRedirectPage() {
       )}
       {status === "ready" && (
         <p className="text-sm text-muted-foreground">Choose a store to download the app.</p>
+      )}
+      {status === null && (
+        <p className="text-sm text-muted-foreground">Redirecting to the app store…</p>
       )}
     </div>
   );

@@ -1,9 +1,6 @@
 const IOS_APP_STORE_URL =
   "https://apps.apple.com/app/ballistiq-shooters-assistant/id6476917854";
 const ANDROID_PACKAGE_ID = "com.zeniq.ballistiq.mobile";
-const ADAPTY_ATTRIBUTION_CLICK_URL =
-  "https://api-ua.adapty.io/api/v1/attribution/click";
-const ADAPTY_CAMPAIGN_ID = "NzEwODo2NzEzOjY3NA";
 
 /** Backend generates 8-char codes; allow 6–12 for redirects (typos / legacy). */
 const REFERRAL_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{6,12}$/i;
@@ -81,28 +78,6 @@ export function buildReferralStoreUrls(code: string) {
   };
 }
 
-function buildAdaptyAttributionUrl(code: string): string {
-  const url = new URL(ADAPTY_ATTRIBUTION_CLICK_URL);
-  url.searchParams.set("adpt_cid", ADAPTY_CAMPAIGN_ID);
-  url.searchParams.set("channel", "referral");
-  url.searchParams.set("deferred_data_sub1", code);
-  return url.toString();
-}
-
-export async function trackReferralClick(code: string): Promise<boolean> {
-  try {
-    const res = await fetch(buildAdaptyAttributionUrl(code), {
-      method: "GET",
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok) return false;
-    const data = (await res.json()) as { success?: boolean };
-    return data.success === true;
-  } catch {
-    return false;
-  }
-}
-
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -169,15 +144,7 @@ function referralHtmlResponse(code: string, invalid: boolean): Response {
   });
 }
 
-export async function buildReferralRedirectResponse(
-  request: Request,
-  code: string,
-): Promise<Response> {
-  const attributed = await trackReferralClick(code);
-  if (!attributed) {
-    return referralHtmlResponse(code, true);
-  }
-
+export function buildReferralRedirectResponse(request: Request, code: string): Response {
   const userAgent = request.headers.get("User-Agent") ?? "";
   const platform = detectMobilePlatform(userAgent, {
     secChUaMobile: request.headers.get("Sec-CH-UA-Mobile"),

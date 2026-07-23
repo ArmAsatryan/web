@@ -4,6 +4,5 @@ export {
   detectMobilePlatform,
   detectMobilePlatformFromNavigator,
   normalizeReferralCode,
-  trackReferralClick,
   type MobilePlatform,
 } from "@shared/referral-redirect";
