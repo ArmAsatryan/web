@@ -58,6 +58,17 @@ async function buildAll() {
     console.log("wrote dist/public/_redirects (Cloudflare Pages SPA: admin-console + client)");
   }
 
+  console.log("building Cloudflare Pages _worker.js...");
+  await esbuild({
+    entryPoints: ["workers/static-site.ts"],
+    platform: "browser",
+    target: "es2022",
+    bundle: true,
+    format: "esm",
+    outfile: path.resolve(process.cwd(), "dist/public/_worker.js"),
+    logLevel: "info",
+  });
+
   console.log("building server...");
   const pkg = JSON.parse(await readFile("package.json", "utf-8"));
   const allDeps = [

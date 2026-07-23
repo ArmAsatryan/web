@@ -72,8 +72,6 @@ export default {
       return res;
     }
 
-    const url = new URL(request.url);
-    const path = url.pathname;
     const origin = url.origin;
 
     if (path === "/admin-console" || path.startsWith("/admin-console/")) {
