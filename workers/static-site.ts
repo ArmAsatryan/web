@@ -8,6 +8,10 @@ import {
   renderMarketingSitemapXml,
 } from "../shared/news-seo";
 import { resolvePublicSiteUrl } from "../shared/marketing-seo";
+import {
+  buildReferralRedirectResponse,
+  extractReferralCodeFromPath,
+} from "../shared/referral-redirect";
 
 interface Env {
   ASSETS: Fetcher;
@@ -40,6 +44,11 @@ export default {
 
     const url = new URL(request.url);
     const path = url.pathname;
+
+    const referralCode = extractReferralCodeFromPath(path);
+    if (referralCode) {
+      return buildReferralRedirectResponse(request, referralCode);
+    }
 
     if (path === "/sitemap.xml") {
       try {

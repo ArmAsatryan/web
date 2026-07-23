@@ -3,13 +3,20 @@ const IOS_APP_STORE_URL =
 const ANDROID_PACKAGE_ID = "com.zeniq.ballistiq.mobile";
 const REFERRAL_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/i;
 
-function normalizeReferralCode(raw: string | undefined): string | null {
+export function normalizeReferralCode(raw: string | undefined): string | null {
   if (!raw) return null;
   const code = raw.trim().toUpperCase();
   return REFERRAL_CODE_PATTERN.test(code) ? code : null;
 }
 
-function detectPlatform(userAgent: string): "ios" | "android" | "other" {
+export function extractReferralCodeFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/r\/([^/]+)\/?$/);
+  return normalizeReferralCode(match?.[1]);
+}
+
+type MobilePlatform = "ios" | "android" | "other";
+
+function detectMobilePlatform(userAgent: string): MobilePlatform {
   if (/iPhone|iPad|iPod/i.test(userAgent)) return "ios";
   if (/Android/i.test(userAgent)) return "android";
   return "other";
@@ -72,20 +79,9 @@ function desktopHtml(code: string): Response {
   });
 }
 
-export async function onRequest(context: {
-  request: Request;
-  params: { code?: string | string[] };
-}): Promise<Response> {
-  const rawParam = context.params.code;
-  const raw = Array.isArray(rawParam) ? rawParam[0] : rawParam;
-  const code = normalizeReferralCode(raw);
-
-  if (!code) {
-    return Response.redirect(new URL("/", context.request.url).toString(), 302);
-  }
-
-  const userAgent = context.request.headers.get("User-Agent") ?? "";
-  const platform = detectPlatform(userAgent);
+export function buildReferralRedirectResponse(request: Request, code: string): Response {
+  const userAgent = request.headers.get("User-Agent") ?? "";
+  const platform = detectMobilePlatform(userAgent);
 
   if (platform === "ios") {
     return redirectResponse(buildStoreUrl("ios", code), code);
