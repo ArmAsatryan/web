@@ -7,6 +7,7 @@ import { PrivacyPolicyPage } from "@/pages/PrivacyPolicy";
 import { TermsOfServicePage } from "@/pages/TermsOfService";
 import { NewsPage } from "@/pages/NewsPage";
 import { NewsDetailPage } from "@/pages/NewsDetailPage";
+import { ReferralRedirectPage } from "@/pages/ReferralRedirectPage";
 import NotFound from "@/pages/not-found";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             <Route path="/terms-of-service" component={TermsOfServicePage} />
             <Route path="/news/:slug" component={NewsDetailPage} />
             <Route path="/news" component={NewsPage} />
+            <Route path="/r/:code" component={ReferralRedirectPage} />
             <Route path="/" component={HomePage} />
             <Route path="/:rest+" component={NotFound} />
           </Switch>
