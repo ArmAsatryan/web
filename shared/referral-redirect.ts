@@ -1,6 +1,10 @@
 const IOS_APP_STORE_URL =
   "https://apps.apple.com/app/ballistiq-shooters-assistant/id6476917854";
 const ANDROID_PACKAGE_ID = "com.zeniq.ballistiq.mobile";
+const ADAPTY_ATTRIBUTION_CLICK_URL =
+  "https://api-ua.adapty.io/api/v1/attribution/click";
+const ADAPTY_CAMPAIGN_ID = "NzEwODo2NzEzOjY3NA";
+
 /** Backend generates 8-char codes; allow 6–12 for redirects (typos / legacy). */
 const REFERRAL_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{6,12}$/i;
 
@@ -15,35 +19,71 @@ export function extractReferralCodeFromPath(pathname: string): string | null {
   return normalizeReferralCode(match?.[1]);
 }
 
-type MobilePlatform = "ios" | "android" | "other";
+export type MobilePlatform = "ios" | "android" | "other";
 
-function detectMobilePlatform(userAgent: string): MobilePlatform {
+export function detectMobilePlatform(userAgent: string): MobilePlatform {
   if (/iPhone|iPad|iPod/i.test(userAgent)) return "ios";
   if (/Android/i.test(userAgent)) return "android";
   return "other";
 }
 
-function buildStoreUrl(platform: "ios" | "android", code: string): string {
-  if (platform === "ios") {
-    return IOS_APP_STORE_URL;
-  }
+export function buildReferralStoreUrls(code: string) {
   const referrer = encodeURIComponent(`referral_code=${code}`);
-  return `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE_ID}&referrer=${referrer}`;
+  return {
+    ios: IOS_APP_STORE_URL,
+    android: `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE_ID}&referrer=${referrer}`,
+  };
+}
+
+function buildAdaptyAttributionUrl(code: string): string {
+  const url = new URL(ADAPTY_ATTRIBUTION_CLICK_URL);
+  url.searchParams.set("adpt_cid", ADAPTY_CAMPAIGN_ID);
+  url.searchParams.set("channel", "referral");
+  url.searchParams.set("deferred_data_sub1", code);
+  return url.toString();
+}
+
+export async function trackReferralClick(code: string): Promise<boolean> {
+  try {
+    const res = await fetch(buildAdaptyAttributionUrl(code), {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return false;
+    const data = (await res.json()) as { success?: boolean };
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function referralCookieHeader(code: string): string {
+  return `ballistiq_referral=${code}; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
 }
 
 function redirectResponse(url: string, code: string): Response {
   const headers = new Headers({
     Location: url,
     "Cache-Control": "no-store",
-    "Set-Cookie": `ballistiq_referral=${code}; Path=/; Max-Age=2592000; Secure; SameSite=Lax`,
+    "Set-Cookie": referralCookieHeader(code),
   });
   return new Response(null, { status: 302, headers });
 }
 
-function desktopHtml(code: string): Response {
-  const ios = IOS_APP_STORE_URL;
-  const referrer = encodeURIComponent(`referral_code=${code}`);
-  const android = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE_ID}&referrer=${referrer}`;
+function referralHtmlResponse(code: string, invalid: boolean): Response {
+  const safeCode = escapeHtml(code);
+  const { ios, android } = buildReferralStoreUrls(code);
+  const message = invalid
+    ? `<p class="error">This referral code isn&apos;t valid. You can still download BALLISTiQ below.</p>`
+    : `<p>Referral code: <strong>${safeCode}</strong></p>`;
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,6 +94,7 @@ function desktopHtml(code: string): Response {
     body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; display: flex; min-height: 100vh; align-items: center; justify-content: center; margin: 0; padding: 1.5rem; }
     .card { max-width: 28rem; text-align: center; }
     a { color: #fff; }
+    .error { color: #f87171; margin-bottom: 0.5rem; }
     .stores { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem; }
     .stores a { display: block; padding: 0.75rem 1rem; border: 1px solid rgba(255,255,255,.25); border-radius: 0.5rem; text-decoration: none; }
   </style>
@@ -61,7 +102,7 @@ function desktopHtml(code: string): Response {
 <body>
   <div class="card">
     <h1>Download BALLISTiQ</h1>
-    <p>Referral code: <strong>${code}</strong></p>
+    ${message}
     <div class="stores">
       <a href="${ios}">App Store (iOS)</a>
       <a href="${android}">Google Play (Android)</a>
@@ -75,21 +116,30 @@ function desktopHtml(code: string): Response {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-store",
-      "Set-Cookie": `ballistiq_referral=${code}; Path=/; Max-Age=2592000; Secure; SameSite=Lax`,
+      ...(invalid ? {} : { "Set-Cookie": referralCookieHeader(code) }),
     },
   });
 }
 
-export function buildReferralRedirectResponse(request: Request, code: string): Response {
+export async function buildReferralRedirectResponse(
+  request: Request,
+  code: string,
+): Promise<Response> {
+  const attributed = await trackReferralClick(code);
+  if (!attributed) {
+    return referralHtmlResponse(code, true);
+  }
+
   const userAgent = request.headers.get("User-Agent") ?? "";
   const platform = detectMobilePlatform(userAgent);
+  const urls = buildReferralStoreUrls(code);
 
   if (platform === "ios") {
-    return redirectResponse(buildStoreUrl("ios", code), code);
+    return redirectResponse(urls.ios, code);
   }
   if (platform === "android") {
-    return redirectResponse(buildStoreUrl("android", code), code);
+    return redirectResponse(urls.android, code);
   }
 
-  return desktopHtml(code);
+  return referralHtmlResponse(code, false);
 }
