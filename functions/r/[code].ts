@@ -42,7 +42,6 @@ function desktopHtml(code: string): Response {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Get BALLISTiQ</title>
-  <meta http-equiv="refresh" content="0;url=/" />
   <style>
     body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; display: flex; min-height: 100vh; align-items: center; justify-content: center; margin: 0; padding: 1.5rem; }
     .card { max-width: 28rem; text-align: center; }
@@ -73,10 +72,16 @@ function desktopHtml(code: string): Response {
   });
 }
 
-export const onRequest: PagesFunction<{ code: string }> = async (context) => {
-  const code = normalizeReferralCode(context.params.code);
+export async function onRequest(context: {
+  request: Request;
+  params: { code?: string | string[] };
+}): Promise<Response> {
+  const rawParam = context.params.code;
+  const raw = Array.isArray(rawParam) ? rawParam[0] : rawParam;
+  const code = normalizeReferralCode(raw);
+
   if (!code) {
-    return Response.redirect("/", 302);
+    return Response.redirect(new URL("/", context.request.url).toString(), 302);
   }
 
   const userAgent = context.request.headers.get("User-Agent") ?? "";
@@ -90,4 +95,4 @@ export const onRequest: PagesFunction<{ code: string }> = async (context) => {
   }
 
   return desktopHtml(code);
-};
+}
