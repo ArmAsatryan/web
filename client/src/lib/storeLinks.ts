@@ -4,7 +4,7 @@ export const IOS_APP_STORE_URL =
 
 export const ANDROID_PACKAGE_ID = "com.zeniq.ballistiq.mobile";
 
-const REFERRAL_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/i;
+const REFERRAL_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{6,12}$/i;
 
 export function normalizeReferralCode(raw: string | undefined): string | null {
   if (!raw) return null;

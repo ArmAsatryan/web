@@ -47,12 +47,28 @@ export function ReferralRedirectPage() {
       window.location.replace(urls.android);
       return;
     }
-
-    window.location.replace("/");
   }, [code]);
 
+  if (!code) {
+    return null;
+  }
+
+  const urls = buildReferralStoreUrls(code);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-6 gap-4 text-center">
+      <h1 className="text-xl font-semibold">Download BALLISTiQ</h1>
+      <p className="text-sm text-muted-foreground">
+        Referral code: <strong>{code}</strong>
+      </p>
+      <div className="flex flex-col gap-3 w-full max-w-xs">
+        <a className="underline" href={urls.ios}>
+          App Store (iOS)
+        </a>
+        <a className="underline" href={urls.android}>
+          Google Play (Android)
+        </a>
+      </div>
       <p className="text-sm text-muted-foreground">Redirecting to the app store…</p>
     </div>
   );
