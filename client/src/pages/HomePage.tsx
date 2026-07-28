@@ -8,6 +8,7 @@ import { B2BSection } from "@/components/B2BSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { NewsSection } from "@/components/NewsSection";
 import { TeamSection } from "@/components/TeamSection";
+import { PartnersSection } from "@/components/PartnersSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/ScrollProgress";
@@ -43,6 +44,7 @@ export function HomePage() {
         <B2BSection />
         <ReviewsSection />
         <FeaturesSection />
+        <PartnersSection />
         <TeamSection />
         <ContactSection />
         <Footer />

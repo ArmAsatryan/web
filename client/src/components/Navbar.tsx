@@ -15,6 +15,7 @@ const navKeys: NavItem[] = [
   { key: "nav.pricing", href: "#pricing", type: "anchor" },
   { key: "nav.business", href: "#b2b", type: "anchor" },
   { key: "nav.reviews", href: "#reviews", type: "anchor" },
+  { key: "nav.partners", href: "#partners", type: "anchor" },
   { key: "nav.team", href: "#team", type: "anchor" },
   { key: "nav.features", href: "#features", type: "anchor" },
   { key: "nav.contact", href: "#contact", type: "anchor" },

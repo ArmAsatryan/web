@@ -24,6 +24,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.pricing": "Pricing",
     "nav.business": "For Business",
     "nav.reviews": "Reviews",
+    "nav.partners": "Partners",
     "nav.team": "Team",
     "nav.news": "News",
     "nav.contact": "Contact",
@@ -112,6 +113,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "team.title2": "Team",
     "team.subtitle": "The people behind BALLISTiQ, dedicated to building the best ballistic tools.",
 
+    "partners.title1": "Our",
+    "partners.title2": "Partners",
+    "partners.subtitle": "Trusted integrations and collaborations with industry-leading instrument makers.",
+
     "contact.title1": "Get in",
     "contact.title2": "Touch",
     "contact.subtitle": "Have questions or interested in B2B integration? We'd love to hear from you.",
@@ -153,6 +158,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.pricing": "Tarifs",
     "nav.business": "Entreprises",
     "nav.reviews": "Avis",
+    "nav.partners": "Partenaires",
     "nav.team": "Équipe",
     "nav.news": "Actualités",
     "nav.contact": "Contact",
@@ -241,6 +247,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "team.title2": "l’Équipe",
     "team.subtitle": "Les passionnés derrière BALLISTiQ, dédiés à la création des meilleurs outils balistiques.",
 
+    "partners.title1": "Nos",
+    "partners.title2": "Partenaires",
+    "partners.subtitle": "Intégrations et collaborations de confiance avec des fabricants d'instruments de référence.",
+
     "contact.title1": "Contactez-",
     "contact.title2": "nous",
     "contact.subtitle": "Des questions ou intéressé par l’intégration B2B ? Nous serions ravis de vous lire.",
@@ -282,6 +292,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.pricing": "Prezzi",
     "nav.business": "Per Aziende",
     "nav.reviews": "Recensioni",
+    "nav.partners": "Partner",
     "nav.team": "Team",
     "nav.news": "Notizie",
     "nav.contact": "Contatti",
@@ -370,6 +381,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "team.title2": "Team",
     "team.subtitle": "Le persone dietro BALLISTiQ, dedicate a creare i migliori strumenti balistici.",
 
+    "partners.title1": "I Nostri",
+    "partners.title2": "Partner",
+    "partners.subtitle": "Integrazioni e collaborazioni con produttori di strumenti leader del settore.",
+
     "contact.title1": "Mettiti in",
     "contact.title2": "Contatto",
     "contact.subtitle": "Hai domande o sei interessato all\u2019integrazione B2B? Ci piacerebbe sentirti.",
@@ -411,6 +426,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.pricing": "Precios",
     "nav.business": "Empresas",
     "nav.reviews": "Rese\u00f1as",
+    "nav.partners": "Socios",
     "nav.team": "Equipo",
     "nav.news": "Noticias",
     "nav.contact": "Contacto",
@@ -497,6 +513,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "team.title2": "Equipo",
     "team.subtitle": "Las personas detr\u00e1s de BALLISTiQ, dedicadas a crear las mejores herramientas bal\u00edsticas.",
 
+    "partners.title1": "Nuestros",
+    "partners.title2": "Socios",
+    "partners.subtitle": "Integraciones y colaboraciones con fabricantes de instrumentos l\u00edderes en la industria.",
+
     "contact.title1": "Ponte en",
     "contact.title2": "Contacto",
     "contact.subtitle": "\u00bfTienes preguntas o te interesa la integraci\u00f3n B2B? Nos encantar\u00eda saber de ti.",
@@ -538,6 +558,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.pricing": "Գնացուցակ",
     "nav.business": "Բիզնեսի համար",
     "nav.reviews": "Կարծիքներ",
+    "nav.partners": "Գործընկերներ",
     "nav.team": "Թիմ",
     "nav.news": "Նորություններ",
     "nav.contact": "Կապ",
@@ -625,6 +646,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "team.title1": "Ծանոթացեք",
     "team.title2": "թիմին",
     "team.subtitle": "BALLISTiQ-ի ստեղծողները, ովքեր նվիրված են լավագույն բալիստիկ գործիքների մշակմանը:",
+
+    "partners.title1": "Մեր",
+    "partners.title2": "Գործընկերները",
+    "partners.subtitle": "Հուսալի ինտեգրացիաներ և համագործակցություններ արդյունաբերության առաջատար արտադրողների հետ:",
 
     "contact.title1": "Կապ հաստատեք",
     "contact.title2": "մեզ հետ",

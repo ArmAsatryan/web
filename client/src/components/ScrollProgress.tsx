@@ -7,6 +7,7 @@ const sections = [
   { id: "pricing", label: "Pricing" },
   { id: "b2b", label: "B2B" },
   { id: "reviews", label: "Reviews" },
+  { id: "partners", label: "Partners" },
   { id: "team", label: "Team" },
   { id: "contact", label: "Contact" },
 ];
