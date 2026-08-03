@@ -78,6 +78,25 @@ export function PrivacyPolicyPage() {
               your device settings.
             </p>
 
+            <h3 className="text-lg font-medium text-foreground mt-6 mb-2">
+              Device and installation identifiers
+            </h3>
+            <p className="text-muted-foreground leading-relaxed mb-6">
+              When you enable push notifications, BALLISTiQ transmits to our servers
+              a Firebase Cloud Messaging registration token and an installation
+              identifier that is generated randomly the first time you run the app.
+              We use them only to deliver notifications to your devices and to
+              associate a device with your account or guest session. The
+              installation identifier is specific to your BALLISTiQ installation on
+              that device, is not derived from your device hardware, cannot be used
+              to identify you across other apps, and is discarded when you uninstall
+              the app or clear its data. We do not use these identifiers for
+              advertising and do not share them with advertising networks. We store
+              them for as long as the device stays registered for notifications;
+              they are removed when the device re-registers under a different
+              account or when the associated account is deleted.
+            </p>
+
             <h2 className="text-xl font-semibold text-foreground mt-10 mb-3">
               Use of Your Information
             </h2>
@@ -142,6 +161,23 @@ export function PrivacyPolicyPage() {
             <p className="text-muted-foreground leading-relaxed mb-6">
               You can access, update, or delete your personal data directly from
               your profile page within the App.
+            </p>
+
+            <h2 className="text-xl font-semibold text-foreground mt-10 mb-3">
+              Deleting your account and data
+            </h2>
+            <p className="text-muted-foreground leading-relaxed mb-6">
+              To delete your BALLISTiQ account and all associated data, including
+              any stored notification identifiers, email{" "}
+              <a
+                href="mailto:support@ballistiq.xyz"
+                className="text-primary hover:underline"
+              >
+                support@ballistiq.xyz
+              </a>{" "}
+              from the address on your account. We process deletion requests within
+              30 days. You can stop notification-identifier collection at any time
+              by revoking the notification permission in your device settings.
             </p>
 
             <h2 className="text-xl font-semibold text-foreground mt-10 mb-3">
