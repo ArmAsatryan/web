@@ -39,3 +39,17 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(145, 158, 171, 0.5);
 }
+
+/* Admin map: custom markers/clusters must not get Leaflet's default white box */
+.bq-map-pin,
+.bq-map-cluster {
+  background: transparent !important;
+  border: none !important;
+}
+.bq-map-pin svg {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+.leaflet-control-layers {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+}

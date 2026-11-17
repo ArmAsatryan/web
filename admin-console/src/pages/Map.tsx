@@ -9,8 +9,8 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import PlaceIcon from '@mui/icons-material/Place';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { useEffect, useMemo, useState } from 'react';
+import { LayersControl, MapContainer, Marker, Popup, ScaleControl, TileLayer, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import { getUserLocations, USER_LOCATIONS_MAX_LIMIT } from '../api/api';
@@ -19,14 +19,62 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
-const DefaultIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+/**
+ * Google Maps tiles rendered through Leaflet (keeps marker clustering working).
+ * lyrs: y = satellite + labels (hybrid), s = satellite only, m = roadmap, p = terrain.
+ */
+const GOOGLE_SUBDOMAINS = ['mt0', 'mt1', 'mt2', 'mt3'];
+const googleTiles = (lyrs: string) => `https://{s}.google.com/vt/lyrs=${lyrs}&x={x}&y={y}&z={z}&hl=en`;
+const GOOGLE_ATTRIBUTION = 'Map data &copy; Google';
+
+/** High-contrast pin that stays visible on satellite imagery. */
+const LocationIcon = L.divIcon({
+  className: 'bq-map-pin',
+  html: `<svg width="30" height="42" viewBox="0 0 30 42" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15 1C7.3 1 1 7.2 1 14.9 1 25.3 15 41 15 41s14-15.7 14-26.1C29 7.2 22.7 1 15 1z"
+      fill="#FF3B30" stroke="#FFFFFF" stroke-width="2.5"/>
+    <circle cx="15" cy="15" r="5.5" fill="#FFFFFF"/>
+  </svg>`,
+  iconSize: [30, 42],
+  iconAnchor: [15, 41],
+  popupAnchor: [0, -38],
 });
-L.Marker.prototype.options.icon = DefaultIcon;
+L.Marker.prototype.options.icon = LocationIcon;
+
+/** Bright, bordered cluster bubbles sized by count. */
+function createClusterIcon(cluster: { getChildCount: () => number }) {
+  const count = cluster.getChildCount();
+  const size = count < 10 ? 38 : count < 100 ? 46 : count < 1000 ? 54 : 62;
+  const color = count < 10 ? '#00C853' : count < 100 ? '#FFB300' : '#FF3B30';
+  const label = count >= 1000 ? `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k` : String(count);
+  return L.divIcon({
+    className: 'bq-map-cluster',
+    html: `<div style="
+      width:${size}px;height:${size}px;border-radius:50%;
+      background:${color};border:3px solid #fff;
+      box-shadow:0 0 0 4px ${color}55, 0 2px 8px rgba(0,0,0,.6);
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font:700 ${size > 46 ? 15 : 13}px Inter,sans-serif;
+      text-shadow:0 1px 2px rgba(0,0,0,.6);">${label}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
+/** Zoom the map to show all loaded points whenever the result set changes. */
+function FitToPoints({ points }: { points: UserLocationPoint[] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (points.length === 0) return;
+    if (points.length === 1) {
+      map.setView([points[0].latitude, points[0].longitude], 14);
+      return;
+    }
+    const bounds = L.latLngBounds(points.map((p) => [p.latitude, p.longitude] as [number, number]));
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+  }, [map, points]);
+  return null;
+}
 
 function parseUserFilter(raw: string | null | undefined): { userId: number | undefined; invalid: boolean } {
   const t = raw?.trim() ?? '';
@@ -83,7 +131,7 @@ export default function MapPage() {
       <Card sx={{ mb: 3 }}>
         <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Free map tiles (OpenStreetMap) via Leaflet. Loads up to {USER_LOCATIONS_MAX_LIMIT.toLocaleString()} points
+            Google Maps (satellite view by default — switch layers with the control in the top-right corner). Loads up to {USER_LOCATIONS_MAX_LIMIT.toLocaleString()} points
             from the database (newest first). Leave user id empty and click <strong>Show locations</strong> for
             everyone, or enter a user id to filter.
           </Typography>
@@ -150,13 +198,50 @@ export default function MapPage() {
             </Box>
           </Box>
         )}
-        <Box sx={{ height: 560, width: '100%' }}>
-          <MapContainer center={center} zoom={6} style={{ height: '100%', width: '100%', borderRadius: 'inherit' }}>
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            />
-            <MarkerClusterGroup chunkedLoading>
+        <Box sx={{ height: 'calc(100vh - 280px)', minHeight: 600, width: '100%' }}>
+          <MapContainer
+            center={center}
+            zoom={6}
+            maxZoom={20}
+            style={{ height: '100%', width: '100%', borderRadius: 'inherit', background: '#0b1016' }}
+          >
+            <LayersControl position="topright">
+              <LayersControl.BaseLayer checked name="Satellite (with labels)">
+                <TileLayer
+                  url={googleTiles('y')}
+                  subdomains={GOOGLE_SUBDOMAINS}
+                  maxZoom={20}
+                  attribution={GOOGLE_ATTRIBUTION}
+                />
+              </LayersControl.BaseLayer>
+              <LayersControl.BaseLayer name="Satellite (no labels)">
+                <TileLayer
+                  url={googleTiles('s')}
+                  subdomains={GOOGLE_SUBDOMAINS}
+                  maxZoom={20}
+                  attribution={GOOGLE_ATTRIBUTION}
+                />
+              </LayersControl.BaseLayer>
+              <LayersControl.BaseLayer name="Roadmap">
+                <TileLayer
+                  url={googleTiles('m')}
+                  subdomains={GOOGLE_SUBDOMAINS}
+                  maxZoom={20}
+                  attribution={GOOGLE_ATTRIBUTION}
+                />
+              </LayersControl.BaseLayer>
+              <LayersControl.BaseLayer name="Terrain">
+                <TileLayer
+                  url={googleTiles('p')}
+                  subdomains={GOOGLE_SUBDOMAINS}
+                  maxZoom={20}
+                  attribution={GOOGLE_ATTRIBUTION}
+                />
+              </LayersControl.BaseLayer>
+            </LayersControl>
+            <ScaleControl position="bottomleft" />
+            <FitToPoints points={points} />
+            <MarkerClusterGroup chunkedLoading iconCreateFunction={createClusterIcon} showCoverageOnHover={false}>
               {points.map((p, i) => (
                 <Marker key={`${p.userId}-${p.latitude}-${p.longitude}-${i}`} position={[p.latitude, p.longitude]}>
                   <Popup>
